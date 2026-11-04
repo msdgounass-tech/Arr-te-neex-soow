@@ -15,7 +15,7 @@ export default async function AdminCoupons() {
         <Card key={c.id} className="mb-3">
           <div className="mb-3 flex items-baseline justify-between">
             <p className="tracking-widest text-gold">{c.code} <span className="ml-3 text-xs tracking-normal text-mist">utilisé {c.used_count} fois</span></p>
-            <form action={deleteCoupon}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer ce code ?" className="text-[0.6rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
+            <form action={deleteCoupon}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer ce code ?" className="text-[0.78rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
           </div>
           <CouponForm initial={c} />
         </Card>

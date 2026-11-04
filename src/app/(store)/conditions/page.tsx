@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Conditions générales de vente" };
 /* À compléter avec le NINEA et le RCCM dès leur obtention. */
 export default function TermsPage() {
   return (
-    <article className="container-luxe max-w-3xl pt-16 text-sm leading-relaxed text-ivory/75 md:pt-24 [&_h2]:display [&_h2]:mb-3 [&_h2]:mt-10 [&_h2]:text-3xl [&_h2]:text-ivory">
+    <article className="container-luxe max-w-3xl pt-16 text-sm leading-relaxed text-ivory/90 md:pt-24 [&_h2]:display [&_h2]:mb-3 [&_h2]:mt-10 [&_h2]:text-3xl [&_h2]:text-ivory">
       <h1 className="display text-center text-5xl text-ivory md:text-6xl">Conditions générales de vente</h1>
       <h2>Objet</h2>
       <p>Les présentes conditions régissent les ventes conclues sur la boutique en ligne GOUNASS LUXURY. Toute commande implique leur acceptation.</p>

@@ -144,7 +144,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
           {images.length ? (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {images.map((img, i) => (
-                <li key={img.url} className={clsx("relative border", i === 0 ? "border-gold" : "border-white/10")}>
+                <li key={img.url} className={clsx("relative border", i === 0 ? "border-gold" : "border-white/15")}>
                   <div className="relative aspect-[3/4]"><Image src={img.url} alt="" fill sizes="200px" className="object-cover" /></div>
                   <input value={img.alt || ""} onChange={(e) => setImages((x) => x.map((m, j) => (j === i ? { ...m, alt: e.target.value } : m)))} placeholder="Texte alternatif" className="w-full bg-ink px-2 py-1 text-xs focus:outline-none" />
                   <div className="flex justify-between bg-ink-3 px-1 py-1">
@@ -166,7 +166,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
             <button type="button" onClick={() => setVariants((v) => [...v, { size: "", color: v.at(-1)?.color || "", color_hex: v.at(-1)?.color_hex || "", sku: "", price_override: "", stock: "0", is_active: true }])} className="btn btn-ghost-gold min-h-9 px-4">Ajouter</button>
           </div>
           <table className="w-full min-w-[760px] text-sm">
-            <thead><tr className="text-left text-[0.58rem] uppercase tracking-[0.16em] text-mist"><th className="pb-2 pr-2 font-normal">Taille</th><th className="pb-2 pr-2 font-normal">Couleur</th><th className="pb-2 pr-2 font-normal">Teinte</th><th className="pb-2 pr-2 font-normal">SKU</th><th className="pb-2 pr-2 font-normal">Prix spécifique</th><th className="pb-2 pr-2 font-normal">Stock</th><th className="pb-2 pr-2 font-normal">Actif</th><th /></tr></thead>
+            <thead><tr className="text-left text-[0.68rem] uppercase tracking-[0.16em] text-mist"><th className="pb-2 pr-2 font-normal">Taille</th><th className="pb-2 pr-2 font-normal">Couleur</th><th className="pb-2 pr-2 font-normal">Teinte</th><th className="pb-2 pr-2 font-normal">SKU</th><th className="pb-2 pr-2 font-normal">Prix spécifique</th><th className="pb-2 pr-2 font-normal">Stock</th><th className="pb-2 pr-2 font-normal">Actif</th><th /></tr></thead>
             <tbody>
               {variants.map((v, i) => (
                 <tr key={v.id || i}>

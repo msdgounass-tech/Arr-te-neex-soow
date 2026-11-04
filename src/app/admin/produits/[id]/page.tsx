@@ -17,7 +17,7 @@ export default async function EditProduct({ params }: { params: Promise<{ id: st
   if (!product) notFound();
   return (
     <>
-      <Link href="/admin/produits" className="text-[0.62rem] uppercase tracking-[0.2em] text-mist hover:text-gold">← Produits</Link>
+      <Link href="/admin/produits" className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-gold">← Produits</Link>
       <PageTitle title={product.name} subtitle={`Réf. ${product.reference}`}>
         <Link href={`/produit/${product.slug}`} target="_blank" className="btn btn-outline min-h-10">Voir en boutique</Link>
         <form action={deleteProduct}>

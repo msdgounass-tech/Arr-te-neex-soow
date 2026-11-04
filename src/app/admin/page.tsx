@@ -41,7 +41,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
     <>
       <PageTitle title="Tableau de bord" subtitle="Données réelles issues de la base de la boutique.">
         {canStats && [7, 30, 90].map((d) => (
-          <Link key={d} href={`/admin?jours=${d}`} className={`px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.2em] ${d === days ? "bg-gold text-ink" : "border border-white/10 text-ivory/70"}`}>{d} jours</Link>
+          <Link key={d} href={`/admin?jours=${d}`} className={`px-3 py-1.5 text-[0.8rem] uppercase tracking-[0.2em] ${d === days ? "bg-gold text-ink" : "border border-white/15 text-ivory/90"}`}>{d} jours</Link>
         ))}
       </PageTitle>
 
@@ -88,7 +88,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
       <Card className="mt-4 overflow-x-auto">
         <div className="mb-4 flex items-baseline justify-between">
           <p className="label">Dernières commandes</p>
-          <Link href="/admin/commandes" className="text-[0.62rem] uppercase tracking-[0.2em] text-gold">Toutes les commandes</Link>
+          <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-gold">Toutes les commandes</Link>
         </div>
         {recent && recent.length ? (
           <table className="w-full min-w-[640px] text-sm">

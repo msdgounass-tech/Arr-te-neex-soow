@@ -59,7 +59,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   return (
     <div className="container-luxe pt-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <nav aria-label="Fil d'Ariane" className="mb-8 flex flex-wrap gap-2 text-[0.62rem] uppercase tracking-[0.22em] text-mist">
+      <nav aria-label="Fil d'Ariane" className="mb-8 flex flex-wrap gap-2 text-[0.8rem] uppercase tracking-[0.22em] text-mist">
         <Link href="/" className="hover:text-ivory">Accueil</Link>/
         <Link href={genderHref} className="hover:text-ivory">{genderLabel}</Link>
         {product.category && (
@@ -79,7 +79,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             </Link>
           )}
           <h1 className="display mt-4 text-4xl leading-tight md:text-6xl">{product.name}</h1>
-          <p className="mt-4 text-[0.62rem] uppercase tracking-[0.26em] text-mist">
+          <p className="mt-4 text-[0.8rem] uppercase tracking-[0.26em] text-mist">
             Réf. {product.reference}
             {product.category ? ` · ${product.category.name}` : ""}
           </p>
@@ -88,24 +88,24 @@ export default async function ProductPage({ params }: { params: Params }) {
           <ProductPurchase product={product} />
 
           {product.description && (
-            <div className="mt-12 border-t border-white/[0.06] pt-8">
+            <div className="mt-12 border-t border-white/[0.1] pt-8">
               <p className="label mb-4">Description</p>
-              <p className="whitespace-pre-line leading-relaxed text-ivory/75">{product.description}</p>
+              <p className="whitespace-pre-line leading-relaxed text-ivory/90">{product.description}</p>
             </div>
           )}
           {product.details && (
-            <details className="group mt-6 border-t border-white/[0.06] pt-6">
+            <details className="group mt-6 border-t border-white/[0.1] pt-6">
               <summary className="label flex cursor-pointer list-none items-center justify-between">
                 Détails &amp; entretien <span className="text-gold transition-transform group-open:rotate-45">+</span>
               </summary>
-              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ivory/70">{product.details}</p>
+              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ivory/90">{product.details}</p>
             </details>
           )}
-          <details className="group mt-6 border-y border-white/[0.06] py-6">
+          <details className="group mt-6 border-y border-white/[0.1] py-6">
             <summary className="label flex cursor-pointer list-none items-center justify-between">
               Livraison &amp; paiement <span className="text-gold transition-transform group-open:rotate-45">+</span>
             </summary>
-            <p className="mt-4 text-sm leading-relaxed text-ivory/70">
+            <p className="mt-4 text-sm leading-relaxed text-ivory/90">
               Livraison à Dakar, dans les régions du Sénégal et à l&apos;international — tarifs et délais affichés lors de la commande.
               Paiement par Wave, Orange Money, carte bancaire ou à la livraison selon disponibilité.{" "}
               <Link href="/livraison" className="text-gold underline-offset-4 hover:underline">En savoir plus</Link>

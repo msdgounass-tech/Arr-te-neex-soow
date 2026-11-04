@@ -32,7 +32,7 @@ export function GenderSection({ eyebrow, title, text, href, image, objectPositio
               className="object-cover transition-transform duration-[2000ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-105"
               style={{ objectPosition }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
             <div className="absolute inset-4 border border-gold/0 transition-colors duration-1000 group-hover:border-gold/40 md:inset-6" />
             <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between">
               <span className="display text-5xl md:text-7xl">{eyebrow}</span>
@@ -47,13 +47,13 @@ export function GenderSection({ eyebrow, title, text, href, image, objectPositio
           <Reveal>
             <p className="eyebrow">Collection {eyebrow}</p>
             <h2 className="display mt-5 text-5xl md:text-7xl">{title}</h2>
-            <p className="mt-6 max-w-md leading-relaxed text-ivory/70">{text}</p>
+            <p className="mt-6 max-w-md leading-relaxed text-ivory/90">{text}</p>
           </Reveal>
           <Reveal delay={0.1}>
-            <ul className="mt-10 grid grid-cols-2 gap-x-8 border-t border-white/[0.06] sm:grid-cols-3">
+            <ul className="mt-10 grid grid-cols-2 gap-x-8 border-t border-white/[0.1] sm:grid-cols-3">
               {categories.map((c) => (
-                <li key={c.slug} className="border-b border-white/[0.06]">
-                  <Link href={`${href}?categorie=${c.slug}`} className="group flex items-center justify-between py-4 text-[0.7rem] uppercase tracking-[0.24em] text-ivory/75 hover:text-gold">
+                <li key={c.slug} className="border-b border-white/[0.1]">
+                  <Link href={`${href}?categorie=${c.slug}`} className="group flex items-center justify-between py-4 text-[0.78rem] uppercase tracking-[0.24em] text-ivory/90 hover:text-gold">
                     {c.label}
                     <ArrowRight width={14} height={14} className="-translate-x-2 opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:opacity-100" />
                   </Link>

@@ -27,10 +27,10 @@ export function CartView() {
         <EmptyState title="Votre panier est vide" text="Découvrez nos collections pour composer votre sélection." cta={{ href: "/shop", label: "Explorer la boutique" }} />
       ) : (
         <div className="grid gap-14 lg:grid-cols-[1.6fr_1fr]">
-          <ul className="border-t border-white/[0.06]">
+          <ul className="border-t border-white/[0.1]">
             <AnimatePresence initial={false}>
               {items.map((l) => (
-                <motion.li key={l.variantId} layout exit={{ opacity: 0, x: -30 }} className="flex gap-5 border-b border-white/[0.06] py-6">
+                <motion.li key={l.variantId} layout exit={{ opacity: 0, x: -30 }} className="flex gap-5 border-b border-white/[0.1] py-6">
                   <Link href={`/produit/${l.slug}`} className="relative aspect-[3/4] w-24 shrink-0 overflow-hidden bg-ink-3 md:w-32">
                     {l.image && <Image src={l.image} alt={l.name} fill sizes="128px" className="object-cover" />}
                   </Link>
@@ -38,12 +38,12 @@ export function CartView() {
                     <div className="flex flex-col justify-between gap-2 md:flex-row">
                       <div>
                         <Link href={`/produit/${l.slug}`} className="display text-2xl hover:text-gold">{l.name}</Link>
-                        <p className="mt-1 text-[0.62rem] uppercase tracking-[0.22em] text-mist">
+                        <p className="mt-1 text-[0.8rem] uppercase tracking-[0.22em] text-mist">
                           Réf. {l.reference}
                           {l.color ? ` · ${l.color}` : ""}
                           {l.size ? ` · Taille ${l.size}` : ""}
                         </p>
-                        <p className="mt-2 text-sm text-ivory/70">{formatPrice(l.unitPrice)} l&apos;unité</p>
+                        <p className="mt-2 text-sm text-ivory/90">{formatPrice(l.unitPrice)} l&apos;unité</p>
                       </div>
                       <p className="display text-xl">{formatPrice(l.unitPrice * l.quantity)}</p>
                     </div>
@@ -53,7 +53,7 @@ export function CartView() {
                         <span className="w-10 text-center text-sm">{l.quantity}</span>
                         <button aria-label="Augmenter" disabled={l.quantity >= l.maxStock} onClick={() => setQuantity(l.variantId, l.quantity + 1)} className="p-3 hover:text-gold disabled:opacity-30"><PlusIcon width={14} height={14} /></button>
                       </div>
-                      <button onClick={() => remove(l.variantId)} className="flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
+                      <button onClick={() => remove(l.variantId)} className="flex items-center gap-2 text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
                         <TrashIcon width={16} height={16} /> Supprimer
                       </button>
                     </div>
@@ -63,7 +63,7 @@ export function CartView() {
             </AnimatePresence>
           </ul>
 
-          <aside className="h-fit border border-white/[0.06] bg-ink-2 p-6 md:p-8 lg:sticky lg:top-28">
+          <aside className="h-fit border border-white/[0.1] bg-ink-2 p-6 md:p-8 lg:sticky lg:top-28">
             <h2 className="display text-3xl">Récapitulatif</h2>
             <dl className="mt-8 space-y-4 text-sm">
               <div className="flex justify-between"><dt className="text-mist">Articles ({cartCount(items)})</dt><dd>{formatPrice(subtotal)}</dd></div>

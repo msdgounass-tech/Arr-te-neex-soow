@@ -40,7 +40,7 @@ const COLS = [
 export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: string }) {
   const year = new Date().getFullYear();
   return (
-    <footer className="relative mt-24 border-t border-white/[0.06] bg-ink">
+    <footer className="relative mt-24 border-t border-white/[0.1] bg-ink">
       <div className="container-luxe grid gap-14 py-20 lg:grid-cols-[1.3fr_2fr]">
         <div>
           {logoUrl ? (
@@ -50,8 +50,8 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
             <Emblem className="h-16 w-16" />
           )}
           <p className="display mt-6 text-4xl tracking-[0.18em]">GOUNASS</p>
-          <p className="mt-1 text-[0.62rem] tracking-[0.6em] text-gold">LUXURY</p>
-          <p className="display mt-6 text-2xl italic text-ivory/80">« Wouro Maama »</p>
+          <p className="mt-1 text-[0.8rem] tracking-[0.6em] text-gold">LUXURY</p>
+          <p className="display mt-6 text-2xl italic text-ivory/90">« Wouro Maama »</p>
           <div className="mt-10 max-w-sm">
             <p className="label mb-1">Newsletter privée</p>
             <NewsletterForm />
@@ -65,7 +65,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
               <ul className="space-y-3.5">
                 {c.links.map(([label, href]) => (
                   <li key={href}>
-                    <Link href={href} className="link-luxe text-sm text-ivory/70 hover:text-ivory">
+                    <Link href={href} className="link-luxe text-sm text-ivory/90 hover:text-ivory">
                       {label}
                     </Link>
                   </li>
@@ -75,7 +75,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
           ))}
           <div>
             <p className="eyebrow mb-6">Nous joindre</p>
-            <ul className="space-y-3.5 text-sm text-ivory/70">
+            <ul className="space-y-3.5 text-sm text-ivory/90">
               {store.address && <li>{[store.address, store.city].filter(Boolean).join(", ")}</li>}
               {store.city && !store.address && <li>{store.city}</li>}
               {store.phone && (
@@ -95,12 +95,12 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
             </ul>
             <div className="mt-6 flex gap-3">
               {store.whatsapp && (
-                <a aria-label="WhatsApp" href={`https://wa.me/${toWhatsAppNumber(store.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/10 text-ivory/80 hover:border-gold hover:text-gold">
+                <a aria-label="WhatsApp" href={`https://wa.me/${toWhatsAppNumber(store.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/15 text-ivory/90 hover:border-gold hover:text-gold">
                   <WhatsAppIcon />
                 </a>
               )}
               {store.instagram && (
-                <a aria-label="Instagram" href={store.instagram.startsWith("http") ? store.instagram : `https://instagram.com/${store.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/10 text-ivory/80 hover:border-gold hover:text-gold">
+                <a aria-label="Instagram" href={store.instagram.startsWith("http") ? store.instagram : `https://instagram.com/${store.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/15 text-ivory/90 hover:border-gold hover:text-gold">
                   <InstagramIcon />
                 </a>
               )}
@@ -110,7 +110,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
       </div>
 
       <div className="hairline" />
-      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.62rem] uppercase tracking-[0.24em] text-mist md:flex-row">
+      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.8rem] uppercase tracking-[0.24em] text-mist md:flex-row">
         <p>© {year} GOUNASS LUXURY — Tous droits réservés</p>
         <div className="flex flex-wrap justify-center gap-6">
           <Link href="/conditions" className="hover:text-ivory">Conditions de vente</Link>

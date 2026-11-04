@@ -29,12 +29,12 @@ export default async function CollectionPage({ params }: { params: Params }) {
           <Reveal>
             <p className="eyebrow">{c.is_exclusive ? "Collection exclusive" : "Collection"}</p>
             <h1 className="display mt-6 text-6xl md:text-9xl">{c.name}</h1>
-            {c.tagline && <p className="display mt-5 text-2xl italic text-ivory/80">{c.tagline}</p>}
+            {c.tagline && <p className="display mt-5 text-2xl italic text-ivory/90">{c.tagline}</p>}
           </Reveal>
         </div>
       </section>
       <div className="container-luxe pt-16">
-        {c.description && <p className="mx-auto mb-16 max-w-2xl text-center leading-relaxed text-ivory/70">{c.description}</p>}
+        {c.description && <p className="mx-auto mb-16 max-w-2xl text-center leading-relaxed text-ivory/90">{c.description}</p>}
         {items.length ? <ProductGrid products={items} /> : <EmptyState title="Bientôt disponible" text="Les pièces de cette collection seront bientôt dévoilées." />}
       </div>
     </>

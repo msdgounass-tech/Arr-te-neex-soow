@@ -58,18 +58,18 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
         <Emblem className="mx-auto h-16 w-16" />
         <p className="eyebrow mt-8">Commande {order.order_number}</p>
         <h1 className="display mt-5 text-4xl md:text-6xl">{title}</h1>
-        <p className="mx-auto mt-5 max-w-xl text-ivory/70">{text}</p>
+        <p className="mx-auto mt-5 max-w-xl text-ivory/90">{text}</p>
       </header>
 
       {feePending && (
-        <div className="mb-12 border border-gold/30 bg-gold/[0.04] p-6 text-center text-sm text-ivory/80">
+        <div className="mb-12 border border-gold/30 bg-gold/[0.04] p-6 text-center text-sm text-ivory/90">
           Frais de livraison <strong className="text-gold">à confirmer</strong> — total actuel hors livraison : {formatPrice(order.total)}.
         </div>
       )}
 
       {awaitingPayment && (
         <div className="mb-12 flex flex-col items-center gap-6 border border-gold/30 bg-gold/[0.04] p-8 text-center">
-          <p className="text-sm text-ivory/80">Montant à régler : <strong className="text-gold">{formatPrice(order.total)}</strong> via {PAYMENT_METHOD_LABEL[order.payment_method]}</p>
+          <p className="text-sm text-ivory/90">Montant à régler : <strong className="text-gold">{formatPrice(order.total)}</strong> via {PAYMENT_METHOD_LABEL[order.payment_method]}</p>
           {order.payment_method === "orange_money" && qrCode && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={qrCode.startsWith("data:") ? qrCode : `data:image/png;base64,${qrCode}`} alt="QR code Orange Money" className="h-48 w-48 bg-white p-2" />

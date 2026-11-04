@@ -40,7 +40,7 @@ export function NewsletterForm({ variant = "footer" }: { variant?: "footer" | "s
           aria-label="Adresse e-mail"
           className={clsx("w-full bg-transparent py-4 text-ivory placeholder:text-ivory/35 focus:outline-none", variant === "section" ? "text-lg" : "text-sm")}
         />
-        <button type="submit" disabled={state === "loading"} aria-label="S'inscrire" className="flex items-center gap-2 py-3 pl-4 text-[0.65rem] uppercase tracking-[0.28em] text-gold hover:text-ivory disabled:opacity-50">
+        <button type="submit" disabled={state === "loading"} aria-label="S'inscrire" className="flex items-center gap-2 py-3 pl-4 text-[0.74rem] uppercase tracking-[0.28em] text-gold hover:text-ivory disabled:opacity-50">
           {variant === "section" && <span>S&apos;inscrire</span>}
           <ArrowRight />
         </button>

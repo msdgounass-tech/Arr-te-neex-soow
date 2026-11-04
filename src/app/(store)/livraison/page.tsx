@@ -11,7 +11,7 @@ export default async function DeliveryPage() {
     <div className="container-luxe max-w-4xl pt-16 md:pt-24">
       <p className="eyebrow text-center">Service</p>
       <h1 className="display mt-5 text-center text-5xl md:text-7xl">Livraison</h1>
-      <p className="mx-auto mt-6 max-w-xl text-center text-ivory/65">Tarifs et délais par zone. Selon la zone, les frais sont fixes, calculés selon la distance (position partagée lors de la commande) ou confirmés par notre équipe sur WhatsApp avant l&apos;expédition.</p>
+      <p className="mx-auto mt-6 max-w-xl text-center text-ivory/90">Tarifs et délais par zone. Selon la zone, les frais sont fixes, calculés selon la distance (position partagée lors de la commande) ou confirmés par notre équipe sur WhatsApp avant l&apos;expédition.</p>
       {zones.length ? (
         <table className="mt-14 w-full text-left text-sm">
           <thead className="label border-b border-white/[0.08]"><tr><th className="py-3 font-normal">Zone</th><th className="font-normal">Délai</th><th className="text-right font-normal">Tarif</th></tr></thead>
@@ -31,7 +31,7 @@ export default async function DeliveryPage() {
       ) : (
         <p className="mt-14 text-center text-mist">Les tarifs de livraison seront publiés prochainement.</p>
       )}
-      <div className="mt-16 space-y-4 text-sm leading-relaxed text-ivory/70">
+      <div className="mt-16 space-y-4 text-sm leading-relaxed text-ivory/90">
         <h2 className="display text-3xl text-ivory">Paiement</h2>
         <p>Wave, Orange Money et carte bancaire : la commande est confirmée uniquement après vérification effective du paiement. Paiement à la livraison : règlement à la réception de la commande.</p>
       </div>

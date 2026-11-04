@@ -24,10 +24,10 @@ export default async function AdminSettings() {
         <p className="label mb-4">Intégrations (configurées par variables d&apos;environnement sur le serveur)</p>
         <ul className="grid gap-2 text-sm md:grid-cols-3">
           {(Object.keys(pay) as PaymentMethod[]).map((m) => (
-            <li key={m} className="flex justify-between border border-white/[0.06] px-4 py-3">{PAYMENT_METHOD_LABEL[m]}<span className={pay[m] ? "text-success" : "text-mist"}>{pay[m] === "api" ? "API officielle" : pay[m] === "lien" ? "Lien (vérif. manuelle)" : pay[m] === "livraison" ? "Actif" : "Non configuré"}</span></li>
+            <li key={m} className="flex justify-between border border-white/[0.1] px-4 py-3">{PAYMENT_METHOD_LABEL[m]}<span className={pay[m] ? "text-success" : "text-mist"}>{pay[m] === "api" ? "API officielle" : pay[m] === "lien" ? "Lien (vérif. manuelle)" : pay[m] === "livraison" ? "Actif" : "Non configuré"}</span></li>
           ))}
           {integrations.map(([l, ok]) => (
-            <li key={l} className="flex justify-between border border-white/[0.06] px-4 py-3">{l}<span className={ok ? "text-success" : "text-mist"}>{ok ? "Actif" : "Non configuré"}</span></li>
+            <li key={l} className="flex justify-between border border-white/[0.1] px-4 py-3">{l}<span className={ok ? "text-success" : "text-mist"}>{ok ? "Actif" : "Non configuré"}</span></li>
           ))}
         </ul>
         <p className="mt-4 text-xs text-mist">Les clés secrètes ne sont jamais stockées en base ni exposées au navigateur. Voir README › Configuration.</p>

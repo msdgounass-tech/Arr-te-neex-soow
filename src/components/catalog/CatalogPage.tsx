@@ -58,7 +58,7 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
           <p className="eyebrow">{eyebrow}</p>
           <h1 className="display mt-5 text-5xl md:text-8xl">{title}</h1>
           {q && <p className="mt-5 text-sm text-mist">Résultats pour « {q} »</p>}
-          {intro && !q && <p className="mx-auto mt-6 max-w-xl leading-relaxed text-ivory/65">{intro}</p>}
+          {intro && !q && <p className="mx-auto mt-6 max-w-xl leading-relaxed text-ivory/90">{intro}</p>}
         </Reveal>
       </header>
 
@@ -83,7 +83,7 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
               key={p}
               href={pageHref(p)}
               aria-current={p === page ? "page" : undefined}
-              className={clsx("flex h-11 w-11 items-center justify-center border text-sm transition-colors", p === page ? "border-gold bg-gold text-ink" : "border-white/10 hover:border-gold")}
+              className={clsx("flex h-11 w-11 items-center justify-center border text-sm transition-colors", p === page ? "border-gold bg-gold text-ink" : "border-white/15 hover:border-gold")}
             >
               {p}
             </Link>

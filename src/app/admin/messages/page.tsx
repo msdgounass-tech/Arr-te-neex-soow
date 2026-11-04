@@ -21,8 +21,8 @@ export default async function AdminMessages() {
                 <p className="text-xs text-mist">{formatDate(m.created_at, true)}</p>
               </div>
               {m.subject && <p className="mt-2 text-sm text-gold">{m.subject}</p>}
-              <p className="mt-2 whitespace-pre-line text-sm text-ivory/80">{m.message}</p>
-              {!m.is_read && <form action={markMessageRead} className="mt-3"><input type="hidden" name="id" value={m.id} /><button className="text-[0.6rem] uppercase tracking-[0.16em] text-gold">Marquer comme traité</button></form>}
+              <p className="mt-2 whitespace-pre-line text-sm text-ivory/90">{m.message}</p>
+              {!m.is_read && <form action={markMessageRead} className="mt-3"><input type="hidden" name="id" value={m.id} /><button className="text-[0.78rem] uppercase tracking-[0.16em] text-gold">Marquer comme traité</button></form>}
             </Card>
           ))}
           {!messages?.length && <Card><p className="text-sm text-mist">Aucun message.</p></Card>}
@@ -30,7 +30,7 @@ export default async function AdminMessages() {
         {subs && (
           <Card>
             <p className="label mb-4">Newsletter — {count} abonné(s)</p>
-            <ul className="max-h-[60vh] space-y-1 overflow-y-auto text-xs text-ivory/80">{subs.map((s) => <li key={s.email}>{s.email}</li>)}</ul>
+            <ul className="max-h-[60vh] space-y-1 overflow-y-auto text-xs text-ivory/90">{subs.map((s) => <li key={s.email}>{s.email}</li>)}</ul>
           </Card>
         )}
       </div>

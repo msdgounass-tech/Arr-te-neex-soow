@@ -42,16 +42,16 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
           <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-            {sale && <span className="bg-gold px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-[0.2em] text-ink">-{discountPercent(product)} %</span>}
-            {product.is_new && !sale && <span className="border border-ivory/40 bg-ink/50 px-2.5 py-1 text-[0.58rem] uppercase tracking-[0.2em] backdrop-blur">Nouveau</span>}
-            {stock === 0 && <span className="bg-ink/80 px-2.5 py-1 text-[0.58rem] uppercase tracking-[0.2em] text-mist">Épuisé</span>}
+            {sale && <span className="bg-gold px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-ink">-{discountPercent(product)} %</span>}
+            {product.is_new && !sale && <span className="border border-ivory/40 bg-ink/50 px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] backdrop-blur">Nouveau</span>}
+            {stock === 0 && <span className="bg-ink/80 px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.2em] text-mist">Épuisé</span>}
           </div>
-          <span className="absolute inset-x-3 bottom-3 translate-y-3 text-center text-[0.6rem] uppercase tracking-[0.3em] text-ivory opacity-0 transition-all duration-700 group-hover:translate-y-0 group-hover:opacity-100">
+          <span className="absolute inset-x-3 bottom-3 translate-y-3 text-center text-[0.78rem] uppercase tracking-[0.3em] text-ivory opacity-0 transition-all duration-700 group-hover:translate-y-0 group-hover:opacity-100">
             Découvrir
           </span>
         </div>
         <div className="mt-4 space-y-1.5 pr-8">
-          {product.category && <p className="text-[0.6rem] uppercase tracking-[0.26em] text-mist">{product.category.name}</p>}
+          {product.category && <p className="text-[0.78rem] uppercase tracking-[0.26em] text-mist">{product.category.name}</p>}
           <h3 className="display text-[1.15rem] leading-snug text-ivory transition-colors group-hover:text-gold md:text-xl">{product.name}</h3>
           <p className="flex items-baseline gap-3 text-sm">
             <span className={sale ? "text-gold" : "text-ivory/90"}>{formatPrice(product.price)}</span>

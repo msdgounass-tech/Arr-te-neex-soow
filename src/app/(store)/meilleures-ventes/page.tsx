@@ -15,7 +15,7 @@ export default async function BestSellersPage() {
         <Reveal>
           <p className="eyebrow">Les plus convoitées</p>
           <h1 className="display mt-5 text-5xl md:text-8xl">Meilleures ventes</h1>
-          <p className="mx-auto mt-6 max-w-xl text-ivory/65">Classement établi à partir des commandes passées sur la boutique.</p>
+          <p className="mx-auto mt-6 max-w-xl text-ivory/90">Classement établi à partir des commandes passées sur la boutique.</p>
         </Reveal>
       </header>
       {products.length ? (

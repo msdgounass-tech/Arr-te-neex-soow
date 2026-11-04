@@ -17,8 +17,8 @@ export function OrderTimeline({ order }: { order: Order }) {
             <span className={clsx("relative flex h-3 w-3 items-center justify-center rounded-full", i <= idx ? "bg-gold" : "bg-white/15")}>
               {i === idx && <span className="absolute h-6 w-6 animate-ping rounded-full bg-gold/30" />}
             </span>
-            <span className={clsx("mt-3 text-[0.55rem] uppercase tracking-[0.16em] sm:text-[0.6rem]", i <= idx ? "text-ivory" : "text-mist")}>{ORDER_STATUS_LABEL[s]}</span>
-            {h && <span className="mt-1 hidden text-[0.6rem] text-mist sm:block">{formatDate(h.created_at)}</span>}
+            <span className={clsx("mt-3 text-[0.68rem] uppercase tracking-[0.16em] sm:text-[0.78rem]", i <= idx ? "text-ivory" : "text-mist")}>{ORDER_STATUS_LABEL[s]}</span>
+            {h && <span className="mt-1 hidden text-[0.78rem] text-mist sm:block">{formatDate(h.created_at)}</span>}
           </li>
         );
       })}

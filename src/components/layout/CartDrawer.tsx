@@ -33,18 +33,18 @@ export function CartDrawer() {
           <motion.aside
             role="dialog"
             aria-label="Votre panier"
-            className="fixed inset-y-0 right-0 z-[81] flex w-full max-w-[460px] flex-col border-l border-white/[0.06] bg-ink-2"
+            className="fixed inset-y-0 right-0 z-[81] flex w-full max-w-[460px] flex-col border-l border-white/[0.1] bg-ink-2"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-6">
+            <div className="flex items-center justify-between border-b border-white/[0.1] px-6 py-6">
               <div>
                 <p className="eyebrow">Votre sélection</p>
                 <h2 className="display mt-1 text-3xl">Panier ({cartCount(items)})</h2>
               </div>
-              <button aria-label="Fermer le panier" onClick={() => setOpen(false)} className="p-2 text-ivory/80 hover:text-gold">
+              <button aria-label="Fermer le panier" onClick={() => setOpen(false)} className="p-2 text-ivory/90 hover:text-gold">
                 <CloseIcon />
               </button>
             </div>
@@ -84,7 +84,7 @@ export function CartDrawer() {
                             {[l.color, l.size].filter(Boolean).join(" · ") || l.reference}
                           </p>
                           <div className="mt-auto flex items-center justify-between pt-3">
-                            <div className="flex items-center border border-white/10">
+                            <div className="flex items-center border border-white/15">
                               <button aria-label="Diminuer" className="p-2 hover:text-gold" onClick={() => setQuantity(l.variantId, l.quantity - 1)}>
                                 <MinusIcon width={14} height={14} />
                               </button>
@@ -98,7 +98,7 @@ export function CartDrawer() {
                                 <PlusIcon width={14} height={14} />
                               </button>
                             </div>
-                            <button onClick={() => remove(l.variantId)} className="text-[0.62rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
+                            <button onClick={() => remove(l.variantId)} className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
                               Retirer
                             </button>
                           </div>
@@ -111,7 +111,7 @@ export function CartDrawer() {
             </div>
 
             {items.length > 0 && (
-              <div className="border-t border-white/[0.06] px-6 py-6">
+              <div className="border-t border-white/[0.1] px-6 py-6">
                 <div className="flex items-baseline justify-between">
                   <span className="label">Sous-total</span>
                   <span className="display text-2xl">{formatPrice(cartSubtotal(items))}</span>

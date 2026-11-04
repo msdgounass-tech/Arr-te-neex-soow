@@ -10,7 +10,7 @@ export function SectionHeading({ eyebrow, title, href, linkLabel = "Tout voir", 
         <h2 className="display mt-4 text-[2.4rem] md:text-6xl">{title}</h2>
       </div>
       {href && (
-        <Link href={href} className={`group inline-flex items-center gap-3 text-[0.66rem] uppercase tracking-[0.3em] text-ivory/80 hover:text-gold ${align === "center" ? "mt-6 justify-center" : ""}`}>
+        <Link href={href} className={`group inline-flex items-center gap-3 text-[0.74rem] uppercase tracking-[0.3em] text-ivory/90 hover:text-gold ${align === "center" ? "mt-6 justify-center" : ""}`}>
           {linkLabel}
           <ArrowRight className="transition-transform duration-500 group-hover:translate-x-1.5" />
         </Link>

@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
     // NEXT_IMAGE_UNOPTIMIZED=1 : le navigateur charge les images directement (utile en prévisualisation)
     unoptimized: process.env.NEXT_IMAGE_UNOPTIMIZED === "1",
     formats: ["image/avif", "image/webp"],
+    // Illustrations produits locales en SVG : servies en pièce jointe, sans script.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
       { protocol: "https", hostname: "cdn.alexya.ai" },

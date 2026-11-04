@@ -29,7 +29,7 @@ export default async function AdminProducts({ searchParams }: { searchParams: Pr
       <input type="hidden" name="id" value={r.id} />
       <input type="hidden" name="field" value={field} />
       <input type="hidden" name="value" value={String(!r[field])} />
-      <button className={`text-[0.58rem] uppercase tracking-[0.14em] ${r[field] ? "text-gold" : "text-mist/50 hover:text-ivory"}`}>{label}</button>
+      <button className={`text-[0.68rem] uppercase tracking-[0.14em] ${r[field] ? "text-gold" : "text-mist hover:text-ivory"}`}>{label}</button>
     </form>
   );
 
@@ -45,7 +45,7 @@ export default async function AdminProducts({ searchParams }: { searchParams: Pr
       </form>
       <Card className="overflow-x-auto p-0 md:p-0">
         <table className="w-full min-w-[900px] text-sm">
-          <thead className="border-b border-white/[0.06]"><tr className="[&>th]:px-4"><th className={th}>Produit</th><th className={th}>Réf.</th><th className={th}>Catégorie</th><th className={th}>Prix</th><th className={th}>Stock</th><th className={th}>Visibilité</th></tr></thead>
+          <thead className="border-b border-white/[0.1]"><tr className="[&>th]:px-4"><th className={th}>Produit</th><th className={th}>Réf.</th><th className={th}>Catégorie</th><th className={th}>Prix</th><th className={th}>Stock</th><th className={th}>Visibilité</th></tr></thead>
           <tbody className="divide-y divide-white/[0.05]">
             {rows.map((r) => {
               const img = [...r.product_images].sort((a, b) => a.position - b.position)[0];

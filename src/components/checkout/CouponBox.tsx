@@ -38,7 +38,7 @@ export function CouponBox() {
         <span>
           Code <strong className="tracking-widest text-gold">{coupon.code}</strong> appliqué ({coupon.message})
         </span>
-        <button onClick={() => setCoupon(null)} className="text-[0.62rem] uppercase tracking-[0.2em] text-mist hover:text-ivory">Retirer</button>
+        <button onClick={() => setCoupon(null)} className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-ivory">Retirer</button>
       </div>
     );
   }

@@ -23,10 +23,10 @@ export function FavoriteButton({ productId, className, withLabel = false }: { pr
         const on = await toggle(productId);
         notify(on ? "Ajouté à vos favoris" : "Retiré de vos favoris");
       }}
-      className={clsx("flex items-center gap-3 transition-colors", active ? "text-gold" : "text-ivory/85 hover:text-gold", className)}
+      className={clsx("flex items-center gap-3 transition-colors", active ? "text-gold" : "text-ivory/95 hover:text-gold", className)}
     >
       <HeartIcon filled={active} />
-      {withLabel && <span className="text-[0.66rem] uppercase tracking-[0.26em]">{active ? "Dans vos favoris" : "Ajouter aux favoris"}</span>}
+      {withLabel && <span className="text-[0.74rem] uppercase tracking-[0.26em]">{active ? "Dans vos favoris" : "Ajouter aux favoris"}</span>}
     </motion.button>
   );
 }

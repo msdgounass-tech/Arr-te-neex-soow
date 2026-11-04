@@ -25,7 +25,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
 
   return (
     <>
-      <Link href="/admin/commandes" className="text-[0.62rem] uppercase tracking-[0.2em] text-mist hover:text-gold">← Commandes</Link>
+      <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-gold">← Commandes</Link>
       <PageTitle title={o.order_number} subtitle={formatDate(o.created_at, true)}>
         <StatusBadge status={o.status} />
       </PageTitle>
@@ -47,7 +47,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(o.subtotal)}</dd></div>
               {o.discount > 0 && <div className="flex justify-between text-gold"><dt>Code {o.coupon_code}</dt><dd>-{formatPrice(o.discount)}</dd></div>}
               <div className="flex justify-between"><dt className="text-mist">Livraison ({o.zone_name})</dt><dd>{o.delivery_fee_pending ? "À confirmer" : formatPrice(o.delivery_fee)}</dd></div>
-              <div className="flex justify-between border-t border-white/[0.06] pt-2 text-base"><dt>Total</dt><dd className="text-gold">{formatPrice(o.total)}</dd></div>
+              <div className="flex justify-between border-t border-white/[0.1] pt-2 text-base"><dt>Total</dt><dd className="text-gold">{formatPrice(o.total)}</dd></div>
             </dl>
           </Card>
 
@@ -55,17 +55,17 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             <Card>
               <p className="label mb-3">Client</p>
               <p>{o.customer_name}</p>
-              <p className="text-sm text-ivory/70"><a href={`tel:${o.phone}`}>{o.phone}</a></p>
-              {o.whatsapp && <p className="text-sm text-ivory/70">WhatsApp : {o.whatsapp}</p>}
-              {o.email && <p className="text-sm text-ivory/70">{o.email}</p>}
+              <p className="text-sm text-ivory/90"><a href={`tel:${o.phone}`}>{o.phone}</a></p>
+              {o.whatsapp && <p className="text-sm text-ivory/90">WhatsApp : {o.whatsapp}</p>}
+              {o.email && <p className="text-sm text-ivory/90">{o.email}</p>}
               <p className="mt-1 text-xs text-mist">{o.user_id ? "Client avec compte" : "Commande invitée"}</p>
               <a href={`https://wa.me/${wa}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-4 min-h-10 w-full"><WhatsAppIcon /> Contacter</a>
             </Card>
             <Card>
               <p className="label mb-3">Adresse de livraison</p>
               <p className="text-sm">{o.address_line}</p>
-              <p className="text-sm text-ivory/70">{[o.city, o.region].filter(Boolean).join(", ")}</p>
-              {o.notes && <p className="mt-3 border-l border-gold/40 pl-3 text-sm italic text-ivory/70">{o.notes}</p>}
+              <p className="text-sm text-ivory/90">{[o.city, o.region].filter(Boolean).join(", ")}</p>
+              {o.notes && <p className="mt-3 border-l border-gold/40 pl-3 text-sm italic text-ivory/90">{o.notes}</p>}
               {o.delivery_lat != null && o.delivery_lng != null && (
                 <a href={`https://www.google.com/maps/search/?api=1&query=${o.delivery_lat},${o.delivery_lng}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-4 min-h-10 w-full">
                   Ouvrir la position GPS{o.delivery_km != null ? ` · ${o.delivery_km} km` : ""}

@@ -1,4 +1,6 @@
 import { Hero } from "@/components/home/Hero";
+import { ServicesStrip } from "@/components/home/ServicesStrip";
+import { CategoryExplorer } from "@/components/home/CategoryExplorer";
 import { GenderSection } from "@/components/home/GenderSection";
 import { AccessoriesSection } from "@/components/home/AccessoriesSection";
 import { FeaturedCollection } from "@/components/home/FeaturedCollection";
@@ -52,6 +54,7 @@ export default async function HomePage() {
     <>
       {/* 1. Bannière */}
       <Hero image={heroImg} />
+      <ServicesStrip />
 
       {/* 2. Collection Homme */}
       <GenderSection
@@ -77,6 +80,9 @@ export default async function HomePage() {
         categories={WOMEN}
         products={women.items}
       />
+
+      {/* Exploration par catégorie */}
+      <CategoryExplorer />
 
       {/* 4. Nouveautés */}
       <section className="container-luxe py-20 md:py-28">

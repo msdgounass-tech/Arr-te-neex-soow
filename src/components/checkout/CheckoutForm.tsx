@@ -134,7 +134,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
       <header className="mb-12 text-center">
         <p className="eyebrow">Commande sécurisée</p>
         <h1 className="display mt-5 text-5xl md:text-7xl">{step === 1 ? "Vos informations" : "Récapitulatif"}</h1>
-        <ol className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-4 text-[0.6rem] uppercase tracking-[0.24em]">
+        <ol className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-4 text-[0.78rem] uppercase tracking-[0.24em]">
           {["Informations", "Validation"].map((s, i) => (
             <li key={s} className={clsx("flex items-center gap-2", step >= i + 1 ? "text-gold" : "text-mist")}>
               <span className={clsx("flex h-6 w-6 items-center justify-center rounded-full border", step > i + 1 ? "border-gold bg-gold text-ink" : step === i + 1 ? "border-gold" : "border-white/20")}>
@@ -158,7 +158,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                   <label><span className="label">Téléphone *</span><input required type="tel" value={f.phone} onChange={set("phone")} autoComplete="tel" placeholder="77 000 00 00" className="field" /></label>
                   <label><span className="label">E-mail (pour le reçu)</span><input type="email" value={f.email} onChange={set("email")} autoComplete="email" className="field" /></label>
                   <div className="md:col-span-2">
-                    <label className="flex items-center gap-3 text-sm text-ivory/80">
+                    <label className="flex items-center gap-3 text-sm text-ivory/90">
                       <input type="checkbox" checked={sameWa} onChange={(e) => setSameWa(e.target.checked)} className="h-4 w-4 accent-[#C6A15B]" />
                       Mon numéro WhatsApp est identique
                     </label>
@@ -172,7 +172,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
               <fieldset>
                 <legend className="display mb-6 text-3xl">Livraison</legend>
                 {zones.length === 0 ? (
-                  <p className="mb-8 border border-gold/30 p-4 text-sm text-ivory/80">
+                  <p className="mb-8 border border-gold/30 p-4 text-sm text-ivory/90">
                     Les zones de livraison sont en cours de configuration. Contactez-nous pour finaliser votre commande. <Link className="text-gold" href="/contact">Nous contacter</Link>
                   </p>
                 ) : (
@@ -183,7 +183,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                         key={z.id}
                         onClick={() => setF((s) => ({ ...s, zone_id: z.id }))}
                         aria-pressed={f.zone_id === z.id}
-                        className={clsx("flex items-start justify-between gap-3 border p-4 text-left transition-colors", f.zone_id === z.id ? "border-gold bg-gold/[0.06]" : "border-white/10 hover:border-white/30")}
+                        className={clsx("flex items-start justify-between gap-3 border p-4 text-left transition-colors", f.zone_id === z.id ? "border-gold bg-gold/[0.06]" : "border-white/15 hover:border-white/30")}
                       >
                         <span>
                           <span className="block text-sm font-medium">{z.name}</span>
@@ -191,13 +191,13 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                         </span>
                         <span className="shrink-0 text-right text-sm text-gold">
                           {z.fee_mode === "quote" ? "Tarif à confirmer" : z.fee_mode === "distance" ? "Selon distance" : z.fee === 0 ? "Offerte" : formatPrice(z.fee)}
-                          {z.free_above ? <span className="block text-[0.65rem] text-mist">Offerte dès {formatPrice(z.free_above)}</span> : null}
+                          {z.free_above ? <span className="block text-[0.74rem] text-mist">Offerte dès {formatPrice(z.free_above)}</span> : null}
                         </span>
                       </button>
                     ))}
                   </div>
                 )}
-                <div className="mb-8 flex flex-col gap-3 border border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mb-8 flex flex-col gap-3 border border-white/15 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-sm">
                     <p className="text-ivory/90">{pos ? "Position enregistrée pour la livraison" : "Localisation de livraison"}</p>
                     <p className="text-xs text-mist">
@@ -223,7 +223,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                   </label>
                   <label className="md:col-span-2"><span className="label">Informations complémentaires</span><textarea rows={3} value={f.notes} onChange={set("notes")} placeholder="Horaires de livraison, instructions…" className="field resize-none" /></label>
                   {loggedIn && (
-                    <label className="flex items-center gap-3 text-sm text-ivory/80 md:col-span-2">
+                    <label className="flex items-center gap-3 text-sm text-ivory/90 md:col-span-2">
                       <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="h-4 w-4 accent-[#C6A15B]" />
                       Enregistrer cette adresse dans mon compte
                     </label>
@@ -244,7 +244,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                         disabled={!ok}
                         onClick={() => setMethod(m.id)}
                         aria-pressed={method === m.id}
-                        className={clsx("flex items-center gap-4 border p-5 text-left transition-colors", method === m.id ? "border-gold bg-gold/[0.06]" : "border-white/10 hover:border-white/30", !ok && "cursor-not-allowed opacity-40")}
+                        className={clsx("flex items-center gap-4 border p-5 text-left transition-colors", method === m.id ? "border-gold bg-gold/[0.06]" : "border-white/15 hover:border-white/30", !ok && "cursor-not-allowed opacity-40")}
                       >
                         <span className={clsx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border", method === m.id ? "border-gold" : "border-white/30")}>
                           {method === m.id && <span className="h-2.5 w-2.5 rounded-full bg-gold" />}
@@ -268,14 +268,14 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                 <div className="bg-ink p-6">
                   <p className="label mb-3">Client</p>
                   <p>{f.customer_name}</p>
-                  <p className="mt-1 text-sm text-ivory/70">{f.phone}</p>
-                  <p className="text-sm text-ivory/70">WhatsApp : {sameWa ? f.phone : f.whatsapp}</p>
-                  {f.email && <p className="text-sm text-ivory/70">{f.email}</p>}
+                  <p className="mt-1 text-sm text-ivory/90">{f.phone}</p>
+                  <p className="text-sm text-ivory/90">WhatsApp : {sameWa ? f.phone : f.whatsapp}</p>
+                  {f.email && <p className="text-sm text-ivory/90">{f.email}</p>}
                 </div>
                 <div className="bg-ink p-6">
                   <p className="label mb-3">Livraison — {zone?.name}</p>
                   <p>{f.address_line}</p>
-                  <p className="mt-1 text-sm text-ivory/70">{[f.city, f.region].filter(Boolean).join(", ")}</p>
+                  <p className="mt-1 text-sm text-ivory/90">{[f.city, f.region].filter(Boolean).join(", ")}</p>
                   {zone?.delay && <p className="text-sm text-mist">Délai : {zone.delay}</p>}
                   {pos && <p className="text-sm text-mist">Position GPS partagée{delivery?.km != null ? ` · ${delivery.km} km` : ""}</p>}
                   {delivery?.pending && <p className="mt-2 text-xs text-gold">Frais de livraison à confirmer : notre équipe vous communique le montant sur WhatsApp avant l&apos;expédition.</p>}
@@ -303,14 +303,14 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
           )}
         </AnimatePresence>
 
-        <aside className="h-fit border border-white/[0.06] bg-ink-2 p-6 md:p-8 lg:sticky lg:top-28">
+        <aside className="h-fit border border-white/[0.1] bg-ink-2 p-6 md:p-8 lg:sticky lg:top-28">
           <h2 className="display text-2xl">Votre commande</h2>
           <ul className="mt-6 max-h-72 space-y-4 overflow-y-auto pr-1">
             {lines.map((l) => (
               <li key={l.variantId} className="flex gap-4">
                 <span className="relative h-20 w-16 shrink-0 overflow-hidden bg-ink-3">
                   {l.image && <Image src={l.image} alt="" fill sizes="64px" className="object-cover" />}
-                  <span className="absolute right-0 top-0 bg-gold px-1.5 text-[0.6rem] font-bold text-ink">{l.quantity}</span>
+                  <span className="absolute right-0 top-0 bg-gold px-1.5 text-[0.78rem] font-bold text-ink">{l.quantity}</span>
                 </span>
                 <span className="flex-1 text-sm">
                   <span className="display block text-lg leading-tight">{l.name}</span>
@@ -321,7 +321,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
             ))}
           </ul>
           {step === 1 && <div className="mt-6"><CouponBox /></div>}
-          <dl className="mt-6 space-y-3 border-t border-white/[0.06] pt-6 text-sm">
+          <dl className="mt-6 space-y-3 border-t border-white/[0.1] pt-6 text-sm">
             <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(subtotal)}</dd></div>
             {discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction ({coupon?.code})</dt><dd>-{formatPrice(discount)}</dd></div>}
             <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd className={delivery?.pending ? "text-gold" : ""}>{feeLabel}</dd></div>

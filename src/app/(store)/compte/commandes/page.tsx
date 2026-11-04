@@ -20,7 +20,7 @@ export default async function OrdersPage() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="label border-b border-white/[0.06]">
+            <thead className="label border-b border-white/[0.1]">
               <tr><th className="py-3 font-normal">Commande</th><th className="font-normal">Date</th><th className="font-normal">Statut</th><th className="font-normal">Paiement</th><th className="text-right font-normal">Total</th></tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
