@@ -1,6 +1,7 @@
 "use client";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { browserStorage } from "./storage";
 import { getBrowserSupabase } from "@/lib/supabase/client";
 
 interface FavState {
@@ -47,6 +48,7 @@ export const useFavorites = create<FavState>()(
         set({ ids: (data || []).map((r) => r.product_id as string) });
       },
     }),
-    { name: "gl-favorites-v1", partialize: (s) => ({ ids: s.ids }) },
+    { name: "gl-favorites-v1",
+      storage: createJSONStorage(browserStorage), partialize: (s) => ({ ids: s.ids }) },
   ),
 );
