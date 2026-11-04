@@ -121,7 +121,8 @@ Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `
 ### Mise en place de Supabase
 
 1. Créez un projet sur https://supabase.com et choisissez une région proche, par exemple `eu-west`.
-2. Ouvrez **SQL Editor** et exécutez **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
+2. Ouvrez **SQL Editor** › **New query**, collez **tout** le fichier `supabase/installation_complete.sql`, puis cliquez sur **Run**. Ce fichier regroupe les migrations, `seed.sql` et `config_gounass.sql`.
+   Vous pouvez aussi exécuter **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
    Ce dernier fichier contient la configuration de la boutique : coordonnées, bandeau, lien Wave, zones du Sénégal actives avec livraison offerte dès 10 000 FCFA, et administrateur `msdgounass@gmail.com`.
    Avec la CLI, c'est `supabase link --project-ref <ref>`, puis `supabase db push`, puis l'exécution de `seed.sql`.
 3. Dans **Authentication › URL Configuration** :
