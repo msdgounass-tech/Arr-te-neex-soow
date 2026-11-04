@@ -53,9 +53,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <div className="mt-4 space-y-1.5 pr-8">
           {product.category && <p className="text-[0.78rem] uppercase tracking-[0.26em] text-mist">{product.category.name}</p>}
           <h3 className="display text-[1.15rem] leading-snug text-ivory transition-colors group-hover:text-gold md:text-xl">{product.name}</h3>
-          <p className="flex items-baseline gap-3 text-sm">
-            <span className={sale ? "text-gold" : "text-ivory/90"}>{formatPrice(product.price)}</span>
-            {sale && <span className="text-xs text-mist line-through">{formatPrice(product.compare_at_price!)}</span>}
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-sm">
+            <span className={`whitespace-nowrap ${sale ? "text-gold" : "text-ivory/90"}`}>{formatPrice(product.price)}</span>
+            {sale && <span className="whitespace-nowrap text-xs text-mist line-through">{formatPrice(product.compare_at_price!)}</span>}
           </p>
           {colors.length > 1 && (
             <div className="flex gap-1.5 pt-1" aria-label="Couleurs disponibles">

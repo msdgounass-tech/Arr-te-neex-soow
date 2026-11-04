@@ -47,7 +47,7 @@ export function Hero({ image }: { image: string }) {
             </div>
           </motion.div>
 
-          <motion.h1 {...item(0.75)} className="display mt-8 text-[3.1rem] leading-[0.98] [text-shadow:0_4px_24px_rgba(0,0,0,.55)] sm:text-7xl lg:text-[6.2rem]">
+          <motion.h1 {...item(0.75)} className="display mt-8 text-[3.1rem] leading-[0.98] [text-shadow:0_2px_14px_rgba(0,0,0,.35)] sm:text-7xl lg:text-[6.2rem]">
             L&apos;élégance est
             <br />
             une <em className="gold-text not-italic md:italic">signature.</em>
@@ -55,7 +55,7 @@ export function Hero({ image }: { image: string }) {
 
           <motion.div initial={reduce ? false : { scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.4, delay: 1.1, ease }} className="mt-8 h-px w-24 origin-left bg-gold" />
 
-          <motion.p {...item(1.05)} className="mt-8 max-w-md text-[1.05rem] font-medium leading-relaxed text-ivory [text-shadow:0_2px_12px_rgba(0,0,0,.6)] md:text-lg">
+          <motion.p {...item(1.05)} className="mt-8 max-w-md text-[1.05rem] font-medium leading-relaxed text-ivory [text-shadow:0_1px_8px_rgba(0,0,0,.35)] md:text-lg">
             Découvrez une sélection exclusive de vêtements et d&apos;accessoires pour affirmer votre style.
           </motion.p>
 
@@ -70,7 +70,7 @@ export function Hero({ image }: { image: string }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2, duration: 1 }}
-        className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex"
+        className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex [@media(max-height:900px)]:!hidden"
         aria-hidden
       >
         <span className="text-[0.68rem] uppercase tracking-[0.5em] text-ivory/90">Défiler</span>

@@ -3,7 +3,7 @@ Usage : python3 scripts/gen-illustrations.py"""
 import os
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "public", "images", "produits")
-TONES = [("#3a3226", "#121110"), ("#262c33", "#0f1113"), ("#3a2626", "#130f0f")]
+TONES = [("#55402e", "#24180f"), ("#4a3a30", "#1f1712"), ("#5a3c2c", "#26170f")]
 
 S = 'fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"'
 DRAW = {

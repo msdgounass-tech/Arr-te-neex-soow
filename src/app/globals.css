@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0b0b0b;
-  --color-ink-2: #161616;
-  --color-ink-3: #222222;
-  --color-line: #3a3a3a;
+  /* Chocolat noir premium (moins sombre qu'un noir pur) */
+  --color-ink: #231811;
+  --color-ink-2: #2d1f16;
+  --color-ink-3: #3a291e;
+  --color-line: #5a4535;
   --color-gold: #c6a15b;
   --color-gold-light: #dcc08a;
   --color-gold-dark: #9c7c3f;
   --color-ivory: #f5f1e8;
-  --color-mist: #cfc8bb;
+  --color-mist: #ddd0bd;
   --color-danger: #d16a5c;
   --color-success: #8fb58a;
 
@@ -27,7 +28,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    background: var(--color-ink);
+    background: radial-gradient(120% 80% at 50% 0%, #33241a 0%, var(--color-ink) 55%) fixed, var(--color-ink);
     color: var(--color-ivory);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;

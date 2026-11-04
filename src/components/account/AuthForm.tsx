@@ -28,7 +28,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
     try {
       if (mode === "login") {
         const { error } = await sb.auth.signInWithPassword({ email: form.email, password: form.password });
-        if (error) throw new Error(error.message.includes("Invalid") ? "E-mail ou mot de passe incorrect." : error.message);
+        if (error) {
+          throw new Error(
+            error.message.includes("Invalid")
+              ? "E-mail ou mot de passe incorrect."
+              : error.message.toLowerCase().includes("confirm")
+                ? "Votre compte est en cours d'activation. Réessayez dans un instant."
+                : error.message,
+          );
+        }
         router.replace(redirectTo);
         router.refresh();
       } else if (mode === "register") {
@@ -38,11 +46,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
           password: form.password,
           options: { data: { full_name: form.full_name, phone: form.phone }, emailRedirectTo: `${window.location.origin}/auth/callback?next=/compte` },
         });
-        if (error) throw new Error(error.message.includes("registered") ? "Un compte existe déjà avec cet e-mail." : error.message);
-        if (data.session) {
-          router.replace(redirectTo);
-          router.refresh();
-        } else setInfo("Un e-mail de confirmation vient de vous être envoyé. Cliquez sur le lien pour activer votre compte.");
+        if (error) throw new Error(error.message.includes("registered") ? "Un compte existe déjà avec cet e-mail. Connectez-vous." : error.message);
+        // Connexion immédiate : aucun e-mail de vérification n'est requis.
+        if (!data.session) {
+          const { error: loginError } = await sb.auth.signInWithPassword({ email: form.email, password: form.password });
+          if (loginError) throw new Error("Compte créé. Connectez-vous avec votre e-mail et votre mot de passe.");
+        }
+        router.replace(redirectTo);
+        router.refresh();
       } else if (mode === "forgot") {
         const { error } = await sb.auth.resetPasswordForEmail(form.email, { redirectTo: `${window.location.origin}/auth/callback?next=/compte/nouveau-mot-de-passe` });
         if (error) throw new Error(error.message);

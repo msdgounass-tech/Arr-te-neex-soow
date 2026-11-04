@@ -68,7 +68,7 @@ async function sendEmail(to: string, subject: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!key || !from) return { skipped: true as const };
-  const html = `<div style="background:#080808;color:#F5F1E8;padding:40px;font-family:Georgia,serif">
+  const html = `<div style="background:#231811;color:#F5F1E8;padding:40px;font-family:Georgia,serif">
     <p style="letter-spacing:6px;color:#C6A15B;font-size:12px">GOUNASS LUXURY</p>
     <h1 style="font-weight:400;font-size:26px">${subject}</h1>
     <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#d8d2c5">${text.replace(/(https?:\/\/\S+)/g, '<a style="color:#C6A15B" href="$1">$1</a>')}</p>
