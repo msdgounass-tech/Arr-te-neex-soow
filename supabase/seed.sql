@@ -44,5 +44,7 @@ on conflict (slug) do nothing;
 -- Paramètres publics de la boutique (à compléter dans Admin > Paramètres)
 insert into public.settings (key, value) values
   ('store', '{"email": "", "phone": "", "whatsapp": "", "address": "", "city": "", "instagram": "", "tiktok": "", "facebook": "", "opening_hours": ""}'::jsonb),
-  ('home', '{"hero_image": "", "men_image": "", "women_image": "", "accessories_image": "", "editorial_image": "", "announcement": ""}'::jsonb)
+  ('home', '{"hero_image": "", "men_image": "", "women_image": "", "accessories_image": "", "editorial_image": "", "announcement": "", "logo_url": ""}'::jsonb),
+  ('delivery', '{"origin_lat": "", "origin_lng": "", "road_factor": "1.3"}'::jsonb),
+  ('payments', '{"wave_link": "", "orange_money_link": ""}'::jsonb)
 on conflict (key) do nothing;

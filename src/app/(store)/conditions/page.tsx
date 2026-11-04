@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Conditions générales de vente" };
 
-/* Modèle à faire valider et compléter par le propriétaire (raison sociale, NINEA, RCCM, politique de retour). */
+/* À compléter avec le NINEA et le RCCM dès leur obtention. */
 export default function TermsPage() {
   return (
     <article className="container-luxe max-w-3xl pt-16 text-sm leading-relaxed text-ivory/75 md:pt-24 [&_h2]:display [&_h2]:mb-3 [&_h2]:mt-10 [&_h2]:text-3xl [&_h2]:text-ivory">
@@ -16,11 +16,12 @@ export default function TermsPage() {
       <h2>Paiement</h2>
       <p>Moyens acceptés selon disponibilité : Wave, Orange Money, carte bancaire, paiement à la livraison. Aucune donnée bancaire n&apos;est stockée par GOUNASS LUXURY.</p>
       <h2>Livraison</h2>
-      <p>Les zones, tarifs et délais sont indiqués sur la page Livraison et lors de la commande. Les délais sont indicatifs.</p>
-      <h2>Retours et réclamations</h2>
-      <p>Pour toute réclamation, contactez le service client en précisant votre numéro de commande. Les modalités de retour et d&apos;échange sont communiquées par le service client.</p>
+      <p>Les zones, tarifs et délais sont indiqués sur la page Livraison et lors de la commande. La livraison est offerte dès 10 000 FCFA d&apos;achat dans les zones concernées. Lorsque les frais dépendent de l&apos;adresse, ils sont confirmés au client avant l&apos;expédition. Les délais sont indicatifs.</p>
+      <h2>Échanges et retours</h2>
+      <p>Les articles peuvent être échangés dans un délai de 7 jours suivant la réception, à condition d&apos;être non portés, non utilisés et conservés dans leur emballage d&apos;origine, sous réserve des règles légales applicables. Pour toute demande, contactez le service client en précisant votre numéro de commande.</p>
       <h2>Informations légales</h2>
-      <p>Raison sociale, adresse du siège, NINEA et RCCM : à compléter par l&apos;exploitant de la boutique.</p>
+      <p>Nom commercial : GOUNASS LUXURY. Boutique exclusivement en ligne — Sénégal. Contact : msdshop01@gmail.com · 70 570 41 21.</p>
+      <p>NINEA et RCCM : en cours d&apos;immatriculation, communiqués dès leur obtention.</p>
     </article>
   );
 }

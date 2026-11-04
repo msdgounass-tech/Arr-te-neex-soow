@@ -1,6 +1,6 @@
 "use client";
-import { useActionState } from "react";
-import { saveCategory, saveCoupon, saveZone, type ActionResult } from "@/app/admin/actions";
+import { useActionState, useState } from "react";
+import { saveCategory, saveCoupon, saveSettings, saveZone, type ActionResult } from "@/app/admin/actions";
 
 function Feedback({ s }: { s: ActionResult }) {
   return s.error ? <p className="text-xs text-danger">{s.error}</p> : s.message ? <p className="text-xs text-gold">{s.message}</p> : null;
@@ -51,19 +51,79 @@ export function CouponForm({ initial }: { initial?: { id: string; code: string; 
   );
 }
 
-export function ZoneForm({ initial }: { initial?: { id: string; name: string; fee: number; free_above: number | null; delay: string | null; position: number; is_active: boolean } }) {
+export function ZoneForm({ initial }: { initial?: { id: string; name: string; fee: number; free_above: number | null; delay: string | null; position: number; is_active: boolean; fee_mode: string; per_km_fee: number; max_km: number | null } }) {
   const [s, action, pending] = useActionState<ActionResult, FormData>(saveZone, {});
+  const [mode, setMode] = useState(initial?.fee_mode || "quote");
   return (
-    <form action={action} className="grid items-end gap-3 md:grid-cols-[1.6fr_1fr_1fr_1.6fr_70px_auto_auto]">
+    <form action={action} className="grid items-end gap-3 md:grid-cols-4 xl:grid-cols-8">
       {initial && <input type="hidden" name="id" value={initial.id} />}
-      <label><span className="label">Zone</span><input name="name" required defaultValue={initial?.name} className="field-box mt-1" /></label>
-      <label><span className="label">Tarif (FCFA)</span><input name="fee" type="number" min={0} required defaultValue={initial?.fee ?? 0} className="field-box mt-1" /></label>
-      <label><span className="label">Offerte dès</span><input name="free_above" type="number" min={0} defaultValue={initial?.free_above ?? ""} className="field-box mt-1" /></label>
-      <label><span className="label">Délai affiché</span><input name="delay" defaultValue={initial?.delay || ""} placeholder="24 à 48 h" className="field-box mt-1" /></label>
+      <label className="xl:col-span-2"><span className="label">Zone</span><input name="name" required defaultValue={initial?.name} className="field-box mt-1" /></label>
+      <label className="xl:col-span-2"><span className="label">Tarification</span>
+        <select name="fee_mode" value={mode} onChange={(e) => setMode(e.target.value)} className="field-box mt-1">
+          <option value="quote">À confirmer après commande</option>
+          <option value="fixed">Tarif fixe</option>
+          <option value="distance">Selon la distance (GPS)</option>
+        </select>
+      </label>
+      <label><span className="label">{mode === "distance" ? "Base (FCFA)" : "Tarif (FCFA)"}</span><input name="fee" type="number" min={0} required defaultValue={initial?.fee ?? 0} disabled={mode === "quote"} className="field-box mt-1 disabled:opacity-40" /></label>
+      {mode === "distance" ? (
+        <>
+          <label><span className="label">Prix / km</span><input name="per_km_fee" type="number" min={0} defaultValue={initial?.per_km_fee ?? 0} className="field-box mt-1" /></label>
+          <label><span className="label">Distance max (km)</span><input name="max_km" type="number" min={1} defaultValue={initial?.max_km ?? ""} className="field-box mt-1" /></label>
+        </>
+      ) : (
+        <>
+          <input type="hidden" name="per_km_fee" value={initial?.per_km_fee ?? 0} />
+          <input type="hidden" name="max_km" value={initial?.max_km ?? ""} />
+        </>
+      )}
+      <label><span className="label">Offerte dès (FCFA)</span><input name="free_above" type="number" min={0} defaultValue={initial?.free_above ?? ""} className="field-box mt-1" /></label>
+      <label className="xl:col-span-2"><span className="label">Délai affiché</span><input name="delay" defaultValue={initial?.delay || ""} placeholder="24 à 48 h" className="field-box mt-1" /></label>
       <label><span className="label">Ordre</span><input name="position" type="number" defaultValue={initial?.position ?? 0} className="field-box mt-1" /></label>
       <label className="flex items-center gap-2 pb-2 text-xs"><input type="checkbox" name="is_active" defaultChecked={initial?.is_active ?? false} className="accent-[#C6A15B]" /> Active</label>
       <button disabled={pending} className="btn btn-ghost-gold min-h-10 px-4">{initial ? "Enregistrer" : "Ajouter"}</button>
-      <div className="md:col-span-7"><Feedback s={s} /></div>
+      {mode === "quote" && <input type="hidden" name="fee" value={initial?.fee ?? 0} />}
+      <div className="md:col-span-4 xl:col-span-8"><Feedback s={s} /></div>
     </form>
+  );
+}
+
+export function DeliveryOriginForm({ initial }: { initial: { origin_lat: string; origin_lng: string; road_factor: string } }) {
+  const [v, setV] = useState(initial);
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="grid items-end gap-3 md:grid-cols-[1fr_1fr_140px_auto_auto]">
+      <label><span className="label">Latitude du point de départ</span><input value={v.origin_lat} onChange={(e) => setV({ ...v, origin_lat: e.target.value })} placeholder="14.6928" className="field-box mt-1" /></label>
+      <label><span className="label">Longitude</span><input value={v.origin_lng} onChange={(e) => setV({ ...v, origin_lng: e.target.value })} placeholder="-17.4467" className="field-box mt-1" /></label>
+      <label><span className="label">Coef. routier</span><input value={v.road_factor} onChange={(e) => setV({ ...v, road_factor: e.target.value })} className="field-box mt-1" /></label>
+      <button
+        type="button"
+        onClick={() =>
+          navigator.geolocation?.getCurrentPosition(
+            (p) => setV((x) => ({ ...x, origin_lat: p.coords.latitude.toFixed(6), origin_lng: p.coords.longitude.toFixed(6) })),
+            () => setMsg("Position non obtenue."),
+            { enableHighAccuracy: true },
+          )
+        }
+        className="btn btn-outline min-h-10 px-4"
+      >
+        Ma position
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          const r = await saveSettings("delivery", v);
+          setMsg(r.error || r.message || "");
+          setBusy(false);
+        }}
+        className="btn btn-gold min-h-10 px-4"
+      >
+        Enregistrer
+      </button>
+      {msg && <p className="text-xs text-gold md:col-span-5">{msg}</p>}
+    </div>
   );
 }

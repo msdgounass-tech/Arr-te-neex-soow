@@ -65,7 +65,7 @@ export function OrderSummary({ order }: { order: Order }) {
         <dl className="ml-auto mt-6 max-w-sm space-y-2 text-sm">
           <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(order.subtotal)}</dd></div>
           {order.discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction {order.coupon_code}</dt><dd>-{formatPrice(order.discount)}</dd></div>}
-          <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd>{order.delivery_fee ? formatPrice(order.delivery_fee) : "Offerte"}</dd></div>
+          <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd>{order.delivery_fee_pending ? "À confirmer" : order.delivery_fee ? formatPrice(order.delivery_fee) : "Offerte"}</dd></div>
           <div className="flex justify-between border-t border-white/[0.06] pt-3"><dt className="label">Total</dt><dd className="display text-2xl">{formatPrice(order.total)}</dd></div>
         </dl>
       </div>

@@ -4,6 +4,7 @@ import { getServiceSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { startPayment } from "@/lib/payments";
 import { paymentAvailability } from "@/lib/payments/config";
+import { getSettings } from "@/lib/queries";
 import { notifyOrder } from "@/lib/notifications";
 import { orderErrorMessage } from "@/lib/order-errors";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
@@ -23,6 +24,8 @@ const schema = z.object({
   payment_method: z.enum(["wave", "orange_money", "carte", "livraison"]),
   coupon_code: z.string().trim().max(40).optional().or(z.literal("")),
   save_address: z.boolean().optional(),
+  lat: z.number().min(-90).max(90).nullable().optional(),
+  lng: z.number().min(-180).max(180).nullable().optional(),
   items: z
     .array(z.object({ variant_id: z.string().uuid(), quantity: z.number().int().min(1).max(99) }))
     .min(1, "Panier vide")
@@ -38,7 +41,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message || "Formulaire invalide." }, { status: 400 });
   }
   const input = parsed.data;
-  if (!paymentAvailability()[input.payment_method]) {
+  const { payments: paySettings } = await getSettings();
+  if (!paymentAvailability(paySettings)[input.payment_method]) {
     return NextResponse.json({ error: "Ce moyen de paiement n'est pas encore disponible." }, { status: 400 });
   }
 
@@ -52,7 +56,7 @@ export async function POST(req: Request) {
     console.error("[orders] place_order", error?.message);
     return NextResponse.json({ error: orderErrorMessage(error?.message || "") }, { status: 409 });
   }
-  const order = data as { order_id: string; order_number: string; access_token: string; total: number; payment_id: string };
+  const order = data as { order_id: string; order_number: string; access_token: string; total: number; payment_id: string; delivery_fee_pending: boolean };
 
   if (user && save_address && session) {
     const { count } = await session.from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id);
@@ -75,6 +79,10 @@ export async function POST(req: Request) {
 
   let redirectUrl: string | null = null;
   let paymentError: string | null = null;
+  // Frais de livraison « à confirmer » : le paiement en ligne est proposé une fois le montant définitif fixé.
+  if (order.delivery_fee_pending && input.payment_method !== "livraison") {
+    return NextResponse.json({ orderNumber: order.order_number, token: order.access_token, redirectUrl: null, paymentError: null });
+  }
   try {
     const r = await startPayment(input.payment_method, {
       paymentId: order.payment_id,

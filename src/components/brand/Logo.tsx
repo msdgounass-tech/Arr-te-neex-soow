@@ -46,10 +46,15 @@ export function Emblem({ className, title = "GOUNASS LUXURY" }: { className?: st
   );
 }
 
-export function Wordmark({ className, compact = false }: { className?: string; compact?: boolean }) {
+export function Wordmark({ className, compact = false, logoUrl }: { className?: string; compact?: boolean; logoUrl?: string }) {
   return (
     <span className={clsx("flex items-center gap-3", className)}>
-      <Emblem className={compact ? "h-9 w-9" : "h-11 w-11"} />
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoUrl} alt="GOUNASS LUXURY" className={clsx("rounded-full object-cover", compact ? "h-9 w-9" : "h-11 w-11")} />
+      ) : (
+        <Emblem className={compact ? "h-9 w-9" : "h-11 w-11"} />
+      )}
       <span className="flex flex-col leading-none">
         <span className={clsx("display tracking-[0.28em] text-ivory", compact ? "text-[1.05rem]" : "text-[1.3rem]")}>GOUNASS</span>
         <span className="mt-1 text-[0.55rem] tracking-[0.62em] text-gold">LUXURY</span>

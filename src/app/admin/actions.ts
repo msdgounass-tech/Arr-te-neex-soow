@@ -153,6 +153,38 @@ export async function updateDelivery(_: ActionResult, fd: FormData): Promise<Act
   return { ok: true, message: "Livraison mise à jour." };
 }
 
+export async function setDeliveryFee(_: ActionResult, fd: FormData): Promise<ActionResult> {
+  const { sb } = await requireRole("staff");
+  const id = String(fd.get("id"));
+  const fee = Number(String(fd.get("fee") || "").replace(/\D/g, ""));
+  if (!Number.isFinite(fee) || String(fd.get("fee") || "").trim() === "") return { error: "Indiquez un montant." };
+  const { error } = await sb.rpc("set_delivery_fee", { p_order_id: id, p_fee: fee });
+  if (error) return { error: error.message.includes("DEJA_PAYEE") ? "Commande déjà payée : montant non modifiable." : "Mise à jour impossible." };
+  if (fd.get("notify") === "on") after(() => notifyOrder(id, "delivery_fee_set"));
+  revalidatePath(`/admin/commandes/${id}`);
+  return { ok: true, message: "Frais de livraison enregistrés." };
+}
+
+export async function confirmManualPayment(_: ActionResult, fd: FormData): Promise<ActionResult> {
+  const { sb } = await requireRole("staff");
+  const id = String(fd.get("id"));
+  const reference = String(fd.get("reference") || "").trim();
+  const { error } = await sb.rpc("confirm_manual_payment", { p_order_id: id, p_reference: reference });
+  if (error) {
+    const m = error.message;
+    return {
+      error: m.includes("REFERENCE_REQUISE")
+        ? "Saisissez la référence de la transaction (au moins 4 caractères)."
+        : m.includes("COMMANDE_NON_PAYABLE")
+          ? "Fixez d'abord les frais de livraison (ou la commande est annulée)."
+          : "Confirmation impossible.",
+    };
+  }
+  after(() => notifyOrder(id, "payment_received"));
+  revalidatePath(`/admin/commandes/${id}`);
+  return { ok: true, message: "Paiement confirmé." };
+}
+
 export async function markCodPaid(fd: FormData) {
   const { sb } = await requireRole("staff");
   const id = String(fd.get("id"));
@@ -273,11 +305,14 @@ export async function saveZone(_: ActionResult, fd: FormData): Promise<ActionRes
       free_above: optInt,
       delay: z.string().trim().max(120).optional(),
       position: z.coerce.number().int().default(0),
+      fee_mode: z.enum(["fixed", "distance", "quote"]),
+      per_km_fee: z.coerce.number().int().min(0).default(0),
+      max_km: optInt,
     })
     .safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { error: "Formulaire invalide." };
   const { id, ...d } = parsed.data;
-  const row = { ...d, free_above: d.free_above || null, delay: d.delay || null, is_active: fd.get("is_active") === "on" };
+  const row = { ...d, free_above: d.free_above || null, max_km: d.max_km || null, delay: d.delay || null, is_active: fd.get("is_active") === "on" };
   const { error } = id ? await sb.from("delivery_zones").update(row).eq("id", id) : await sb.from("delivery_zones").insert({ ...row, slug: slugify(d.name) });
   if (error) return { error: dbError(error) };
   revalidatePath("/admin/livraison");
@@ -296,9 +331,16 @@ export async function setRole(fd: FormData) {
 }
 
 // ─── Paramètres ────────────────────────────────────────────────────
-export async function saveSettings(key: "store" | "home", value: Record<string, string>): Promise<ActionResult> {
+export async function saveSettings(key: "store" | "home" | "delivery" | "payments", value: Record<string, string>): Promise<ActionResult> {
   const { sb } = await requireRole("admin");
-  const clean = Object.fromEntries(Object.entries(value).map(([k, v]) => [k.slice(0, 40), String(v ?? "").slice(0, 500)]));
+  const clean = Object.fromEntries(Object.entries(value).map(([k, v]) => [k.slice(0, 40), String(v ?? "").trim().slice(0, 500)]));
+  if (key === "payments") {
+    for (const v of [clean.wave_link, clean.orange_money_link]) if (v && !/^https:\/\/\S+$/.test(v)) return { error: "Les liens de paiement doivent commencer par https://" };
+  }
+  if (key === "delivery") {
+    const lat = Number(clean.origin_lat), lng = Number(clean.origin_lng);
+    if ((clean.origin_lat || clean.origin_lng) && (!(lat >= -90 && lat <= 90) || !(lng >= -180 && lng <= 180))) return { error: "Coordonnées invalides." };
+  }
   const { error } = await sb.from("settings").upsert({ key, value: clean, is_public: true });
   if (error) return { error: dbError(error) };
   revalidatePath("/", "layout");

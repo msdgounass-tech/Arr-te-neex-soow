@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { formatDate, formatPrice, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, toWhatsAppNumber } from "@/lib/format";
 import { Card, PageTitle, PaymentBadge, StatusBadge } from "@/components/admin/ui";
-import { DeliveryForm, StatusForm } from "@/components/admin/OrderForms";
+import { DeliveryFeeForm, DeliveryForm, ManualPaymentForm, StatusForm } from "@/components/admin/OrderForms";
 import { markCodPaid } from "../../actions";
 import type { Order } from "@/lib/types";
 import { WhatsAppIcon } from "@/components/ui/Icons";
@@ -14,7 +14,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   const { sb } = await requireRole("staff");
   const [{ data }, { data: payments }, { data: notifications }] = await Promise.all([
     sb.from("orders").select("*, order_items(*), order_status_history(id, status, note, created_at), deliveries(*)").eq("id", id).maybeSingle(),
-    sb.from("payments").select("id, provider, amount, status, provider_reference, created_at, updated_at").eq("order_id", id).order("created_at"),
+    sb.from("payments").select("id, provider, amount, status, provider_reference, raw, created_at, updated_at").eq("order_id", id).order("created_at"),
     sb.from("notifications").select("id, channel, event, status, error, created_at").eq("order_id", id).order("created_at", { ascending: false }).limit(20),
   ]);
   if (!data) notFound();
@@ -46,7 +46,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             <dl className="ml-auto mt-4 max-w-xs space-y-1 text-sm">
               <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(o.subtotal)}</dd></div>
               {o.discount > 0 && <div className="flex justify-between text-gold"><dt>Code {o.coupon_code}</dt><dd>-{formatPrice(o.discount)}</dd></div>}
-              <div className="flex justify-between"><dt className="text-mist">Livraison ({o.zone_name})</dt><dd>{formatPrice(o.delivery_fee)}</dd></div>
+              <div className="flex justify-between"><dt className="text-mist">Livraison ({o.zone_name})</dt><dd>{o.delivery_fee_pending ? "À confirmer" : formatPrice(o.delivery_fee)}</dd></div>
               <div className="flex justify-between border-t border-white/[0.06] pt-2 text-base"><dt>Total</dt><dd className="text-gold">{formatPrice(o.total)}</dd></div>
             </dl>
           </Card>
@@ -66,6 +66,11 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <p className="text-sm">{o.address_line}</p>
               <p className="text-sm text-ivory/70">{[o.city, o.region].filter(Boolean).join(", ")}</p>
               {o.notes && <p className="mt-3 border-l border-gold/40 pl-3 text-sm italic text-ivory/70">{o.notes}</p>}
+              {o.delivery_lat != null && o.delivery_lng != null && (
+                <a href={`https://www.google.com/maps/search/?api=1&query=${o.delivery_lat},${o.delivery_lng}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-4 min-h-10 w-full">
+                  Ouvrir la position GPS{o.delivery_km != null ? ` · ${o.delivery_km} km` : ""}
+                </a>
+              )}
             </Card>
           </div>
 
@@ -82,7 +87,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
                 <button className="btn btn-ghost-gold min-h-10">Marquer comme encaissé</button>
               </form>
             )}
-            {o.payment_method !== "livraison" && <p className="mt-3 text-xs text-mist">Les paiements en ligne sont confirmés uniquement par les webhooks signés des prestataires.</p>}
+            {(() => {
+              const last = (payments || []).at(-1) as { raw?: { mode?: string } | null; status: string } | undefined;
+              const linkMode = last?.raw?.mode === "lien";
+              if (o.payment_method === "livraison") return null;
+              if (linkMode && o.payment_status !== "reussi" && o.status !== "annulee" && !o.delivery_fee_pending) return <ManualPaymentForm id={o.id} label={PAYMENT_METHOD_LABEL[o.payment_method]} />;
+              return <p className="mt-3 text-xs text-mist">{linkMode ? "Paiement par lien marchand, confirmé manuellement après vérification." : "Les paiements en ligne sont confirmés uniquement par les webhooks signés des prestataires."}</p>;
+            })()}
           </Card>
 
           <Card>
@@ -104,6 +115,9 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         </div>
 
         <div className="space-y-4">
+          {o.delivery_fee_pending && o.status !== "annulee" && (
+            <Card className="border-gold/40"><p className="label mb-2 text-gold">Frais de livraison à confirmer</p><p className="mb-4 text-xs text-mist">Le client attend le montant. Le paiement en ligne lui sera proposé ensuite.</p><DeliveryFeeForm id={o.id} current={o.delivery_fee} /></Card>
+          )}
           <Card><p className="label mb-4">Statut de la commande</p><StatusForm id={o.id} status={o.status} /></Card>
           <Card><p className="label mb-4">Livraison {delivery ? `— ${delivery.status}` : ""}</p><DeliveryForm orderId={o.id} d={delivery} /></Card>
         </div>

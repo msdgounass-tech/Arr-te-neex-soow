@@ -121,18 +121,19 @@ Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `
 ### Mise en place de Supabase
 
 1. Créez un projet sur https://supabase.com et choisissez une région proche, par exemple `eu-west`.
-2. Ouvrez **SQL Editor** et exécutez **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, puis `supabase/seed.sql`.
+2. Ouvrez **SQL Editor** et exécutez **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
+   Ce dernier fichier contient la configuration de la boutique : coordonnées, bandeau, lien Wave, zones du Sénégal actives avec livraison offerte dès 10 000 FCFA, et administrateur `msdgounass@gmail.com`.
    Avec la CLI, c'est `supabase link --project-ref <ref>`, puis `supabase db push`, puis l'exécution de `seed.sql`.
 3. Dans **Authentication › URL Configuration** :
    - Site URL : `https://votre-domaine.com`
    - Redirect URLs : `https://votre-domaine.com/auth/callback`, `http://localhost:3000/auth/callback`
 4. Dans **Authentication › Providers › Email** : laissez la confirmation d'e-mail activée. Il est aussi conseillé de configurer un SMTP personnalisé (Resend, Brevo…) pour l'envoi des e-mails.
-5. Créez votre compte depuis `/compte/inscription`, puis nommez-vous administrateur en exécutant dans SQL Editor :
-   ```sql
-   update public.profiles set role = 'admin'
-   where id = (select id from auth.users where email = 'votre@email.com');
-   ```
-6. Dans `/admin/livraison`, saisissez les tarifs et délais de chaque zone puis **activez-les**. Une zone inactive n'est jamais proposée au client.
+5. Créez votre compte depuis `/compte/inscription` avec **msdgounass@gmail.com**. Ce compte devient administrateur automatiquement, grâce à `config_gounass.sql`.
+   Pour un autre e-mail, exécutez `update public.profiles set role = 'admin' where email = 'autre@email.com';`
+6. Dans `/admin/livraison`, réglez chaque zone. Une zone inactive n'est jamais proposée au client. Trois modes de tarification :
+   - **À confirmer** (réglage par défaut) : sous le seuil de gratuité, l'équipe fixe les frais depuis la fiche commande et le client est prévenu sur WhatsApp. Le paiement en ligne n'est proposé qu'ensuite.
+   - **Tarif fixe** pour la zone.
+   - **Selon la distance** : base + prix au km depuis le point de départ. Le client partage sa position GPS au moment de commander. Le point de départ se règle en haut de la page ; un bouton « Ma position » permet de le capter.
 7. Dans `/admin/parametres`, renseignez téléphone, WhatsApp, e-mail, adresse et réseaux sociaux. Vous pouvez aussi remplacer les visuels de la page d'accueil.
 8. Ajoutez vos produits dans `/admin/produits`, avec photos, déclinaisons et stock.
 
@@ -169,6 +170,8 @@ Un moyen de paiement dont les clés manquent s'affiche **« Bientôt disponible 
 **Carte bancaire (Stripe Checkout)**
 1. Le XOF est accepté par Stripe comme devise sans décimales. Vérifiez cependant que votre entité légale peut ouvrir un compte Stripe : le Sénégal ne fait pas partie des pays où Stripe ouvre des comptes marchands. Sinon, l'architecture permet d'ajouter un autre prestataire (PayDunya, CinetPay…) dans `src/lib/payments/`.
 2. Déclarez le webhook `https://votre-domaine.com/api/webhooks/stripe` pour les événements `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed` et `checkout.session.expired`, puis copiez le secret `whsec_…`.
+
+**Wave par lien marchand** (actif dès maintenant) : tant que l'API Wave n'est pas configurée, le client paie via le lien `https://pay.wave.com/m/M_sn_Rb6z4J8BYSDP/c/sn/`, avec le montant pré-rempli et le numéro de commande affiché. La commande reste « En attente » jusqu'à ce qu'un membre de l'équipe vérifie la réception dans l'application Wave Business et saisisse la **référence de transaction** dans la fiche commande. Ce n'est qu'à ce moment qu'elle passe à « Payée ». Le lien est modifiable dans Admin › Paramètres, et un lien Orange Money peut y être ajouté de la même façon.
 
 **Paiement à la livraison** : la commande reste « En attente ». Elle est marquée « Payé » quand l'équipe clique sur *Marquer comme encaissé*, ou automatiquement au passage au statut *Livrée*.
 

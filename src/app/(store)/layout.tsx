@@ -13,11 +13,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-gold focus:px-4 focus:py-2 focus:text-ink">
         Aller au contenu
       </a>
-      <Header announcement={home.announcement} />
+      <Header announcement={home.announcement} logoUrl={home.logo_url} />
       <main id="contenu" className="min-h-[60vh]">
         <PageTransition>{children}</PageTransition>
       </main>
-      <Footer store={store} />
+      <Footer store={store} logoUrl={home.logo_url} />
       <CartDrawer />
       <SearchOverlay />
       <SessionSync />

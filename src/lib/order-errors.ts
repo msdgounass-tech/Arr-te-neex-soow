@@ -6,6 +6,9 @@ const MAP: Record<string, string> = {
   PRODUIT_INDISPONIBLE: "Un article de votre panier n'est plus disponible.",
   STOCK_INSUFFISANT: "Stock insuffisant pour",
   COUPON_INVALIDE: "Le code promotionnel n'est plus valide pour cette commande.",
+  POSITION_REQUISE: "Pour cette zone, partagez votre position afin de calculer les frais de livraison.",
+  POSITION_INVALIDE: "La position transmise est invalide.",
+  HORS_ZONE: "Votre adresse est en dehors de la zone de livraison choisie.",
 };
 
 export function orderErrorMessage(raw: string) {

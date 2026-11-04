@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
-import { getDeliveryZones } from "@/lib/queries";
-import { paymentAvailability } from "@/lib/payments/config";
+import { getDeliveryZones, getSettings } from "@/lib/queries";
+import { paymentModes } from "@/lib/payments/config";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Commande", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const zones = await getDeliveryZones();
-  const availability = paymentAvailability();
+  const [zones, settings] = await Promise.all([getDeliveryZones(), getSettings()]);
+  const modes = paymentModes(settings.payments);
+  const o = settings.delivery;
+  const origin = o.origin_lat && o.origin_lng ? { lat: Number(o.origin_lat), lng: Number(o.origin_lng), factor: Number(o.road_factor) || 1.3 } : null;
   const sb = await getServerSupabase();
   let prefill: Record<string, string> = {};
   let loggedIn = false;
@@ -33,5 +35,5 @@ export default async function CheckoutPage() {
       };
     }
   }
-  return <CheckoutForm zones={zones} availability={availability} prefill={prefill} loggedIn={loggedIn} />;
+  return <CheckoutForm zones={zones} modes={modes} origin={origin} prefill={prefill} loggedIn={loggedIn} />;
 }

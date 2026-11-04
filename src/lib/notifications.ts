@@ -4,13 +4,17 @@ import { SITE_URL } from "@/lib/env";
 import { formatPrice, ORDER_STATUS_LABEL, toWhatsAppNumber } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
 
-export type NotificationEvent = "order_created" | "payment_received" | "status_changed" | "shipped" | "delivered";
+export type NotificationEvent = "order_created" | "payment_received" | "status_changed" | "shipped" | "delivered" | "delivery_fee_set";
 
 const message = (event: NotificationEvent, o: Order) => {
   const link = `${SITE_URL}/commande/confirmation/${o.order_number}?t=${o.access_token}`;
   switch (event) {
     case "order_created":
-      return `Votre commande ${o.order_number} (${formatPrice(o.total)}) a bien été enregistrée. Suivi : ${link}`;
+      return o.delivery_fee_pending
+        ? `Votre commande ${o.order_number} (${formatPrice(o.total)} hors livraison) a bien été enregistrée. Nous vous confirmons les frais de livraison très vite. Suivi : ${link}`
+        : `Votre commande ${o.order_number} (${formatPrice(o.total)}) a bien été enregistrée. Suivi : ${link}`;
+    case "delivery_fee_set":
+      return `Frais de livraison de votre commande ${o.order_number} : ${formatPrice(o.delivery_fee)}. Total à régler : ${formatPrice(o.total)}. Détails et paiement : ${link}`;
     case "payment_received":
       return `Nous avons reçu votre paiement de ${formatPrice(o.total)} pour la commande ${o.order_number}. Merci !`;
     case "shipped":
@@ -84,6 +88,7 @@ const SUBJECT: Record<NotificationEvent, string> = {
   status_changed: "Mise à jour de votre commande",
   shipped: "Votre commande est en route",
   delivered: "Commande livrée",
+  delivery_fee_set: "Frais de livraison confirmés",
 };
 
 /** Envoie les notifications d'un événement de commande (sans jamais bloquer le flux principal). */

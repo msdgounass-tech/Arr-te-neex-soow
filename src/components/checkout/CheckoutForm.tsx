@@ -6,16 +6,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import clsx from "clsx";
 import type { DeliveryZone, PaymentMethod } from "@/lib/types";
-import { formatPrice, PAYMENT_METHOD_LABEL } from "@/lib/format";
+import { formatPrice, PAYMENT_METHOD_LABEL, previewDeliveryFee } from "@/lib/format";
 import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/hooks/useHydrated";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CouponBox } from "./CouponBox";
 import { CheckIcon } from "@/components/ui/Icons";
 
-const METHODS: { id: PaymentMethod; hint: string }[] = [
-  { id: "wave", hint: "Payez instantanément depuis l'application Wave." },
-  { id: "orange_money", hint: "Validez le paiement dans Orange Money / Max it." },
+type Mode = "api" | "lien" | "livraison" | null;
+
+const METHODS: { id: PaymentMethod; hint: string; linkHint?: string }[] = [
+  { id: "wave", hint: "Payez instantanément depuis l'application Wave.", linkHint: "Payez via le lien Wave de la boutique. La commande est confirmée après vérification du paiement." },
+  { id: "orange_money", hint: "Validez le paiement dans Orange Money / Max it.", linkHint: "Payez via le lien Orange Money de la boutique. Confirmation après vérification." },
   { id: "carte", hint: "Visa, Mastercard — paiement sécurisé 3-D Secure." },
   { id: "livraison", hint: "Réglez en espèces ou par mobile money à la réception." },
 ];
@@ -24,7 +26,7 @@ const REGIONS = ["Dakar", "Diourbel", "Fatick", "Kaffrine", "Kaolack", "Kédougo
 
 type Form = Record<"customer_name" | "email" | "phone" | "whatsapp" | "address_line" | "city" | "region" | "zone_id" | "notes", string>;
 
-export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones: DeliveryZone[]; availability: Record<PaymentMethod, boolean>; prefill: Record<string, string>; loggedIn: boolean }) {
+export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zones: DeliveryZone[]; modes: Record<PaymentMethod, Mode>; origin: { lat: number; lng: number; factor: number } | null; prefill: Record<string, string>; loggedIn: boolean }) {
   const hydrated = useHydrated();
   const router = useRouter();
   const { lines, coupon, clear } = useCart();
@@ -34,6 +36,25 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState("");
+  const locate = () => {
+    if (!("geolocation" in navigator)) return setLocError("La géolocalisation n'est pas disponible sur cet appareil.");
+    setLocating(true);
+    setLocError("");
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        setPos({ lat: Math.round(p.coords.latitude * 1e6) / 1e6, lng: Math.round(p.coords.longitude * 1e6) / 1e6 });
+        setLocating(false);
+      },
+      () => {
+        setLocError("Position non obtenue. Autorisez la localisation ou décrivez précisément votre adresse.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
+  };
   const [f, setF] = useState<Form>({
     customer_name: prefill.customer_name || "",
     email: prefill.email || "",
@@ -50,8 +71,10 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
   const subtotal = cartSubtotal(lines);
   const discount = coupon && coupon.subtotal === subtotal ? coupon.discount : 0;
   const zone = zones.find((z) => z.id === f.zone_id);
-  const fee = useMemo(() => (zone ? (zone.free_above && subtotal - discount >= zone.free_above ? 0 : zone.fee) : 0), [zone, subtotal, discount]);
+  const delivery = useMemo(() => (zone ? previewDeliveryFee(zone, subtotal - discount, pos, origin) : null), [zone, subtotal, discount, pos, origin]);
+  const fee = delivery?.fee ?? 0;
   const total = subtotal - discount + fee;
+  const feeLabel = !zone ? "—" : delivery?.free ? "Offerte" : delivery?.pending ? "À confirmer" : delivery?.needsLocation ? "Position requise" : delivery?.outOfRange ? "Hors zone" : fee === 0 ? "Offerte" : formatPrice(fee);
 
   if (!hydrated) return <div className="min-h-[60vh]" />;
   if (!lines.length) {
@@ -67,6 +90,8 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
     setError("");
     if (!f.zone_id) return setError("Choisissez une zone de livraison.");
     if (!method) return setError("Choisissez un moyen de paiement.");
+    if (delivery?.needsLocation) return setError("Partagez votre position pour calculer les frais de livraison de cette zone.");
+    if (delivery?.outOfRange) return setError("Votre position est en dehors de la zone de livraison choisie.");
     setStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -85,6 +110,8 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
           payment_method: method,
           coupon_code: discount ? coupon?.code : "",
           save_address: loggedIn && saveAddress,
+          lat: pos?.lat ?? null,
+          lng: pos?.lng ?? null,
           items: lines.map((l) => ({ variant_id: l.variantId, quantity: l.quantity })),
         }),
       });
@@ -162,11 +189,28 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
                           <span className="block text-sm font-medium">{z.name}</span>
                           {z.delay && <span className="mt-1 block text-xs text-mist">{z.delay}</span>}
                         </span>
-                        <span className="shrink-0 text-sm text-gold">{z.fee === 0 ? "Offerte" : formatPrice(z.fee)}</span>
+                        <span className="shrink-0 text-right text-sm text-gold">
+                          {z.fee_mode === "quote" ? "Tarif à confirmer" : z.fee_mode === "distance" ? "Selon distance" : z.fee === 0 ? "Offerte" : formatPrice(z.fee)}
+                          {z.free_above ? <span className="block text-[0.65rem] text-mist">Offerte dès {formatPrice(z.free_above)}</span> : null}
+                        </span>
                       </button>
                     ))}
                   </div>
                 )}
+                <div className="mb-8 flex flex-col gap-3 border border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm">
+                    <p className="text-ivory/90">{pos ? "Position enregistrée pour la livraison" : "Localisation de livraison"}</p>
+                    <p className="text-xs text-mist">
+                      {pos
+                        ? `${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}${delivery?.km != null ? ` · environ ${delivery.km} km` : ""}`
+                        : "Partagez votre position pour une livraison précise et un tarif calculé selon la distance."}
+                    </p>
+                    {locError && <p className="mt-1 text-xs text-danger">{locError}</p>}
+                  </div>
+                  <button type="button" onClick={locate} disabled={locating} className="btn btn-ghost-gold min-h-10 shrink-0 px-4">
+                    {locating ? "Localisation…" : pos ? "Mettre à jour" : "Utiliser ma position"}
+                  </button>
+                </div>
                 <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
                   <label className="md:col-span-2"><span className="label">Adresse de livraison *</span><input required value={f.address_line} onChange={set("address_line")} autoComplete="street-address" placeholder="Quartier, rue, villa, repère…" className="field" /></label>
                   <label><span className="label">Ville *</span><input required value={f.city} onChange={set("city")} autoComplete="address-level2" className="field" /></label>
@@ -191,7 +235,8 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
                 <legend className="display mb-6 text-3xl">Paiement</legend>
                 <div className="grid gap-3">
                   {METHODS.map((m) => {
-                    const ok = availability[m.id];
+                    const mode = modes[m.id];
+                    const ok = Boolean(mode);
                     return (
                       <button
                         type="button"
@@ -206,7 +251,7 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
                         </span>
                         <span>
                           <span className="block text-sm font-medium">{PAYMENT_METHOD_LABEL[m.id]}</span>
-                          <span className="mt-0.5 block text-xs text-mist">{ok ? m.hint : "Bientôt disponible"}</span>
+                          <span className="mt-0.5 block text-xs text-mist">{!ok ? "Bientôt disponible" : mode === "lien" && m.linkHint ? m.linkHint : m.hint}</span>
                         </span>
                       </button>
                     );
@@ -232,12 +277,16 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
                   <p>{f.address_line}</p>
                   <p className="mt-1 text-sm text-ivory/70">{[f.city, f.region].filter(Boolean).join(", ")}</p>
                   {zone?.delay && <p className="text-sm text-mist">Délai : {zone.delay}</p>}
+                  {pos && <p className="text-sm text-mist">Position GPS partagée{delivery?.km != null ? ` · ${delivery.km} km` : ""}</p>}
+                  {delivery?.pending && <p className="mt-2 text-xs text-gold">Frais de livraison à confirmer : notre équipe vous communique le montant sur WhatsApp avant l&apos;expédition.</p>}
                   {f.notes && <p className="mt-2 text-sm italic text-mist">« {f.notes} »</p>}
                 </div>
                 <div className="bg-ink p-6 md:col-span-2">
                   <p className="label mb-3">Paiement</p>
                   <p>{method && PAYMENT_METHOD_LABEL[method]}</p>
-                  {method !== "livraison" && <p className="mt-1 text-xs text-mist">Vous serez redirigé vers la page sécurisée du prestataire. La commande sera confirmée dès réception de la notification de paiement.</p>}
+                  {method && method !== "livraison" && modes[method] === "api" && !delivery?.pending && <p className="mt-1 text-xs text-mist">Vous serez redirigé vers la page sécurisée du prestataire. La commande sera confirmée dès réception de la notification de paiement.</p>}
+                  {method && modes[method] === "lien" && <p className="mt-1 text-xs text-mist">Après validation, le lien de paiement {PAYMENT_METHOD_LABEL[method]} s&apos;affichera avec le montant exact. Votre commande sera confirmée après vérification de la réception du paiement.</p>}
+                  {method && method !== "livraison" && delivery?.pending && <p className="mt-1 text-xs text-mist">Le paiement vous sera proposé dès que les frais de livraison seront confirmés.</p>}
                 </div>
               </div>
               {error && <p role="alert" className="text-sm text-danger">{error}</p>}
@@ -275,11 +324,11 @@ export function CheckoutForm({ zones, availability, prefill, loggedIn }: { zones
           <dl className="mt-6 space-y-3 border-t border-white/[0.06] pt-6 text-sm">
             <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(subtotal)}</dd></div>
             {discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction ({coupon?.code})</dt><dd>-{formatPrice(discount)}</dd></div>}
-            <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd>{zone ? (fee === 0 ? "Offerte" : formatPrice(fee)) : "—"}</dd></div>
+            <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd className={delivery?.pending ? "text-gold" : ""}>{feeLabel}</dd></div>
           </dl>
           <div className="hairline my-5" />
           <div className="flex items-baseline justify-between">
-            <span className="label">Total</span>
+            <span className="label">{delivery?.pending ? "Total hors livraison" : "Total"}</span>
             <span className="display text-3xl">{formatPrice(total)}</span>
           </div>
         </aside>

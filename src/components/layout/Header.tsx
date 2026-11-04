@@ -19,7 +19,7 @@ const SUB = {
 const subSlug = (prefix: "homme" | "femme", label: string) =>
   `${prefix}-${label.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()}`;
 
-export function Header({ announcement }: { announcement?: string }) {
+export function Header({ announcement, logoUrl }: { announcement?: string; logoUrl?: string }) {
   const pathname = usePathname();
   const hydrated = useHydrated();
   const [scrolled, setScrolled] = useState(false);
@@ -70,8 +70,8 @@ export function Header({ announcement }: { announcement?: string }) {
           </div>
 
           <Link href="/" aria-label="GOUNASS LUXURY — accueil" className="shrink-0">
-            <Wordmark compact className="hidden sm:flex" />
-            <Wordmark compact className="sm:hidden [&>span:last-child]:hidden" />
+            <Wordmark compact logoUrl={logoUrl} className="hidden sm:flex" />
+            <Wordmark compact logoUrl={logoUrl} className="sm:hidden [&>span:last-child]:hidden" />
           </Link>
 
           <nav aria-label="Navigation principale" className="hidden items-center gap-8 xl:gap-10 lg:flex">

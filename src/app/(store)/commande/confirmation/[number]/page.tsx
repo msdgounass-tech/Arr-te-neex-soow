@@ -19,12 +19,13 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
   if (!t) notFound();
   const res = await getOrderByToken(decodeURIComponent(number), t);
   if (!res) notFound();
-  const { order, qrCode } = res;
+  const { order, qrCode, payLink } = res;
   const { store } = await getSettings();
 
   const paid = order.payment_status === "reussi";
   const online = order.payment_method !== "livraison";
-  const awaitingPayment = online && !paid && order.status !== "annulee";
+  const feePending = Boolean(order.delivery_fee_pending);
+  const awaitingPayment = online && !paid && order.status !== "annulee" && !feePending;
   const cancelledReturn = retour?.includes("annule") || retour?.includes("erreur");
 
   const lines = (order.order_items || []).map((i) => `• ${i.product_name}${i.size ? ` (${i.size})` : ""}${i.color ? ` ${i.color}` : ""} x${i.quantity} — ${formatPrice(i.line_total)}`);
@@ -32,9 +33,15 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
 
   let title = "Merci pour votre commande";
   let text = "Votre commande est enregistrée. Notre équipe vous contactera pour confirmer la livraison.";
-  if (paid) {
+  if (feePending) {
+    title = "Commande enregistrée";
+    text = "Les frais de livraison pour votre adresse vont vous être confirmés par notre équipe sur WhatsApp. " + (online ? "Le paiement vous sera ensuite proposé sur cette page." : "Vous réglerez à la réception.");
+  } else if (paid) {
     title = "Paiement confirmé";
     text = "Nous avons reçu votre paiement. Votre commande est en cours de traitement.";
+  } else if (awaitingPayment && payLink) {
+    title = "Finalisez votre paiement";
+    text = "Réglez le montant exact via le lien ci-dessous en indiquant votre numéro de commande. Votre commande sera confirmée dès que notre équipe aura vérifié la réception du paiement.";
   } else if (awaitingPayment && !cancelledReturn && retour) {
     title = "Paiement en cours de vérification";
     text = "Nous attendons la confirmation du prestataire. Cette page se mettra à jour dès sa réception — actualisez-la dans quelques instants.";
@@ -54,6 +61,12 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
         <p className="mx-auto mt-5 max-w-xl text-ivory/70">{text}</p>
       </header>
 
+      {feePending && (
+        <div className="mb-12 border border-gold/30 bg-gold/[0.04] p-6 text-center text-sm text-ivory/80">
+          Frais de livraison <strong className="text-gold">à confirmer</strong> — total actuel hors livraison : {formatPrice(order.total)}.
+        </div>
+      )}
+
       {awaitingPayment && (
         <div className="mb-12 flex flex-col items-center gap-6 border border-gold/30 bg-gold/[0.04] p-8 text-center">
           <p className="text-sm text-ivory/80">Montant à régler : <strong className="text-gold">{formatPrice(order.total)}</strong> via {PAYMENT_METHOD_LABEL[order.payment_method]}</p>
@@ -61,7 +74,16 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
             // eslint-disable-next-line @next/next/no-img-element
             <img src={qrCode.startsWith("data:") ? qrCode : `data:image/png;base64,${qrCode}`} alt="QR code Orange Money" className="h-48 w-48 bg-white p-2" />
           )}
-          <RetryPayment orderNumber={order.order_number} token={t} />
+          {payLink ? (
+            <>
+              <a href={payLink} target="_blank" rel="noopener noreferrer" className="btn btn-gold">Payer {formatPrice(order.total)} avec {PAYMENT_METHOD_LABEL[order.payment_method]}</a>
+              <p className="max-w-md text-xs leading-relaxed text-mist">
+                Vérifiez que le montant affiché est bien <strong className="text-ivory">{formatPrice(order.total)}</strong> et indiquez la référence <strong className="text-ivory">{order.order_number}</strong> si l&apos;application vous le propose. Le statut « Payé » s&apos;affichera ici après vérification.
+              </p>
+            </>
+          ) : (
+            <RetryPayment orderNumber={order.order_number} token={t} />
+          )}
         </div>
       )}
 

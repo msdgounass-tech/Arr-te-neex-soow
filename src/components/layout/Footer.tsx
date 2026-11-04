@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Emblem } from "@/components/brand/Logo";
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import { NewsletterForm } from "./NewsletterForm";
-import { toWhatsAppNumber } from "@/lib/format";
+import { formatPhone, toWhatsAppNumber } from "@/lib/format";
 import type { StoreSettings } from "@/lib/types";
 
 const COLS = [
@@ -37,13 +37,18 @@ const COLS = [
   },
 ];
 
-export function Footer({ store }: { store: StoreSettings }) {
+export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: string }) {
   const year = new Date().getFullYear();
   return (
     <footer className="relative mt-24 border-t border-white/[0.06] bg-ink">
       <div className="container-luxe grid gap-14 py-20 lg:grid-cols-[1.3fr_2fr]">
         <div>
-          <Emblem className="h-16 w-16" />
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="GOUNASS LUXURY" className="h-16 w-16 rounded-full object-cover" />
+          ) : (
+            <Emblem className="h-16 w-16" />
+          )}
           <p className="display mt-6 text-4xl tracking-[0.18em]">GOUNASS</p>
           <p className="mt-1 text-[0.62rem] tracking-[0.6em] text-gold">LUXURY</p>
           <p className="display mt-6 text-2xl italic text-ivory/80">« Wouro Maama »</p>
@@ -72,9 +77,10 @@ export function Footer({ store }: { store: StoreSettings }) {
             <p className="eyebrow mb-6">Nous joindre</p>
             <ul className="space-y-3.5 text-sm text-ivory/70">
               {store.address && <li>{[store.address, store.city].filter(Boolean).join(", ")}</li>}
+              {store.city && !store.address && <li>{store.city}</li>}
               {store.phone && (
                 <li>
-                  <a href={`tel:${store.phone.replace(/\s/g, "")}`} className="hover:text-ivory">{store.phone}</a>
+                  <a href={`tel:+${toWhatsAppNumber(store.phone)}`} className="hover:text-ivory">{formatPhone(store.phone)}</a>
                 </li>
               )}
               {store.email && (

@@ -1,8 +1,8 @@
 import "server-only";
 import { cache } from "react";
 import { getPublicSupabase } from "./supabase/server";
-import type { Category, Collection, DeliveryZone, Gender, HomeSettings, Product, StoreSettings } from "./types";
-import { EMPTY_HOME, EMPTY_STORE } from "./site";
+import type { Category, Collection, DeliverySettings, DeliveryZone, Gender, HomeSettings, PaymentSettings, Product, StoreSettings } from "./types";
+import { EMPTY_DELIVERY, EMPTY_HOME, EMPTY_PAYMENTS, EMPTY_STORE } from "./site";
 
 export const PRODUCT_SELECT = `
   id, name, slug, reference, description, details, gender, price, compare_at_price, is_featured, is_new, is_active,
@@ -144,13 +144,22 @@ export const getDeliveryZones = cache(async (): Promise<DeliveryZone[]> => {
   return (data || []) as DeliveryZone[];
 });
 
-export const getSettings = cache(async (): Promise<{ store: StoreSettings; home: HomeSettings }> => {
+export interface AllSettings {
+  store: StoreSettings;
+  home: HomeSettings;
+  delivery: DeliverySettings;
+  payments: PaymentSettings;
+}
+
+export const getSettings = cache(async (): Promise<AllSettings> => {
   const sb = getPublicSupabase();
-  if (!sb) return { store: EMPTY_STORE, home: EMPTY_HOME };
-  const { data } = await sb.from("settings").select("key, value").in("key", ["store", "home"]);
+  if (!sb) return { store: EMPTY_STORE, home: EMPTY_HOME, delivery: EMPTY_DELIVERY, payments: EMPTY_PAYMENTS };
+  const { data } = await sb.from("settings").select("key, value").in("key", ["store", "home", "delivery", "payments"]);
   const map = Object.fromEntries((data || []).map((r) => [r.key, r.value]));
   return {
     store: { ...EMPTY_STORE, ...(map.store || {}) },
     home: { ...EMPTY_HOME, ...(map.home || {}) },
+    delivery: { ...EMPTY_DELIVERY, ...(map.delivery || {}) },
+    payments: { ...EMPTY_PAYMENTS, ...(map.payments || {}) },
   };
 });

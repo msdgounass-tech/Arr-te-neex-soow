@@ -83,6 +83,9 @@ export interface DeliveryZone {
   delay: string | null;
   position: number;
   is_active: boolean;
+  fee_mode: "fixed" | "distance" | "quote";
+  per_km_fee: number;
+  max_km: number | null;
 }
 
 export interface OrderItem {
@@ -124,6 +127,10 @@ export interface Order {
   payment_status: PaymentStatus;
   paid_at: string | null;
   created_at: string;
+  delivery_lat?: number | null;
+  delivery_lng?: number | null;
+  delivery_km?: number | null;
+  delivery_fee_pending?: boolean;
   order_items?: OrderItem[];
   order_status_history?: { id: string; status: OrderStatus; note: string | null; created_at: string }[];
   deliveries?: { status: string; carrier: string | null; tracking_number: string | null; shipped_at: string | null; delivered_at: string | null } | null;
@@ -148,4 +155,16 @@ export interface HomeSettings {
   accessories_image: string;
   editorial_image: string;
   announcement: string;
+  logo_url: string;
+}
+
+export interface DeliverySettings {
+  origin_lat: string;
+  origin_lng: string;
+  road_factor: string;
+}
+
+export interface PaymentSettings {
+  wave_link: string;
+  orange_money_link: string;
 }

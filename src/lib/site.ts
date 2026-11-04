@@ -1,4 +1,4 @@
-import type { HomeSettings, StoreSettings } from "./types";
+import type { DeliverySettings, HomeSettings, PaymentSettings, StoreSettings } from "./types";
 
 export const BRAND = {
   name: "GOUNASS LUXURY",
@@ -37,7 +37,11 @@ export const EMPTY_HOME: HomeSettings = {
   accessories_image: "",
   editorial_image: "",
   announcement: "",
+  logo_url: "",
 };
+
+export const EMPTY_DELIVERY: DeliverySettings = { origin_lat: "", origin_lng: "", road_factor: "1.3" };
+export const EMPTY_PAYMENTS: PaymentSettings = { wave_link: "", orange_money_link: "" };
 
 export const NAV = [
   { href: "/", label: "Home" },

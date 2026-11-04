@@ -12,7 +12,9 @@ export async function getOrderByToken(orderNumber: string, token: string) {
   if (!data) return null;
   const order = data as Order & { deliveries: Order["deliveries"] | Order["deliveries"][] };
   if (Array.isArray(order.deliveries)) order.deliveries = order.deliveries[0] ?? null;
-  const { data: pay } = await sb.from("payments").select("raw, status").eq("order_id", order.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
-  const qrCode = (pay?.raw as { checkout?: { qrCode?: string } } | null)?.checkout?.qrCode ?? null;
-  return { order: order as Order, qrCode };
+  const { data: pay } = await sb.from("payments").select("raw, status, checkout_url").eq("order_id", order.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const raw = pay?.raw as { checkout?: { qrCode?: string }; mode?: string } | null;
+  const qrCode = raw?.checkout?.qrCode ?? null;
+  const payLink = raw?.mode === "lien" && pay?.checkout_url ? pay.checkout_url : null;
+  return { order: order as Order, qrCode, payLink };
 }
