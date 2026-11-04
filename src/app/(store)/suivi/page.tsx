@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getServiceSupabase } from "@/lib/supabase/admin";
-import { isSupabaseConfigured } from "@/lib/env";
+import { getPublicSupabase } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Suivre une commande" };
 
@@ -9,11 +8,11 @@ async function track(formData: FormData) {
   "use server";
   const number = String(formData.get("number") || "").trim().toUpperCase().slice(0, 40);
   const phone = String(formData.get("phone") || "").replace(/\D/g, "").slice(-9);
-  if (!number || phone.length < 7 || !isSupabaseConfigured) redirect("/suivi?erreur=1");
-  const { data } = await getServiceSupabase().from("orders").select("order_number, access_token, phone, whatsapp").eq("order_number", number).maybeSingle();
-  const match = data && [data.phone, data.whatsapp].some((p) => (p || "").replace(/\D/g, "").endsWith(phone));
-  if (!match) redirect("/suivi?erreur=1");
-  redirect(`/commande/confirmation/${data!.order_number}?t=${data!.access_token}`);
+  const sb = getPublicSupabase();
+  if (!number || phone.length < 7 || !sb) redirect("/suivi?erreur=1");
+  const { data: token } = await sb.rpc("find_order_access", { p_number: number, p_phone: phone });
+  if (!token) redirect("/suivi?erreur=1");
+  redirect(`/commande/confirmation/${number}?t=${token}`);
 }
 
 export default async function TrackPage({ searchParams }: { searchParams: Promise<{ erreur?: string }> }) {

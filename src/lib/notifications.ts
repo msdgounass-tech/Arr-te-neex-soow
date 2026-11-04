@@ -1,5 +1,5 @@
 import "server-only";
-import { getServiceSupabase } from "@/lib/supabase/admin";
+import { getServiceSupabase, hasServiceKey } from "@/lib/supabase/admin";
 import { SITE_URL } from "@/lib/env";
 import { formatPrice, ORDER_STATUS_LABEL, toWhatsAppNumber } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
@@ -93,6 +93,8 @@ const SUBJECT: Record<NotificationEvent, string> = {
 
 /** Envoie les notifications d'un événement de commande (sans jamais bloquer le flux principal). */
 export async function notifyOrder(orderId: string, event: NotificationEvent) {
+  // Les envois automatiques (WhatsApp Cloud API / e-mail) nécessitent la clé service ; sans elle on s'abstient.
+  if (!hasServiceKey()) return;
   try {
     const sb = getServiceSupabase();
     const { data: o } = await sb.from("orders").select("*").eq("id", orderId).single();

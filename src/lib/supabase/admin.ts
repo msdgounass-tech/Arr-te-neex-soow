@@ -2,9 +2,13 @@ import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_URL } from "@/lib/env";
 
+export const hasServiceKey = () => Boolean(SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
 /**
- * Client « service role » : contourne RLS. À n'utiliser QUE côté serveur,
- * pour les opérations de confiance (création de commande, webhooks de paiement).
+ * Client « service role » : contourne RLS. À n'utiliser QUE côté serveur, et
+ * seulement pour les intégrations qui l'exigent (webhooks de paiement par API,
+ * journal des notifications). Les parcours essentiels passent par des fonctions
+ * SQL sécurisées appelables avec la clé publique (voir 0006_public_rpcs.sql).
  */
 let adminClient: SupabaseClient | null = null;
 export function getServiceSupabase(): SupabaseClient {

@@ -148,7 +148,7 @@ Elles sont listées dans `.env.example`. Les clés dont le nom ne commence pas p
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | oui | Votre domaine, ex. `https://gounassluxury.com` |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | oui | Supabase › Project Settings › API |
-| `SUPABASE_SERVICE_ROLE_KEY` | oui | Même page. **Secrète**. |
+| `SUPABASE_SERVICE_ROLE_KEY` | non (requise pour les paiements par API, webhooks et notifications automatiques) | Même page. **Secrète**. Sans elle, la boutique fonctionne : commandes, suivi, paiement à la livraison et par lien Wave. |
 | `WAVE_API_KEY`, `WAVE_WEBHOOK_SECRET` | pour Wave | Wave Business Portal › Développeurs |
 | `ORANGE_MONEY_CLIENT_ID`, `ORANGE_MONEY_CLIENT_SECRET`, `ORANGE_MONEY_MERCHANT_CODE`, `ORANGE_MONEY_WEBHOOK_TOKEN`, `ORANGE_MONEY_BASE_URL` | pour Orange Money | Contrat marchand Sonatel (developer.orange-sonatel.com) |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | pour la carte | dashboard.stripe.com |

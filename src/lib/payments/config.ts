@@ -3,11 +3,15 @@ import type { PaymentMethod, PaymentSettings } from "@/lib/types";
 
 export type PaymentMode = "api" | "lien" | "livraison" | null;
 
+const svc = () => Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+// Les intégrations par API exigent la clé service (webhooks signés → mise à jour en base).
 const apiConfigured = {
-  wave: () => Boolean(process.env.WAVE_API_KEY && process.env.WAVE_WEBHOOK_SECRET),
+  wave: () => svc() && Boolean(process.env.WAVE_API_KEY && process.env.WAVE_WEBHOOK_SECRET),
   orange_money: () =>
+    svc() &&
     Boolean(process.env.ORANGE_MONEY_CLIENT_ID && process.env.ORANGE_MONEY_CLIENT_SECRET && process.env.ORANGE_MONEY_MERCHANT_CODE && process.env.ORANGE_MONEY_WEBHOOK_TOKEN),
-  carte: () => Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET),
+  carte: () => svc() && Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET),
 };
 
 const isPayLink = (u: string | undefined) => Boolean(u && /^https:\/\/[^\s]+$/.test(u));

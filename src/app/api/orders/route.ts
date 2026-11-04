@@ -1,6 +1,5 @@
 import { NextResponse, after } from "next/server";
 import { z } from "zod";
-import { getServiceSupabase } from "@/lib/supabase/admin";
 import { getServerSupabase } from "@/lib/supabase/server";
 import { startPayment } from "@/lib/payments";
 import { paymentAvailability } from "@/lib/payments/config";
@@ -47,18 +46,19 @@ export async function POST(req: Request) {
   }
 
   const session = await getServerSupabase();
-  const user = session ? (await session.auth.getUser()).data.user : null;
+  if (!session) return NextResponse.json({ error: "Boutique en cours de configuration." }, { status: 503 });
+  const user = (await session.auth.getUser()).data.user;
 
-  const sb = getServiceSupabase();
   const { save_address, ...payload } = input;
-  const { data, error } = await sb.rpc("place_order", { p: { ...payload, user_id: user?.id ?? null } });
+  // L'identité du client est déterminée par la session côté base (auth.uid()).
+  const { data, error } = await session.rpc("place_order_public", { p: payload });
   if (error || !data) {
     console.error("[orders] place_order", error?.message);
     return NextResponse.json({ error: orderErrorMessage(error?.message || "") }, { status: 409 });
   }
   const order = data as { order_id: string; order_number: string; access_token: string; total: number; payment_id: string; delivery_fee_pending: boolean };
 
-  if (user && save_address && session) {
+  if (user && save_address) {
     const { count } = await session.from("addresses").select("id", { count: "exact", head: true }).eq("user_id", user.id);
     if (!count) {
       await session.from("addresses").insert({
