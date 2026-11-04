@@ -60,12 +60,12 @@ export function ProductPurchase({ product }: { product: Product }) {
 
   return (
     <div>
-      <div className="flex items-baseline gap-4">
-        <p className={clsx("display text-3xl", sale && "text-gold")}>{formatPrice(price)}</p>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <p className={clsx("display whitespace-nowrap text-3xl", sale && "text-gold")}>{formatPrice(price)}</p>
         {sale && (
           <>
-            <p className="text-mist line-through">{formatPrice(product.compare_at_price!)}</p>
-            <span className="bg-gold px-2 py-0.5 text-[0.78rem] font-bold text-ink">-{discountPercent(product)} %</span>
+            <p className="whitespace-nowrap text-mist line-through">{formatPrice(product.compare_at_price!)}</p>
+            <span className="whitespace-nowrap bg-gold px-2 py-0.5 text-[0.78rem] font-bold text-ink">-{discountPercent(product)} %</span>
           </>
         )}
       </div>

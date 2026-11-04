@@ -1,6 +1,6 @@
 -- ════════════════════════════════════════════════════════════════
 --  GOUNASS LUXURY — INSTALLATION COMPLÈTE (à exécuter une seule fois)
---  Regroupe : migrations 0001 à 0007, seed.sql et config_gounass.sql.
+--  Regroupe : migrations 0001 à 0008, seed.sql et config_gounass.sql.
 -- ════════════════════════════════════════════════════════════════
 
 -- ───── supabase/migrations/0001_schema.sql ─────
@@ -1321,6 +1321,32 @@ revoke execute on function public.admin_stats(int) from anon, public;
 revoke execute on function public.sync_cod_payment(uuid) from anon, public;
 revoke execute on function public.set_delivery_fee(uuid, int) from anon, public;
 revoke execute on function public.confirm_manual_payment(uuid, text) from anon, public;
+
+-- ───── supabase/migrations/0008_auto_confirm_email.sql ─────
+-- ════════════════════════════════════════════════════════════════
+--  GOUNASS LUXURY — Inscription sans e-mail de vérification
+--  Le compte est confirmé dès sa création : le client se connecte immédiatement.
+--  (Pour ne plus envoyer d'e-mail du tout : Supabase › Authentication ›
+--   Sign In / Providers › Email › désactiver « Confirm email ».)
+-- ════════════════════════════════════════════════════════════════
+create or replace function public.auto_confirm_email() returns trigger
+language plpgsql security definer set search_path = public, auth as $$
+begin
+  if tg_op = 'INSERT' then
+    new.email_confirmed_at := coalesce(new.email_confirmed_at, now());
+  else
+    new.email_confirmed_at := coalesce(new.email_confirmed_at, old.email_confirmed_at, now());
+  end if;
+  return new;
+end $$;
+revoke execute on function public.auto_confirm_email() from public, anon, authenticated;
+
+drop trigger if exists auto_confirm_email on auth.users;
+create trigger auto_confirm_email
+  before insert or update of email_confirmed_at on auth.users
+  for each row execute function public.auto_confirm_email();
+
+update auth.users set email_confirmed_at = now() where email_confirmed_at is null;
 
 -- ───── supabase/seed.sql ─────
 -- ════════════════════════════════════════════════════════════════

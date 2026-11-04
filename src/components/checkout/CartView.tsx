@@ -45,7 +45,7 @@ export function CartView() {
                         </p>
                         <p className="mt-2 text-sm text-ivory/90">{formatPrice(l.unitPrice)} l&apos;unité</p>
                       </div>
-                      <p className="display text-xl">{formatPrice(l.unitPrice * l.quantity)}</p>
+                      <p className="display whitespace-nowrap text-xl">{formatPrice(l.unitPrice * l.quantity)}</p>
                     </div>
                     <div className="mt-auto flex items-center justify-between pt-4">
                       <div className="flex items-center border border-white/15">
@@ -54,7 +54,7 @@ export function CartView() {
                         <button aria-label="Augmenter" disabled={l.quantity >= l.maxStock} onClick={() => setQuantity(l.variantId, l.quantity + 1)} className="p-3 hover:text-gold disabled:opacity-30"><PlusIcon width={14} height={14} /></button>
                       </div>
                       <button onClick={() => remove(l.variantId)} className="flex items-center gap-2 text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
-                        <TrashIcon width={16} height={16} /> Supprimer
+                        <TrashIcon width={16} height={16} /> <span className="hidden sm:inline">Supprimer</span>
                       </button>
                     </div>
                   </div>

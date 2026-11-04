@@ -134,14 +134,14 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
       <header className="mb-12 text-center">
         <p className="eyebrow">Commande sécurisée</p>
         <h1 className="display mt-5 text-5xl md:text-7xl">{step === 1 ? "Vos informations" : "Récapitulatif"}</h1>
-        <ol className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-4 text-[0.78rem] uppercase tracking-[0.24em]">
+        <ol className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-2 sm:gap-4 text-[0.78rem] uppercase tracking-[0.24em]">
           {["Informations", "Validation"].map((s, i) => (
             <li key={s} className={clsx("flex items-center gap-2", step >= i + 1 ? "text-gold" : "text-mist")}>
               <span className={clsx("flex h-6 w-6 items-center justify-center rounded-full border", step > i + 1 ? "border-gold bg-gold text-ink" : step === i + 1 ? "border-gold" : "border-white/20")}>
                 {step > i + 1 ? <CheckIcon width={12} height={12} /> : i + 1}
               </span>
               {s}
-              {i === 0 && <span className="ml-2 h-px w-10 bg-white/15" />}
+              {i === 0 && <span className="ml-1 h-px w-6 bg-white/15 sm:ml-2 sm:w-10" />}
             </li>
           ))}
         </ol>
