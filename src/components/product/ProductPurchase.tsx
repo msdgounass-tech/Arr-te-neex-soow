@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import type { Product } from "@/lib/types";
@@ -24,6 +25,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [qty, setQty] = useState(1);
   const [error, setError] = useState("");
   const add = useCart((s) => s.add);
+  const setCartOpen = useCart((s) => s.setOpen);
+  const router = useRouter();
   const notify = useUI((s) => s.notify);
 
   const stockOf = (c: string | null, s: string | null) =>
@@ -34,12 +37,16 @@ export function ProductPurchase({ product }: { product: Product }) {
   const price = selected?.price_override ?? product.price;
   const sale = isOnSale(product) && !selected?.price_override;
 
-  const addToCart = () => {
+  const addToCart = (buyNow = false): boolean => {
     setError("");
-    if (sizes.length && !size) return setError("Veuillez choisir une taille.");
-    if (colors.length && !color) return setError("Veuillez choisir une couleur.");
-    if (!selected) return setError("Cette combinaison n'est pas disponible.");
-    if (stock < 1) return setError("Cette déclinaison est épuisée.");
+    const fail = (m: string) => {
+      setError(m);
+      return false;
+    };
+    if (sizes.length && !size) return fail("Veuillez choisir une taille.");
+    if (colors.length && !color) return fail("Veuillez choisir une couleur.");
+    if (!selected) return fail("Cette combinaison n'est pas disponible.");
+    if (stock < 1) return fail("Cette déclinaison est épuisée.");
     const img = sortedImages(product)[0];
     add({
       variantId: selected.id,
@@ -54,8 +61,12 @@ export function ProductPurchase({ product }: { product: Product }) {
       quantity: Math.min(qty, stock),
       maxStock: stock,
     });
-    notify("Ajouté à votre panier");
     setQty(1);
+    if (buyNow) {
+      setCartOpen(false);
+      router.push("/commande");
+    } else notify("Ajouté à votre panier");
+    return true;
   };
 
   return (
@@ -137,13 +148,21 @@ export function ProductPurchase({ product }: { product: Product }) {
       {error && <p role="alert" className="mt-4 text-sm text-danger">{error}</p>}
 
       <div className="mt-8 flex gap-3">
-        <motion.button whileTap={{ scale: 0.98 }} onClick={addToCart} disabled={variants.length === 0 || stockOf(null, null) === 0} className="btn btn-gold flex-1">
+        <motion.button whileTap={{ scale: 0.98 }} onClick={() => addToCart(false)} disabled={variants.length === 0 || stockOf(null, null) === 0} className="btn btn-gold flex-1">
           {stockOf(null, null) === 0 ? "Épuisé" : "Ajouter au panier"}
         </motion.button>
         <span className="flex w-14 items-center justify-center border border-white/15">
           <FavoriteButton productId={product.id} className="p-3" />
         </span>
       </div>
+      <button
+        type="button"
+        onClick={() => addToCart(true)}
+        disabled={variants.length === 0 || stockOf(null, null) === 0}
+        className="btn btn-outline mt-3 w-full"
+      >
+        Acheter maintenant
+      </button>
     </div>
   );
 }

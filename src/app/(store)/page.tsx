@@ -1,6 +1,7 @@
 import { Hero } from "@/components/home/Hero";
 import { ServicesStrip } from "@/components/home/ServicesStrip";
 import { CategoryExplorer } from "@/components/home/CategoryExplorer";
+import { CategoryRail } from "@/components/home/CategoryRail";
 import { GenderSection } from "@/components/home/GenderSection";
 import { AccessoriesSection } from "@/components/home/AccessoriesSection";
 import { FeaturedCollection } from "@/components/home/FeaturedCollection";
@@ -10,7 +11,8 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Reveal } from "@/components/ui/Reveal";
-import { getBestSellers, getCollections, getProducts, getSettings } from "@/lib/queries";
+import { getBestSellers, getCollections, getDeliveryZones, getProducts, getSettings } from "@/lib/queries";
+import { commonFreeThreshold, minFreeThreshold } from "@/lib/delivery";
 import { DEFAULT_IMAGES } from "@/lib/site";
 
 export const revalidate = 60;
@@ -33,17 +35,26 @@ const WOMEN = [
 ];
 
 export default async function HomePage() {
-  const [{ home }, men, women, news, best, accessories, promos, collections] = await Promise.all([
+  const [{ home }, men, women, news, best, promos, collections] = await Promise.all([
     getSettings(),
     getProducts({ gender: "homme", limit: 4 }),
     getProducts({ gender: "femme", limit: 4 }),
     getProducts({ isNew: true, limit: 8 }),
     getBestSellers(8),
-    getProducts({ accessoriesOnly: true, limit: 4 }),
     getProducts({ onSale: true, limit: 8 }),
     getCollections(),
   ]);
 
+  const both = (s: string) => [`homme-${s}`, `femme-${s}`];
+  const [zones, watches, shoes, bags, perfumes, jewels, glasses] = await Promise.all([
+    getDeliveryZones(),
+    getProducts({ categorySlugs: both("montres"), limit: 4 }),
+    getProducts({ categorySlugs: both("chaussures"), limit: 4 }),
+    getProducts({ categorySlugs: both("sacs"), limit: 4 }),
+    getProducts({ categorySlugs: both("parfums"), limit: 4 }),
+    getProducts({ categorySlugs: both("bijoux"), limit: 4 }),
+    getProducts({ categorySlugs: both("lunettes"), limit: 4 }),
+  ]);
   const featured = collections.find((c) => c.is_featured) || null;
   const featuredProducts = featured ? (await getProducts({ collectionSlug: featured.slug, limit: 4 })).items : [];
 
@@ -54,7 +65,7 @@ export default async function HomePage() {
     <>
       {/* 1. Bannière */}
       <Hero image={heroImg} />
-      <ServicesStrip />
+      <ServicesStrip freeAbove={commonFreeThreshold(zones) ?? minFreeThreshold(zones)} common={commonFreeThreshold(zones) != null} />
 
       {/* 2. Collection Homme */}
       <GenderSection
@@ -103,7 +114,15 @@ export default async function HomePage() {
       )}
 
       {/* 6. Accessoires exclusifs */}
-      <AccessoriesSection image={accImg} products={accessories.items} />
+      <AccessoriesSection image={accImg} products={[]} />
+
+      {/* Sections par catégorie */}
+      <CategoryRail eyebrow="L'heure GOUNASS" title="Montres" href="/montres" products={watches.items} />
+      <CategoryRail tone="soft" eyebrow="Souliers" title="Chaussures" href="/chaussures" products={shoes.items} />
+      <CategoryRail eyebrow="Maroquinerie" title="Sacs" href="/accessories?type=sacs" products={bags.items} />
+      <CategoryRail tone="soft" eyebrow="Fragrances" title="Parfums" href="/accessories?type=parfums" products={perfumes.items} />
+      <CategoryRail eyebrow="Éclat" title="Bijoux" href="/accessories?type=bijoux" products={jewels.items} />
+      <CategoryRail tone="soft" eyebrow="Solaires" title="Lunettes" href="/accessories?type=lunettes" products={glasses.items} />
 
       {/* 7. Collection vedette */}
       {featured && <FeaturedCollection collection={featured} products={featuredProducts} fallbackImage={heroImg} />}

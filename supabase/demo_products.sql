@@ -36,3 +36,11 @@ insert into public.coupons (code, description, discount_type, value, min_order, 
   ('GOUNASS5000', 'Démo : -5 000 FCFA dès 50 000 FCFA d''achat', 'fixed', 5000, 50000, null, true),
   ('VIP20', 'Démo : -20 % dès 150 000 FCFA d''achat', 'percent', 20, 150000, null, true)
 on conflict (code) do nothing;
+
+-- Styles des montres de démonstration (page /montres)
+update public.products set tags = array['luxe'] where reference = 'GL-H-MON-01';
+update public.products set tags = array['sportive', 'luxe'] where reference = 'GL-H-MON-02';
+update public.products set tags = array['classique'] where reference = 'GL-H-MON-03';
+update public.products set tags = array['luxe'] where reference = 'GL-F-MON-01';
+update public.products set tags = array['classique', 'luxe'] where reference = 'GL-F-MON-02';
+update public.products set tags = array['classique'] where reference = 'GL-F-MON-03';

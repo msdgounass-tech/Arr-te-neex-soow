@@ -8,11 +8,13 @@ import { MinusIcon, PlusIcon, TrashIcon } from "@/components/ui/Icons";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CouponBox } from "./CouponBox";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useCartValidation } from "@/hooks/useCartValidation";
 
-export function CartView() {
+export function CartView({ freeAbove = null, freeEverywhere = false }: { freeAbove?: number | null; freeEverywhere?: boolean }) {
   const hydrated = useHydrated();
   const { lines, setQuantity, remove, coupon } = useCart();
   const items = hydrated ? lines : [];
+  const { notice } = useCartValidation(hydrated);
   const subtotal = cartSubtotal(items);
   const discount = coupon && coupon.subtotal === subtotal ? coupon.discount : 0;
 
@@ -26,6 +28,8 @@ export function CartView() {
       {!hydrated ? null : items.length === 0 ? (
         <EmptyState title="Votre panier est vide" text="Découvrez nos collections pour composer votre sélection." cta={{ href: "/shop", label: "Explorer la boutique" }} />
       ) : (
+        <>
+        {notice && <p role="status" className="mb-8 border border-gold/40 bg-gold/[0.06] px-4 py-3 text-sm text-ivory">{notice}</p>}
         <div className="grid gap-14 lg:grid-cols-[1.6fr_1fr]">
           <ul className="border-t border-white/[0.1]">
             <AnimatePresence initial={false}>
@@ -68,7 +72,18 @@ export function CartView() {
             <dl className="mt-8 space-y-4 text-sm">
               <div className="flex justify-between"><dt className="text-mist">Articles ({cartCount(items)})</dt><dd>{formatPrice(subtotal)}</dd></div>
               {discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction</dt><dd>-{formatPrice(discount)}</dd></div>}
-              <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd className="text-mist">Selon la zone, à l&apos;étape suivante</dd></div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-mist">Livraison</dt>
+                <dd className="text-right text-mist">
+                  {freeAbove && freeEverywhere && subtotal - discount >= freeAbove ? (
+                    <span className="text-gold">Offerte</span>
+                  ) : freeAbove ? (
+                    <>Offerte dès {formatPrice(freeAbove)}{freeEverywhere ? "" : " selon la zone"}<br />sinon selon la zone</>
+                  ) : (
+                    "Selon la zone, à l'étape suivante"
+                  )}
+                </dd>
+              </div>
             </dl>
             <div className="hairline my-6" />
             <div className="flex items-baseline justify-between">
@@ -80,6 +95,7 @@ export function CartView() {
             <Link href="/shop" className="btn btn-outline mt-3 w-full">Continuer mes achats</Link>
           </aside>
         </div>
+        </>
       )}
     </div>
   );

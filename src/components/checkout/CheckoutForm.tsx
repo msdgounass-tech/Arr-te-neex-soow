@@ -9,6 +9,7 @@ import type { DeliveryZone, PaymentMethod } from "@/lib/types";
 import { formatPrice, PAYMENT_METHOD_LABEL, previewDeliveryFee } from "@/lib/format";
 import { cartSubtotal, useCart } from "@/store/cart";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useCartValidation } from "@/hooks/useCartValidation";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CouponBox } from "./CouponBox";
 import { CheckIcon } from "@/components/ui/Icons";
@@ -30,6 +31,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
   const hydrated = useHydrated();
   const router = useRouter();
   const { lines, coupon, clear } = useCart();
+  const { notice: cartNotice } = useCartValidation(hydrated);
   const [step, setStep] = useState<1 | 2>(1);
   const [sameWa, setSameWa] = useState(!prefill.whatsapp);
   const [saveAddress, setSaveAddress] = useState(true);
@@ -147,6 +149,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
         </ol>
       </header>
 
+      {cartNotice && <p role="status" className="mb-8 border border-gold/40 bg-gold/[0.06] px-4 py-3 text-sm text-ivory">{cartNotice}</p>}
       <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
         <AnimatePresence mode="wait">
           {step === 1 ? (

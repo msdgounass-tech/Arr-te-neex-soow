@@ -68,6 +68,7 @@ export interface Product {
   collection_id: string | null;
   seo_title?: string | null;
   seo_description?: string | null;
+  tags?: string[];
   category: Pick<Category, "id" | "name" | "slug" | "gender"> | null;
   collection?: Pick<Collection, "id" | "name" | "slug"> | null;
   product_images: ProductImage[];

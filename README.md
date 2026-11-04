@@ -19,9 +19,11 @@ Direction artistique **Dark Luxury** : noir profond `#080808`, `#111111`, anthra
 **Boutique**
 - Page d'accueil en 11 sections : grande bannière avec mannequins, collection Homme, collection Femme, nouveautés, meilleures ventes, accessoires exclusifs, collection vedette, promotions, bannière éditoriale « Wouro Maama », newsletter, footer.
 - Navigation HOME · SHOP · MEN · WOMEN · ACCESSORIES · COLLECTIONS · CONTACT, recherche instantanée, compte, favoris, panier avec compteur animé, menu plein écran sur mobile.
-- Catalogue avec filtres : catégorie, genre, prix, tri. Pages Nouveautés, Meilleures ventes, Promotions, Collections et collection détaillée.
+- Catalogue avec filtres : catégorie, genre, style, prix, tri. Pages dédiées **Montres** (Hommes, Femmes, Connectées, Luxe, Classiques, Sportives) et **Chaussures**.
+- Menus déroulants (ordinateur), menu mobile avec toutes les sous-catégories, bouton WhatsApp flottant. Pages Nouveautés, Meilleures ventes, Promotions, Collections et collection détaillée.
 - Fiche produit : galerie, zoom au survol, plein écran, tailles, couleurs, stock par déclinaison, quantité, favoris, référence, produits similaires et données structurées `schema.org/Product`.
-- Panier : ajout, suppression, quantités plafonnées au stock, sous-total, code promo. Un panier latéral et une page panier.
+- Panier : ajout, suppression, quantités plafonnées au stock, sous-total, code promo. Les prix et le stock sont **revérifiés auprès de la base** à l'ouverture du panier et du formulaire de commande (`/api/cart/validate`).
+- Bouton « Acheter maintenant » sur chaque fiche produit. Un panier latéral et une page panier.
 - Commande en 2 étapes : coordonnées, WhatsApp, adresse, ville, région, informations complémentaires, zone de livraison, moyen de paiement, puis un **récapitulatif avant la validation définitive**. Chaque commande reçoit un **numéro unique** (`GL-AAMMJJ-01001`).
 - Page de suivi de commande avec frise de statut, relance du paiement, transmission de la commande sur WhatsApp et impression du reçu.
 
@@ -116,7 +118,7 @@ cp .env.example .env.local      # puis renseigner les variables (section 5)
 npm run dev                     # http://localhost:3000
 ```
 
-Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `npm run fetch-images`.
+Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `npm test` (tests unitaires des calculs de prix, remises et livraison), `npm run fetch-images`.
 
 ### Mise en place de Supabase
 

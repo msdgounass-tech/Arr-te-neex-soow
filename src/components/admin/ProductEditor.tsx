@@ -26,6 +26,7 @@ export interface EditableProduct {
   is_active: boolean;
   seo_title: string | null;
   seo_description: string | null;
+  tags?: string[];
   product_images: { id: string; url: string; storage_path: string | null; alt: string | null; position: number }[];
   product_variants: { id: string; size: string | null; color: string | null; color_hex: string | null; sku: string; price_override: number | null; position: number; is_active: boolean; inventory: { quantity: number } | null }[];
 }
@@ -57,6 +58,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
     is_active: product?.is_active ?? true,
     seo_title: product?.seo_title || "",
     seo_description: product?.seo_description || "",
+    tags: (product?.tags || []).join(", "),
   });
   const [images, setImages] = useState<Img[]>(() => [...(product?.product_images || [])].sort((a, b) => a.position - b.position));
   const [variants, setVariants] = useState<Var[]>(() =>
@@ -102,6 +104,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
     setMsg(null);
     const res = await saveProduct({
       ...f,
+      tags: f.tags.split(",").map((t) => slugify(t)).filter(Boolean),
       id: product?.id,
       category_id: f.category_id || null,
       collection_id: f.collection_id || null,
@@ -216,6 +219,12 @@ export function ProductEditor({ product, categories, collections }: Props) {
           </label>
           <label className="mt-4 block"><span className="label">Collection</span>
             <select value={f.collection_id} onChange={set("collection_id")} className="field-box mt-1"><option value="">—</option>{collections.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+          </label>
+
+          <label className="mt-4 block">
+            <span className="label">Styles (séparés par des virgules)</span>
+            <input value={f.tags} onChange={set("tags")} placeholder="luxe, classique, sportive, connectee" className="field-box mt-1" />
+            <span className="mt-1 block text-xs text-mist">Utilisés par la page Montres et les filtres de style.</span>
           </label>
 
           <div className="mt-8 space-y-3 text-sm">

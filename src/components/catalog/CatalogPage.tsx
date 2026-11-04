@@ -18,12 +18,16 @@ interface Props {
   base: ProductFilters;
   searchParams: Awaited<SearchParams>;
   categories?: CatOption[];
-  /** transforme la valeur du filtre de catégorie en liste de slugs */
   categoryParam?: string;
+  /** transforme la valeur du filtre de catégorie en liste de slugs */
   mapCategory?: (value: string) => string[];
+  /** nature du filtre affiché en pastilles : catégorie (défaut), univers ou style */
+  filterKind?: "category" | "gender" | "tag";
+  /** contenu affiché entre l'en-tête et la grille (ex. tuiles de styles) */
+  children?: React.ReactNode;
 }
 
-export async function CatalogPage({ eyebrow, title, intro, basePath, base, searchParams, categories = [], categoryParam = "categorie", mapCategory }: Props) {
+export async function CatalogPage({ eyebrow, title, intro, basePath, base, searchParams, categories = [], categoryParam = "categorie", mapCategory, filterKind = "category", children }: Props) {
   const page = Math.max(1, parseInt(one(searchParams.page)) || 1);
   const catValue = one(searchParams[categoryParam]);
   const filters: ProductFilters = {
@@ -34,8 +38,11 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
     max: parseInt(one(searchParams.max)) || undefined,
     page,
   };
-  if (catValue) filters.categorySlugs = mapCategory ? mapCategory(catValue) : [catValue];
+  if (catValue && filterKind === "category") filters.categorySlugs = mapCategory ? mapCategory(catValue) : [catValue];
+  if (catValue && filterKind === "tag") filters.tag = catValue.slice(0, 30);
   if (one(searchParams.genre) === "homme" || one(searchParams.genre) === "femme") filters.gender = one(searchParams.genre) as "homme" | "femme";
+  const styleParam = one(searchParams.style);
+  if (styleParam && filterKind !== "tag") filters.tag = styleParam.slice(0, 30);
 
   const { items, count } = await getProducts(filters);
   const pages = Math.ceil(count / PAGE_SIZE);
@@ -61,6 +68,8 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
           {intro && !q && <p className="mx-auto mt-6 max-w-xl leading-relaxed text-ivory/90">{intro}</p>}
         </Reveal>
       </header>
+
+      {children}
 
       <CatalogToolbar categories={categories} paramName={categoryParam} count={count} />
 

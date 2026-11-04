@@ -85,13 +85,13 @@ export function CartDrawer() {
                           </p>
                           <div className="mt-auto flex items-center justify-between pt-3">
                             <div className="flex items-center border border-white/15">
-                              <button aria-label="Diminuer" className="p-2 hover:text-gold" onClick={() => setQuantity(l.variantId, l.quantity - 1)}>
+                              <button aria-label="Diminuer" className="p-3 hover:text-gold" onClick={() => setQuantity(l.variantId, l.quantity - 1)}>
                                 <MinusIcon width={14} height={14} />
                               </button>
                               <span className="w-8 text-center text-sm">{l.quantity}</span>
                               <button
                                 aria-label="Augmenter"
-                                className="p-2 hover:text-gold disabled:opacity-30"
+                                className="p-3 hover:text-gold disabled:opacity-30"
                                 disabled={l.quantity >= l.maxStock}
                                 onClick={() => setQuantity(l.variantId, l.quantity + 1)}
                               >

@@ -1,6 +1,6 @@
 -- ════════════════════════════════════════════════════════════════
 --  GOUNASS LUXURY — INSTALLATION COMPLÈTE (à exécuter une seule fois)
---  Regroupe : migrations 0001 à 0008, seed.sql et config_gounass.sql.
+--  Regroupe : migrations 0001 à 0009, seed.sql et config_gounass.sql.
 -- ════════════════════════════════════════════════════════════════
 
 -- ───── supabase/migrations/0001_schema.sql ─────
@@ -1347,6 +1347,14 @@ create trigger auto_confirm_email
   for each row execute function public.auto_confirm_email();
 
 update auth.users set email_confirmed_at = now() where email_confirmed_at is null;
+
+-- ───── supabase/migrations/0009_product_tags.sql ─────
+-- ════════════════════════════════════════════════════════════════
+--  GOUNASS LUXURY — Styles / étiquettes produits (ex. montres :
+--  connectee, luxe, classique, sportive). Modifiables dans Admin › Produits.
+-- ════════════════════════════════════════════════════════════════
+alter table public.products add column if not exists tags text[] not null default '{}';
+create index if not exists products_tags_idx on public.products using gin (tags);
 
 -- ───── supabase/seed.sql ─────
 -- ════════════════════════════════════════════════════════════════
