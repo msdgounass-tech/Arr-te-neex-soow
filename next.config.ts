@@ -19,6 +19,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
+    // NEXT_IMAGE_UNOPTIMIZED=1 : le navigateur charge les images directement (utile en prévisualisation)
+    unoptimized: process.env.NEXT_IMAGE_UNOPTIMIZED === "1",
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
