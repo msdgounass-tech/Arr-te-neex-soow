@@ -1,6 +1,7 @@
 "use client";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { browserStorage } from "./storage";
 
 export interface CartLine {
   variantId: string;
@@ -69,6 +70,7 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "gl-cart-v1",
+      storage: createJSONStorage(browserStorage),
       partialize: (s) => ({ lines: s.lines, coupon: s.coupon }),
     },
   ),
