@@ -121,7 +121,8 @@ Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `
 ### Mise en place de Supabase
 
 1. Créez un projet sur https://supabase.com et choisissez une région proche, par exemple `eu-west`.
-2. Ouvrez **SQL Editor** et exécutez **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
+2. Ouvrez **SQL Editor** › **New query**, collez **tout** le fichier `supabase/installation_complete.sql`, puis cliquez sur **Run**. Ce fichier regroupe les migrations, `seed.sql` et `config_gounass.sql`.
+   Vous pouvez aussi exécuter **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
    Ce dernier fichier contient la configuration de la boutique : coordonnées, bandeau, lien Wave, zones du Sénégal actives avec livraison offerte dès 10 000 FCFA, et administrateur `msdgounass@gmail.com`.
    Avec la CLI, c'est `supabase link --project-ref <ref>`, puis `supabase db push`, puis l'exécution de `seed.sql`.
 3. Dans **Authentication › URL Configuration** :
@@ -147,7 +148,7 @@ Elles sont listées dans `.env.example`. Les clés dont le nom ne commence pas p
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | oui | Votre domaine, ex. `https://gounassluxury.com` |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | oui | Supabase › Project Settings › API |
-| `SUPABASE_SERVICE_ROLE_KEY` | oui | Même page. **Secrète**. |
+| `SUPABASE_SERVICE_ROLE_KEY` | non (requise pour les paiements par API, webhooks et notifications automatiques) | Même page. **Secrète**. Sans elle, la boutique fonctionne : commandes, suivi, paiement à la livraison et par lien Wave. |
 | `WAVE_API_KEY`, `WAVE_WEBHOOK_SECRET` | pour Wave | Wave Business Portal › Développeurs |
 | `ORANGE_MONEY_CLIENT_ID`, `ORANGE_MONEY_CLIENT_SECRET`, `ORANGE_MONEY_MERCHANT_CODE`, `ORANGE_MONEY_WEBHOOK_TOKEN`, `ORANGE_MONEY_BASE_URL` | pour Orange Money | Contrat marchand Sonatel (developer.orange-sonatel.com) |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | pour la carte | dashboard.stripe.com |

@@ -1,7 +1,8 @@
 import "server-only";
 import { getServiceSupabase } from "@/lib/supabase/admin";
 import type { PaymentMethod } from "@/lib/types";
-import { payLinkWithAmount, paymentModes } from "./config";
+import { paymentModes } from "./config";
+import { getPublicSupabase } from "@/lib/supabase/server";
 import { getSettings } from "@/lib/queries";
 import { createWaveCheckout } from "./wave";
 import { createStripeCheckout } from "./stripe";
@@ -20,11 +21,11 @@ export async function startPayment(method: PaymentMethod, ctx: PaymentContext): 
 
   // Lien marchand : aucune session en ligne, la confirmation se fait après vérification par l'équipe.
   if (mode === "lien") {
-    const link = method === "wave" ? payments.wave_link : payments.orange_money_link;
-    const url = payLinkWithAmount(link, ctx.amount);
-    const { error } = await getServiceSupabase().rpc("mark_payment_link_mode", { p_payment_id: ctx.paymentId, p_url: url });
+    const sb = getPublicSupabase();
+    if (!sb) throw new Error("Supabase non configuré.");
+    const { data, error } = await sb.rpc("start_link_payment", { p_number: ctx.orderNumber, p_token: ctx.accessToken });
     if (error) throw new Error(error.message);
-    return { providerReference: "", redirectUrl: null, extra: { mode: "lien", url } };
+    return { providerReference: "", redirectUrl: null, extra: { mode: "lien", url: data as string } };
   }
 
   const result =
