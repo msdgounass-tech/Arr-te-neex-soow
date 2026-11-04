@@ -1,0 +1,87 @@
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { Emblem } from "@/components/brand/Logo";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+export function Hero({ image }: { image: string }) {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "18%"]);
+  const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  const item = (d: number) => ({
+    initial: reduce ? false : { opacity: 0, y: 26 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 1.3, delay: d, ease },
+  });
+
+  return (
+    <section ref={ref} className="relative -mt-[72px] h-[100svh] min-h-[640px] overflow-hidden bg-ink lg:-mt-[84px]">
+      <motion.div style={{ y }} className="absolute inset-0">
+        <motion.div
+          className="absolute inset-0"
+          initial={reduce ? false : { scale: 1.14, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 2.6, ease }}
+        >
+          <Image src={image} alt="Mannequins GOUNASS LUXURY en tenues de soirée" fill priority sizes="100vw" className="object-cover object-[60%_center] md:object-center" />
+        </motion.div>
+      </motion.div>
+
+      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/55 to-transparent md:via-ink/35" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40" />
+      <div className="grain absolute inset-0" />
+
+      <motion.div style={{ opacity: fade }} className="container-luxe relative flex h-full flex-col justify-end pb-20 md:justify-center md:pb-0">
+        <div className="max-w-2xl pt-24">
+          <motion.div {...item(0.5)} className="flex items-center gap-4">
+            <Emblem className="h-12 w-12 md:h-14 md:w-14" />
+            <div className="leading-none">
+              <p className="text-[0.66rem] tracking-[0.5em] text-ivory">GOUNASS LUXURY</p>
+              <p className="gold-text animate-shimmer mt-2 text-[0.66rem] font-semibold tracking-[0.62em]">WOURO MAAMA</p>
+            </div>
+          </motion.div>
+
+          <motion.h1 {...item(0.75)} className="display mt-8 text-[3.1rem] leading-[0.98] sm:text-7xl lg:text-[6.2rem]">
+            L&apos;élégance est
+            <br />
+            une <em className="gold-text not-italic md:italic">signature.</em>
+          </motion.h1>
+
+          <motion.div initial={reduce ? false : { scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.4, delay: 1.1, ease }} className="mt-8 h-px w-24 origin-left bg-gold" />
+
+          <motion.p {...item(1.05)} className="mt-8 max-w-md text-[0.98rem] leading-relaxed text-ivory/75 md:text-lg">
+            Découvrez une sélection exclusive de vêtements et d&apos;accessoires pour affirmer votre style.
+          </motion.p>
+
+          <motion.div {...item(1.3)} className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <Link href="/collections" className="btn btn-gold">Découvrir la collection</Link>
+            <Link href="/shop" className="btn btn-outline">Explorer la boutique</Link>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.2, duration: 1 }}
+        className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex"
+        aria-hidden
+      >
+        <span className="text-[0.55rem] uppercase tracking-[0.5em] text-ivory/50">Défiler</span>
+        <span className="relative h-12 w-px overflow-hidden bg-ivory/15">
+          <motion.span
+            className="absolute inset-x-0 top-0 h-1/2 bg-gold"
+            animate={{ y: ["-100%", "200%"] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </span>
+      </motion.div>
+    </section>
+  );
+}
