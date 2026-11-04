@@ -5,7 +5,7 @@ import { getPublicSupabase } from "@/lib/supabase/server";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const statics = ["", "/shop", "/men", "/women", "/accessories", "/collections", "/nouveautes", "/meilleures-ventes", "/promotions", "/contact", "/livraison"].map((p) => ({
+  const statics = ["", "/shop", "/men", "/women", "/accessories", "/montres", "/chaussures", "/collections", "/nouveautes", "/meilleures-ventes", "/promotions", "/contact", "/livraison"].map((p) => ({
     url: `${SITE_URL}${p}`,
     changeFrequency: "daily" as const,
     priority: p === "" ? 1 : 0.8,

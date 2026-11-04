@@ -5,19 +5,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Wordmark } from "@/components/brand/Logo";
-import { BagIcon, CloseIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/ui/Icons";
+import { BagIcon, ChevronDown, CloseIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/ui/Icons";
 import { NAV } from "@/lib/site";
 import { cartCount, useCart } from "@/store/cart";
 import { useFavorites } from "@/store/favorites";
 import { useUI } from "@/store/ui";
 import { useHydrated } from "@/hooks/useHydrated";
-
-const SUB = {
-  men: ["Vêtements", "Chaussures", "Montres", "Sacs", "Lunettes", "Parfums", "Bijoux", "Accessoires"],
-  women: ["Vêtements", "Robes", "Chaussures", "Sacs", "Montres", "Lunettes", "Parfums", "Bijoux", "Accessoires"],
-};
-const subSlug = (prefix: "homme" | "femme", label: string) =>
-  `${prefix}-${label.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()}`;
 
 export function Header({ announcement, logoUrl }: { announcement?: string; logoUrl?: string }) {
   const pathname = usePathname();
@@ -74,19 +67,30 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             <Wordmark compact logoUrl={logoUrl} className="sm:hidden [&>span:last-child]:hidden" />
           </Link>
 
-          <nav aria-label="Navigation principale" className="hidden items-center gap-8 xl:gap-10 lg:flex">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-7 xl:gap-9 lg:flex">
             {NAV.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                data-active={isActive(n.href)}
-                className={clsx(
-                  "link-luxe text-[0.74rem] font-semibold uppercase tracking-[0.24em] transition-colors",
-                  isActive(n.href) ? "text-gold" : "text-ivory hover:text-gold-light",
+              <div key={n.href} className="group relative">
+                <Link
+                  href={n.href}
+                  data-active={isActive(n.href)}
+                  className={clsx(
+                    "link-luxe flex items-center gap-1 py-3 text-[0.74rem] font-semibold uppercase tracking-[0.2em] transition-colors",
+                    isActive(n.href) ? "text-gold" : "text-ivory hover:text-gold-light",
+                  )}
+                >
+                  {n.label}
+                  {n.children && <ChevronDown width={12} height={12} className="opacity-70 transition-transform group-hover:rotate-180" />}
+                </Link>
+                {n.children && (
+                  <div className="invisible absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 translate-y-2 border border-white/[0.12] bg-ink-2/98 p-2 opacity-0 shadow-2xl backdrop-blur-xl transition-all duration-300 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    {n.children.map((c) => (
+                      <Link key={c.href} href={c.href} className="block px-4 py-2.5 text-sm text-ivory/90 transition-colors hover:bg-white/[0.05] hover:text-gold">
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
                 )}
-              >
-                {n.label}
-              </Link>
+              </div>
             ))}
           </nav>
 
@@ -143,18 +147,19 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                     transition={{ delay: 0.06 * i + 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     className="border-b border-white/[0.1]"
                   >
-                    <Link href={n.href} className={clsx("display block py-4 text-[2rem]", isActive(n.href) ? "text-gold" : "text-ivory")}>
+                    <Link href={n.href} onClick={() => setMenu(false)} className={clsx("display block py-4 text-[2rem]", isActive(n.href) ? "text-gold" : "text-ivory")}>
                       {n.label}
                     </Link>
-                    {(n.href === "/men" || n.href === "/women") && (
-                      <div className="no-scrollbar -mt-1 flex gap-4 overflow-x-auto pb-4">
-                        {SUB[n.href === "/men" ? "men" : "women"].map((s) => (
+                    {n.children && (
+                      <div className="-mt-1 flex flex-wrap gap-2 pb-5">
+                        {n.children.map((c) => (
                           <Link
-                            key={s}
-                            href={`${n.href}?categorie=${subSlug(n.href === "/men" ? "homme" : "femme", s)}`}
-                            className="shrink-0 text-[0.8rem] uppercase tracking-[0.24em] text-mist hover:text-gold"
+                            key={c.href}
+                            href={c.href}
+                            onClick={() => setMenu(false)}
+                            className="inline-flex min-h-10 items-center border border-white/[0.14] px-3.5 text-[0.78rem] tracking-[0.06em] text-ivory/90 hover:border-gold hover:text-gold"
                           >
-                            {s}
+                            {c.label}
                           </Link>
                         ))}
                       </div>

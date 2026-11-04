@@ -8,7 +8,7 @@ const TILES = [
   { label: "Robes", sub: "Femme", href: "/women?categorie=femme-robes", img: "/images/produits/robe-3.svg" },
   { label: "Montres", sub: "Homme & Femme", href: "/accessories?type=montres", img: "/images/produits/montre-2.svg" },
   { label: "Sacs", sub: "Maroquinerie", href: "/accessories?type=sacs", img: "/images/produits/sac-1.svg" },
-  { label: "Chaussures", sub: "Homme & Femme", href: "/men?categorie=homme-chaussures", img: "/images/produits/escarpin-2.svg" },
+  { label: "Chaussures", sub: "Homme & Femme", href: "/chaussures", img: "/images/produits/escarpin-2.svg" },
   { label: "Parfums", sub: "Fragrances", href: "/accessories?type=parfums", img: "/images/produits/parfum-3.svg" },
   { label: "Bijoux", sub: "Or & éclat", href: "/accessories?type=bijoux", img: "/images/produits/bijou-1.svg" },
   { label: "Lunettes", sub: "Solaires", href: "/accessories?type=lunettes", img: "/images/produits/lunettes-2.svg" },

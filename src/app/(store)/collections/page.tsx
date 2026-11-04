@@ -20,6 +20,22 @@ export default async function CollectionsPage() {
           <p className="mx-auto mt-6 max-w-xl text-ivory/90">Capsules, éditions exclusives et sélections de saison.</p>
         </Reveal>
       </header>
+      <nav aria-label="Sélections" className="mb-12 grid gap-3 sm:grid-cols-3">
+        {[
+          ["/nouveautes", "Nouvelle collection", "Les dernières arrivées"],
+          ["/meilleures-ventes", "Meilleures ventes", "Les pièces les plus convoitées"],
+          ["/promotions", "Promotions", "Offres privilèges"],
+        ].map(([href, title, sub]) => (
+          <Link key={href} href={href} className="group flex items-center justify-between border border-white/[0.12] bg-ink-2/60 px-6 py-6 transition-colors hover:border-gold/60">
+            <span>
+              <span className="display block text-2xl text-ivory group-hover:text-gold">{title}</span>
+              <span className="mt-1 block text-sm text-mist">{sub}</span>
+            </span>
+            <span aria-hidden className="text-gold transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        ))}
+      </nav>
+
       {collections.length ? (
         <div className="grid gap-6 md:grid-cols-2">
           {collections.map((c, i) => (

@@ -24,17 +24,17 @@ export function CatalogToolbar({ categories, paramName = "categorie", count }: {
   const active = params.get(paramName) || "";
 
   return (
-    <div className={clsx("sticky top-[72px] z-30 -mx-5 border-y border-white/[0.1] bg-ink/90 px-5 backdrop-blur-xl transition-opacity md:-mx-10 md:px-10 lg:top-[84px] xl:-mx-16 xl:px-16", pending && "opacity-70")}>
+    <div className={clsx("relative z-30 -mx-5 border-y border-white/[0.1] bg-ink/90 px-5 backdrop-blur-xl transition-opacity md:-mx-10 md:px-10 lg:sticky lg:top-[84px] xl:-mx-16 xl:px-16", pending && "opacity-70")}>
       <div className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between">
         {categories.length > 0 && (
-          <div className="no-scrollbar -mx-1 flex min-w-0 flex-1 gap-1 overflow-x-auto">
+          <div className="-mx-1 flex min-w-0 flex-1 flex-wrap gap-1.5 lg:flex-nowrap lg:overflow-x-auto lg:no-scrollbar">
             {[{ label: "Tout", value: "" }, ...categories].map((c) => (
               <button
                 key={c.value || "all"}
                 onClick={() => update({ [paramName]: c.value || null })}
                 className={clsx(
-                  "shrink-0 px-3.5 py-2 text-[0.8rem] uppercase tracking-[0.22em] transition-colors",
-                  active === c.value ? "bg-gold text-ink" : "text-ivory/90 hover:text-gold",
+                  "inline-flex min-h-10 shrink-0 items-center px-3.5 text-[0.74rem] uppercase tracking-[0.14em] transition-colors",
+                  active === c.value ? "border border-gold bg-gold text-ink" : "border border-white/[0.12] text-ivory/90 hover:border-gold/60 hover:text-gold",
                 )}
               >
                 {c.label}

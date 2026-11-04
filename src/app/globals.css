@@ -2,15 +2,15 @@
 
 @theme {
   /* Chocolat noir premium (moins sombre qu'un noir pur) */
-  --color-ink: #231811;
-  --color-ink-2: #2d1f16;
-  --color-ink-3: #3a291e;
-  --color-line: #5a4535;
-  --color-gold: #c6a15b;
+  --color-ink: #21150f;
+  --color-ink-2: #302017;
+  --color-ink-3: #3c2a1e;
+  --color-line: #5b4636;
+  --color-gold: #c6a15c;
   --color-gold-light: #dcc08a;
   --color-gold-dark: #9c7c3f;
-  --color-ivory: #f5f1e8;
-  --color-mist: #ddd0bd;
+  --color-ivory: #f4ede2;
+  --color-mist: #d6c5a8;
   --color-danger: #d16a5c;
   --color-success: #8fb58a;
 
@@ -28,7 +28,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    background: radial-gradient(120% 80% at 50% 0%, #33241a 0%, var(--color-ink) 55%) fixed, var(--color-ink);
+    background: radial-gradient(120% 80% at 50% 0%, #34231a 0%, var(--color-ink) 55%) fixed, var(--color-ink);
     color: var(--color-ivory);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;

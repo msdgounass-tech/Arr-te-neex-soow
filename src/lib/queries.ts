@@ -6,7 +6,7 @@ import { EMPTY_DELIVERY, EMPTY_HOME, EMPTY_PAYMENTS, EMPTY_STORE } from "./site"
 
 export const PRODUCT_SELECT = `
   id, name, slug, reference, description, details, gender, price, compare_at_price, is_featured, is_new, is_active,
-  created_at, category_id, collection_id, seo_title, seo_description,
+  created_at, category_id, collection_id, seo_title, seo_description, tags,
   category:categories(id, name, slug, gender),
   collection:collections(id, name, slug),
   product_images(id, url, alt, position),
@@ -33,6 +33,7 @@ export interface ProductFilters {
   limit?: number;
   ids?: string[];
   excludeId?: string;
+  tag?: string;
 }
 
 const clean = (q: string) => q.replace(/[%,()*\\'"]/g, " ").trim().slice(0, 60);
@@ -68,6 +69,7 @@ export async function getProducts(f: ProductFilters = {}): Promise<{ items: Prod
   if (f.featured) q = q.eq("is_featured", true);
   if (f.ids) q = q.in("id", f.ids.length ? f.ids : ["00000000-0000-0000-0000-000000000000"]);
   if (f.excludeId) q = q.neq("id", f.excludeId);
+  if (f.tag) q = q.contains("tags", [f.tag]);
   if (f.min) q = q.gte("price", f.min);
   if (f.max) q = q.lte("price", f.max);
   if (f.q) {

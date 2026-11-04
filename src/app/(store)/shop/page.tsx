@@ -15,7 +15,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
       searchParams={await searchParams}
       categories={GENDER_OPTIONS}
       categoryParam="genre"
-      mapCategory={() => []}
+      filterKind="gender"
     />
   );
 }

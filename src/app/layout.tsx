@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
-import { BRAND } from "@/lib/site";
+import { BRAND, DEFAULT_IMAGES } from "@/lib/site";
 import { SITE_URL } from "@/lib/env";
 import { Toast } from "@/components/ui/Toast";
 
@@ -25,13 +25,16 @@ export const metadata: Metadata = {
     siteName: BRAND.name,
     title: `${BRAND.name} — ${BRAND.slogan}`,
     description: BRAND.description,
+    images: [{ url: DEFAULT_IMAGES.hero, width: 1600, height: 900, alt: "GOUNASS LUXURY — Wouro Maama" }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", images: [DEFAULT_IMAGES.hero] },
+  alternates: { canonical: "/" },
+  keywords: ["boutique de luxe Sénégal", "mode de luxe Dakar", "montres de luxe", "sacs de luxe", "parfums", "bijoux", "GOUNASS LUXURY"],
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#231811",
+  themeColor: "#21150F",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

@@ -40,6 +40,7 @@ const productSchema = z.object({
   is_active: z.boolean(),
   seo_title: z.string().trim().max(160).optional().default(""),
   seo_description: z.string().trim().max(320).optional().default(""),
+  tags: z.array(z.string().trim().toLowerCase().max(30)).max(12).optional().default([]),
   images: z.array(z.object({ id: z.string().uuid().optional(), url: z.string().url(), storage_path: z.string().nullable().optional(), alt: z.string().max(200).nullable().optional() })).max(20),
   variants: z
     .array(

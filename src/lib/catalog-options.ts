@@ -12,3 +12,9 @@ export const GENDER_OPTIONS = [
   { label: "Homme", value: "homme" },
   { label: "Femme", value: "femme" },
 ];
+export const WATCH_STYLES = [
+  { label: "Luxe", value: "luxe" },
+  { label: "Classiques", value: "classique" },
+  { label: "Sportives", value: "sportive" },
+  { label: "Connectées", value: "connectee" },
+];
