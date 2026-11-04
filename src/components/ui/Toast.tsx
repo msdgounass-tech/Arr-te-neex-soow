@@ -22,7 +22,7 @@ export function Toast() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="border border-gold/40 bg-ink-2/95 px-6 py-3.5 text-[0.72rem] uppercase tracking-[0.22em] text-ivory shadow-2xl backdrop-blur"
+            className="border border-gold/40 bg-ink-2/95 px-6 py-3.5 text-[0.8rem] uppercase tracking-[0.22em] text-ivory shadow-2xl backdrop-blur"
           >
             {toast.message}
           </motion.div>

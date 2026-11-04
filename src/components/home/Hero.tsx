@@ -33,21 +33,21 @@ export function Hero({ image }: { image: string }) {
         </motion.div>
       </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/55 to-transparent md:via-ink/35" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/40" />
-      <div className="grain absolute inset-0" />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/30 to-transparent md:from-ink/80 md:via-ink/15" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/30" />
+      
 
       <motion.div style={{ opacity: fade }} className="container-luxe relative flex h-full flex-col justify-end pb-20 md:justify-center md:pb-0">
         <div className="max-w-2xl pt-24">
           <motion.div {...item(0.5)} className="flex items-center gap-4">
             <Emblem className="h-12 w-12 md:h-14 md:w-14" />
             <div className="leading-none">
-              <p className="text-[0.66rem] tracking-[0.5em] text-ivory">GOUNASS LUXURY</p>
-              <p className="gold-text animate-shimmer mt-2 text-[0.66rem] font-semibold tracking-[0.62em]">WOURO MAAMA</p>
+              <p className="text-[0.74rem] tracking-[0.5em] text-ivory">GOUNASS LUXURY</p>
+              <p className="gold-text animate-shimmer mt-2 text-[0.74rem] font-semibold tracking-[0.62em]">WOURO MAAMA</p>
             </div>
           </motion.div>
 
-          <motion.h1 {...item(0.75)} className="display mt-8 text-[3.1rem] leading-[0.98] sm:text-7xl lg:text-[6.2rem]">
+          <motion.h1 {...item(0.75)} className="display mt-8 text-[3.1rem] leading-[0.98] [text-shadow:0_4px_24px_rgba(0,0,0,.55)] sm:text-7xl lg:text-[6.2rem]">
             L&apos;élégance est
             <br />
             une <em className="gold-text not-italic md:italic">signature.</em>
@@ -55,7 +55,7 @@ export function Hero({ image }: { image: string }) {
 
           <motion.div initial={reduce ? false : { scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.4, delay: 1.1, ease }} className="mt-8 h-px w-24 origin-left bg-gold" />
 
-          <motion.p {...item(1.05)} className="mt-8 max-w-md text-[0.98rem] leading-relaxed text-ivory/75 md:text-lg">
+          <motion.p {...item(1.05)} className="mt-8 max-w-md text-[1.05rem] font-medium leading-relaxed text-ivory [text-shadow:0_2px_12px_rgba(0,0,0,.6)] md:text-lg">
             Découvrez une sélection exclusive de vêtements et d&apos;accessoires pour affirmer votre style.
           </motion.p>
 
@@ -73,7 +73,7 @@ export function Hero({ image }: { image: string }) {
         className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 md:flex"
         aria-hidden
       >
-        <span className="text-[0.55rem] uppercase tracking-[0.5em] text-ivory/50">Défiler</span>
+        <span className="text-[0.68rem] uppercase tracking-[0.5em] text-ivory/90">Défiler</span>
         <span className="relative h-12 w-px overflow-hidden bg-ivory/15">
           <motion.span
             className="absolute inset-x-0 top-0 h-1/2 bg-gold"

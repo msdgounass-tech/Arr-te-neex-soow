@@ -16,7 +16,7 @@ export function PageTitle({ title, subtitle, children }: { title: string; subtit
 }
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <div className={clsx("border border-white/[0.06] bg-ink-2 p-6", className)}>{children}</div>;
+  return <div className={clsx("border border-white/[0.1] bg-ink-2 p-6", className)}>{children}</div>;
 }
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -29,12 +29,12 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
-  return <span className={clsx("inline-block whitespace-nowrap border px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.14em]", STATUS_COLOR[status])}>{ORDER_STATUS_LABEL[status]}</span>;
+  return <span className={clsx("inline-block whitespace-nowrap border px-2 py-0.5 text-[0.78rem] uppercase tracking-[0.14em]", STATUS_COLOR[status])}>{ORDER_STATUS_LABEL[status]}</span>;
 }
 
 export function PaymentBadge({ status }: { status: PaymentStatus }) {
-  return <span className={clsx("text-[0.66rem] uppercase tracking-[0.12em]", status === "reussi" ? "text-success" : status === "echoue" || status === "annule" ? "text-danger" : "text-mist")}>{PAYMENT_STATUS_LABEL[status]}</span>;
+  return <span className={clsx("text-[0.74rem] uppercase tracking-[0.12em]", status === "reussi" ? "text-success" : status === "echoue" || status === "annule" ? "text-danger" : "text-mist")}>{PAYMENT_STATUS_LABEL[status]}</span>;
 }
 
-export const th = "py-3 pr-4 text-left text-[0.6rem] font-normal uppercase tracking-[0.2em] text-mist";
+export const th = "py-3 pr-4 text-left text-[0.78rem] font-normal uppercase tracking-[0.2em] text-mist";
 export const td = "py-3 pr-4 align-middle";

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#3a3226"/><stop offset="1" stop-color="#121110"/></radialGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9C7C3F"/><stop offset=".45" stop-color="#F1DFB4"/><stop offset=".7" stop-color="#C6A15B"/><stop offset="1" stop-color="#8A6A32"/></linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg)"/>
+  <rect x="24" y="24" width="552" height="752" fill="none" stroke="#C6A15B" stroke-opacity=".28" stroke-width="1.5"/>
+  <g transform="translate(300 400) scale(1.22) translate(-300 -400)"><path fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M265 190 L280 260 Q300 280 320 260 L335 190"/>
+      <path fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M265 190 Q245 230 255 300 L270 330 Q300 345 330 330 L345 300 Q355 230 335 190"/>
+      <path fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M270 330 Q220 450 170 600 Q300 630 430 600 Q380 450 330 330"/>
+      <path fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M255 300 L345 300"/></g>
+  <text x="300" y="720" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="9" fill="#C6A15B" fill-opacity=".75">GOUNASS LUXURY</text>
+</svg>

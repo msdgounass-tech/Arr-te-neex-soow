@@ -47,7 +47,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
   return (
     <>
       {announcement ? (
-        <div className="relative z-[61] bg-gold py-2 text-center text-[0.62rem] font-semibold uppercase tracking-[0.3em] text-ink">
+        <div className="relative z-[61] bg-gold py-2 text-center text-[0.8rem] font-semibold uppercase tracking-[0.3em] text-ink">
           {announcement}
         </div>
       ) : null}
@@ -56,7 +56,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
           "sticky top-0 z-[60] transition-[background,border-color,backdrop-filter] duration-700",
           overHero
             ? "border-b border-transparent bg-gradient-to-b from-ink/70 to-transparent"
-            : "border-b border-white/[0.06] bg-ink/85 backdrop-blur-xl",
+            : "border-b border-white/[0.1] bg-ink/85 backdrop-blur-xl",
         )}
       >
         <div className="container-luxe flex h-[72px] items-center justify-between gap-4 lg:h-[84px]">
@@ -81,8 +81,8 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                 href={n.href}
                 data-active={isActive(n.href)}
                 className={clsx(
-                  "link-luxe text-[0.66rem] font-medium uppercase tracking-[0.3em] transition-colors",
-                  isActive(n.href) ? "text-gold" : "text-ivory/85 hover:text-ivory",
+                  "link-luxe text-[0.74rem] font-semibold uppercase tracking-[0.24em] transition-colors",
+                  isActive(n.href) ? "text-gold" : "text-ivory hover:text-gold-light",
                 )}
               >
                 {n.label}
@@ -113,7 +113,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.4, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                    className="absolute -right-0.5 top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 text-[0.6rem] font-bold text-ink"
+                    className="absolute -right-0.5 top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 text-[0.78rem] font-bold text-ink"
                   >
                     {count}
                   </motion.span>
@@ -141,7 +141,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                     initial={{ opacity: 0, x: -18 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.06 * i + 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="border-b border-white/[0.06]"
+                    className="border-b border-white/[0.1]"
                   >
                     <Link href={n.href} className={clsx("display block py-4 text-[2rem]", isActive(n.href) ? "text-gold" : "text-ivory")}>
                       {n.label}
@@ -152,7 +152,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                           <Link
                             key={s}
                             href={`${n.href}?categorie=${subSlug(n.href === "/men" ? "homme" : "femme", s)}`}
-                            className="shrink-0 text-[0.62rem] uppercase tracking-[0.24em] text-mist hover:text-gold"
+                            className="shrink-0 text-[0.8rem] uppercase tracking-[0.24em] text-mist hover:text-gold"
                           >
                             {s}
                           </Link>

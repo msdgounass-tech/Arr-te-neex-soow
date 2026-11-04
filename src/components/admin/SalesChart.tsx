@@ -20,7 +20,7 @@ export function SalesChart({ data }: { data: { day: string; revenue: number; ord
           })}
         </svg>
       </div>
-      <div className="mt-2 flex justify-between text-[0.6rem] text-mist">
+      <div className="mt-2 flex justify-between text-[0.78rem] text-mist">
         <span>{data[0] ? new Date(data[0].day).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""}</span>
         <span>Max : {formatPrice(max === 1 ? 0 : max)}</span>
         <span>{data.at(-1) ? new Date(data.at(-1)!.day).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""}</span>

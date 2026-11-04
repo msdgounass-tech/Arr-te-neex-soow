@@ -20,7 +20,7 @@ export default async function AdminCategories() {
             {all.filter((c) => c.parent_id === p.id).map((c) => (
               <div key={c.id} className="flex flex-col gap-2 md:flex-row md:items-end">
                 <div className="flex-1"><CategoryForm parents={parents} initial={c} /></div>
-                <form action={deleteCategory}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer cette catégorie ? Les produits associés n'auront plus de catégorie." className="pb-3 text-[0.6rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
+                <form action={deleteCategory}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer cette catégorie ? Les produits associés n'auront plus de catégorie." className="pb-3 text-[0.78rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
               </div>
             ))}
           </div>

@@ -7,7 +7,7 @@ export function OrderSummary({ order }: { order: Order }) {
   const items = order.order_items || [];
   return (
     <div className="space-y-10">
-      <div className="border border-white/[0.06] bg-ink-2 p-6 md:p-8">
+      <div className="border border-white/[0.1] bg-ink-2 p-6 md:p-8">
         <div className="mb-8 flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <p className="label">Commande</p>
@@ -17,7 +17,7 @@ export function OrderSummary({ order }: { order: Order }) {
         </div>
         <OrderTimeline order={order} />
         {order.deliveries?.tracking_number && (
-          <p className="mt-6 text-sm text-ivory/80">
+          <p className="mt-6 text-sm text-ivory/90">
             Suivi : {order.deliveries.carrier ? `${order.deliveries.carrier} — ` : ""}
             <span className="text-gold">{order.deliveries.tracking_number}</span>
           </p>
@@ -28,13 +28,13 @@ export function OrderSummary({ order }: { order: Order }) {
         <div className="bg-ink p-6">
           <p className="label mb-3">Client</p>
           <p>{order.customer_name}</p>
-          <p className="text-sm text-ivory/70">{order.phone}</p>
-          {order.whatsapp && <p className="text-sm text-ivory/70">WhatsApp : {order.whatsapp}</p>}
+          <p className="text-sm text-ivory/90">{order.phone}</p>
+          {order.whatsapp && <p className="text-sm text-ivory/90">WhatsApp : {order.whatsapp}</p>}
         </div>
         <div className="bg-ink p-6">
           <p className="label mb-3">Livraison{order.zone_name ? ` — ${order.zone_name}` : ""}</p>
           <p className="text-sm">{order.address_line}</p>
-          <p className="text-sm text-ivory/70">{[order.city, order.region].filter(Boolean).join(", ")}</p>
+          <p className="text-sm text-ivory/90">{[order.city, order.region].filter(Boolean).join(", ")}</p>
         </div>
         <div className="bg-ink p-6">
           <p className="label mb-3">Paiement</p>
@@ -44,7 +44,7 @@ export function OrderSummary({ order }: { order: Order }) {
       </div>
 
       <div>
-        <ul className="divide-y divide-white/[0.06] border-y border-white/[0.06]">
+        <ul className="divide-y divide-white/[0.06] border-y border-white/[0.1]">
           {items.map((it) => (
             <li key={it.id} className="flex items-center gap-4 py-4">
               <span className="relative h-20 w-16 shrink-0 overflow-hidden bg-ink-3">
@@ -66,7 +66,7 @@ export function OrderSummary({ order }: { order: Order }) {
           <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(order.subtotal)}</dd></div>
           {order.discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction {order.coupon_code}</dt><dd>-{formatPrice(order.discount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd>{order.delivery_fee_pending ? "À confirmer" : order.delivery_fee ? formatPrice(order.delivery_fee) : "Offerte"}</dd></div>
-          <div className="flex justify-between border-t border-white/[0.06] pt-3"><dt className="label">Total</dt><dd className="display text-2xl">{formatPrice(order.total)}</dd></div>
+          <div className="flex justify-between border-t border-white/[0.1] pt-3"><dt className="label">Total</dt><dd className="display text-2xl">{formatPrice(order.total)}</dd></div>
         </dl>
       </div>
     </div>

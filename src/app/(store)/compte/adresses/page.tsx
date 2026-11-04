@@ -22,15 +22,15 @@ export default async function AddressesPage() {
             <li key={a.id} className={`border p-6 ${a.is_default ? "border-gold/50" : "border-white/[0.08]"}`}>
               <div className="flex items-start justify-between gap-3">
                 <p className="label">{a.label || "Adresse"}</p>
-                {a.is_default && <span className="text-[0.58rem] uppercase tracking-[0.2em] text-gold">Par défaut</span>}
+                {a.is_default && <span className="text-[0.68rem] uppercase tracking-[0.2em] text-gold">Par défaut</span>}
               </div>
               <p className="mt-3">{a.full_name}</p>
-              <p className="text-sm text-ivory/70">{a.address_line}</p>
-              <p className="text-sm text-ivory/70">{[a.city, a.region].filter(Boolean).join(", ")}</p>
+              <p className="text-sm text-ivory/90">{a.address_line}</p>
+              <p className="text-sm text-ivory/90">{[a.city, a.region].filter(Boolean).join(", ")}</p>
               <p className="text-sm text-mist">{a.phone}</p>
-              <div className="mt-5 flex gap-5 text-[0.6rem] uppercase tracking-[0.2em]">
+              <div className="mt-5 flex gap-5 text-[0.78rem] uppercase tracking-[0.2em]">
                 {!a.is_default && (
-                  <form action={setDefaultAddress}><input type="hidden" name="id" value={a.id} /><button className="text-ivory/70 hover:text-gold">Définir par défaut</button></form>
+                  <form action={setDefaultAddress}><input type="hidden" name="id" value={a.id} /><button className="text-ivory/90 hover:text-gold">Définir par défaut</button></form>
                 )}
                 <form action={deleteAddress}><input type="hidden" name="id" value={a.id} /><button className="text-mist hover:text-danger">Supprimer</button></form>
               </div>

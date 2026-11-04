@@ -71,7 +71,7 @@ export function SearchOverlay() {
         >
           <div className="container-luxe py-6">
             <div className="flex justify-end">
-              <button aria-label="Fermer la recherche" onClick={() => setSearch(false)} className="p-2 text-ivory/80 hover:text-gold">
+              <button aria-label="Fermer la recherche" onClick={() => setSearch(false)} className="p-2 text-ivory/90 hover:text-gold">
                 <CloseIcon width={24} height={24} />
               </button>
             </div>

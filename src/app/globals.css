@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #080808;
-  --color-ink-2: #111111;
-  --color-ink-3: #1c1c1c;
-  --color-line: #2a2a2a;
+  --color-ink: #0b0b0b;
+  --color-ink-2: #161616;
+  --color-ink-3: #222222;
+  --color-line: #3a3a3a;
   --color-gold: #c6a15b;
   --color-gold-light: #dcc08a;
   --color-gold-dark: #9c7c3f;
   --color-ivory: #f5f1e8;
-  --color-mist: #a8a39a;
+  --color-mist: #cfc8bb;
   --color-danger: #d16a5c;
   --color-success: #8fb58a;
 
@@ -23,6 +23,7 @@
 @layer base {
   html {
     color-scheme: dark;
+    font-size: 106.25%; /* 17px : texte plus lisible partout */
     -webkit-tap-highlight-color: transparent;
   }
   body {
@@ -49,14 +50,15 @@
 
 @layer components {
   .eyebrow {
-    font-size: 0.68rem;
-    letter-spacing: var(--tracking-luxe);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: var(--color-gold-light);
   }
   .display {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.01em;
     line-height: 1.02;
   }
@@ -80,9 +82,9 @@
     gap: 0.75rem;
     min-height: 3.25rem;
     padding: 0 2rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.28em;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     overflow: hidden;
     isolation: isolate;
@@ -117,7 +119,7 @@
     background: var(--color-ivory);
   }
   .btn-outline {
-    border: 1px solid color-mix(in srgb, var(--color-ivory) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-ivory) 70%, transparent);
     color: var(--color-ivory);
   }
   .btn-outline::before {
@@ -170,7 +172,7 @@
     border-radius: 0;
   }
   .field::placeholder {
-    color: #6d6860;
+    color: #8f897f;
   }
   .field:focus {
     outline: none;
@@ -202,8 +204,9 @@
   }
   .label {
     display: block;
-    font-size: 0.65rem;
-    letter-spacing: 0.24em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--color-mist);
   }

@@ -65,7 +65,7 @@ export function ProductPurchase({ product }: { product: Product }) {
         {sale && (
           <>
             <p className="text-mist line-through">{formatPrice(product.compare_at_price!)}</p>
-            <span className="bg-gold px-2 py-0.5 text-[0.6rem] font-bold text-ink">-{discountPercent(product)} %</span>
+            <span className="bg-gold px-2 py-0.5 text-[0.78rem] font-bold text-ink">-{discountPercent(product)} %</span>
           </>
         )}
       </div>
@@ -82,7 +82,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                   onClick={() => setColor(name)}
                   aria-pressed={color === name}
                   title={name}
-                  className={clsx("relative flex items-center gap-2 border px-3 py-2 text-xs transition-colors", color === name ? "border-gold text-ivory" : "border-white/10 text-ivory/70 hover:border-white/40", out && "opacity-40")}
+                  className={clsx("relative flex items-center gap-2 border px-3 py-2 text-xs transition-colors", color === name ? "border-gold text-ivory" : "border-white/15 text-ivory/90 hover:border-white/40", out && "opacity-40")}
                 >
                   {hex && <span className="h-4 w-4 rounded-full border border-white/20" style={{ background: hex }} />}
                   {name}
@@ -107,7 +107,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                   aria-pressed={size === s}
                   className={clsx(
                     "min-w-12 border px-3 py-3 text-xs tracking-wider transition-colors",
-                    size === s ? "border-gold bg-gold text-ink" : "border-white/10 hover:border-gold",
+                    size === s ? "border-gold bg-gold text-ink" : "border-white/15 hover:border-gold",
                     out && "cursor-not-allowed line-through opacity-30",
                   )}
                 >

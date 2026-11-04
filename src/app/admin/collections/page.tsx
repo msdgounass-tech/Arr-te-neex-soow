@@ -16,7 +16,7 @@ export default async function AdminCollections() {
         <Card key={c.id} className="mb-4">
           <div className="mb-4 flex items-baseline justify-between">
             <Link href={`/collections/${c.slug}`} target="_blank" className="display text-2xl hover:text-gold">{c.name}</Link>
-            <form action={deleteCollection}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer cette collection ?" className="text-[0.6rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
+            <form action={deleteCollection}><input type="hidden" name="id" value={c.id} /><ConfirmSubmit message="Supprimer cette collection ?" className="text-[0.78rem] uppercase tracking-[0.16em] text-mist hover:text-danger">Supprimer</ConfirmSubmit></form>
           </div>
           <CollectionEditor initial={c} />
         </Card>

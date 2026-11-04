@@ -81,13 +81,13 @@ export function Gallery({ images, name }: { images: ProductImage[]; name: string
         </span>
         {count > 1 && (
           <>
-            <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); go(-1); }} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-ivory/80 hover:text-gold md:hidden">
+            <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); go(-1); }} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-ivory/90 hover:text-gold md:hidden">
               <ChevronLeft width={26} height={26} />
             </button>
-            <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); go(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-ivory/80 hover:text-gold md:hidden">
+            <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); go(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-ivory/90 hover:text-gold md:hidden">
               <ChevronRight width={26} height={26} />
             </button>
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[0.6rem] tracking-[0.3em] text-ivory/80">
+            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[0.78rem] tracking-[0.3em] text-ivory/90">
               {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
             </span>
           </>

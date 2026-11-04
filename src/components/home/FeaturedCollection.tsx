@@ -15,7 +15,7 @@ export function FeaturedCollection({ collection, products, fallbackImage }: { co
           <Reveal>
             <p className="eyebrow">Collection vedette{collection.is_exclusive ? " · Exclusive" : ""}</p>
             <h2 className="display mt-6 text-6xl md:text-9xl">{collection.name}</h2>
-            {collection.tagline && <p className="display mt-5 text-2xl italic text-ivory/80">{collection.tagline}</p>}
+            {collection.tagline && <p className="display mt-5 text-2xl italic text-ivory/90">{collection.tagline}</p>}
             <span className="btn btn-outline mt-10">Découvrir la collection</span>
           </Reveal>
         </div>

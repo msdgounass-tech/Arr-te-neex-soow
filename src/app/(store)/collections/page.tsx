@@ -17,7 +17,7 @@ export default async function CollectionsPage() {
         <Reveal>
           <p className="eyebrow">Univers</p>
           <h1 className="display mt-5 text-5xl md:text-8xl">Collections</h1>
-          <p className="mx-auto mt-6 max-w-xl text-ivory/65">Capsules, éditions exclusives et sélections de saison.</p>
+          <p className="mx-auto mt-6 max-w-xl text-ivory/90">Capsules, éditions exclusives et sélections de saison.</p>
         </Reveal>
       </header>
       {collections.length ? (
@@ -30,7 +30,7 @@ export default async function CollectionsPage() {
                 <div className="absolute bottom-8 left-8 right-8">
                   {c.is_exclusive && <p className="eyebrow">Exclusive</p>}
                   <h2 className="display mt-3 text-5xl md:text-6xl">{c.name}</h2>
-                  {c.tagline && <p className="mt-3 text-ivory/70">{c.tagline}</p>}
+                  {c.tagline && <p className="mt-3 text-ivory/90">{c.tagline}</p>}
                 </div>
               </Link>
             </Reveal>

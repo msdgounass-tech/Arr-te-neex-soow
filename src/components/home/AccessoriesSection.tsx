@@ -26,7 +26,7 @@ export function AccessoriesSection({ image, products }: { image: string; product
               <br />
               <em className="text-gold">qui signe tout.</em>
             </h2>
-            <p className="mt-6 max-w-md leading-relaxed text-ivory/70">
+            <p className="mt-6 max-w-md leading-relaxed text-ivory/90">
               Montres, maroquinerie, lunettes, parfums et bijoux : les pièces qui achèvent une silhouette et révèlent une personnalité.
             </p>
           </Reveal>
@@ -36,7 +36,7 @@ export function AccessoriesSection({ image, products }: { image: string; product
                 <li key={it.q} className="border-b border-white/[0.08]">
                   <Link href={`/accessories?type=${it.q}`} className="group flex items-center justify-between py-5">
                     <span className="flex items-baseline gap-6">
-                      <span className="text-[0.6rem] tracking-[0.2em] text-gold/70">0{i + 1}</span>
+                      <span className="text-[0.78rem] tracking-[0.2em] text-gold/70">0{i + 1}</span>
                       <span className="display text-3xl transition-all duration-700 group-hover:translate-x-2 group-hover:text-gold md:text-4xl">{it.label}</span>
                     </span>
                     <ArrowRight className="text-ivory/40 transition-all duration-500 group-hover:translate-x-1 group-hover:text-gold" />
@@ -50,7 +50,7 @@ export function AccessoriesSection({ image, products }: { image: string; product
           <Link href="/accessories" className="group relative block aspect-[4/5] overflow-hidden">
             <Image src={image} alt="Montre, sac, parfum et lunettes GOUNASS LUXURY" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover transition-transform duration-[2200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink-2/70 to-transparent" />
-            <span className="absolute bottom-8 left-8 text-[0.66rem] uppercase tracking-[0.32em] text-ivory">Explorer les accessoires</span>
+            <span className="absolute bottom-8 left-8 text-[0.74rem] uppercase tracking-[0.32em] text-ivory">Explorer les accessoires</span>
           </Link>
         </Reveal>
       </div>

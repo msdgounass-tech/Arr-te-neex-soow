@@ -21,7 +21,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
     <div className="container-luxe max-w-xl pt-20 md:pt-28">
       <p className="eyebrow text-center">Service client</p>
       <h1 className="display mt-5 text-center text-5xl md:text-6xl">Suivre ma commande</h1>
-      <p className="mt-5 text-center text-ivory/70">Saisissez votre numéro de commande et le téléphone utilisé lors de l&apos;achat.</p>
+      <p className="mt-5 text-center text-ivory/90">Saisissez votre numéro de commande et le téléphone utilisé lors de l&apos;achat.</p>
       <form action={track} className="mt-12 space-y-8">
         <label className="block"><span className="label">Numéro de commande</span><input name="number" required placeholder="GL-000000-00000" className="field uppercase tracking-wider" /></label>
         <label className="block"><span className="label">Téléphone</span><input name="phone" type="tel" required className="field" /></label>

@@ -29,9 +29,9 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       <PageTitle title="Commandes" subtitle={`${count ?? 0} commande(s)`} />
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="no-scrollbar flex gap-1 overflow-x-auto">
-          <Link href={link({ statut: undefined, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.18em] ${!sp.statut ? "bg-gold text-ink" : "text-ivory/70"}`}>Toutes</Link>
+          <Link href={link({ statut: undefined, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${!sp.statut ? "bg-gold text-ink" : "text-ivory/90"}`}>Toutes</Link>
           {(Object.keys(ORDER_STATUS_LABEL) as OrderStatus[]).map((s) => (
-            <Link key={s} href={link({ statut: s, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.6rem] uppercase tracking-[0.18em] ${sp.statut === s ? "bg-gold text-ink" : "text-ivory/70"}`}>{ORDER_STATUS_LABEL[s]}</Link>
+            <Link key={s} href={link({ statut: s, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${sp.statut === s ? "bg-gold text-ink" : "text-ivory/90"}`}>{ORDER_STATUS_LABEL[s]}</Link>
           ))}
         </div>
         <form className="flex gap-2">
@@ -42,7 +42,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       </div>
       <Card className="overflow-x-auto p-0 md:p-0">
         <table className="w-full min-w-[820px] text-sm">
-          <thead className="border-b border-white/[0.06]"><tr className="[&>th]:px-4"><th className={th}>N°</th><th className={th}>Date</th><th className={th}>Client</th><th className={th}>Ville</th><th className={th}>Paiement</th><th className={th}>Statut</th><th className={`${th} text-right`}>Total</th></tr></thead>
+          <thead className="border-b border-white/[0.1]"><tr className="[&>th]:px-4"><th className={th}>N°</th><th className={th}>Date</th><th className={th}>Client</th><th className={th}>Ville</th><th className={th}>Paiement</th><th className={th}>Statut</th><th className={`${th} text-right`}>Total</th></tr></thead>
           <tbody className="divide-y divide-white/[0.05]">
             {orders.map((o) => (
               <tr key={o.id} className="hover:bg-ink-3 [&>td]:px-4">
@@ -62,7 +62,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       {pages > 1 && (
         <div className="mt-6 flex gap-2">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <Link key={p} href={link({ page: String(p) })} className={`flex h-9 w-9 items-center justify-center border text-xs ${p === page ? "border-gold bg-gold text-ink" : "border-white/10"}`}>{p}</Link>
+            <Link key={p} href={link({ page: String(p) })} className={`flex h-9 w-9 items-center justify-center border text-xs ${p === page ? "border-gold bg-gold text-ink" : "border-white/15"}`}>{p}</Link>
           ))}
         </div>
       )}

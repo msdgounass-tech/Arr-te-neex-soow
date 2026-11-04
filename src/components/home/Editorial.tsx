@@ -14,9 +14,9 @@ export function Editorial({ image }: { image: string }) {
   return (
     <section ref={ref} className="relative overflow-hidden py-28 md:py-44">
       <motion.div style={{ y }} className="absolute inset-[-15%_0]">
-        <Image src={image} alt="" fill sizes="100vw" className="object-cover opacity-30" />
+        <Image src={image} alt="" fill sizes="100vw" className="object-cover opacity-45" />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/70 to-ink" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/55 to-ink" />
       <div className="grain absolute inset-0" />
 
       <motion.p style={{ x }} aria-hidden className="display pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap text-[24vw] italic leading-none text-ivory/[0.04]">
@@ -36,7 +36,7 @@ export function Editorial({ image }: { image: string }) {
             <span className="gold-text italic">Wouro Maama</span>
           </h2>
           <div className="mx-auto mt-10 h-px w-20 bg-gold/70" />
-          <p className="display mx-auto mt-10 max-w-3xl text-2xl leading-relaxed text-ivory/85 md:text-[2.1rem] md:leading-[1.45]">
+          <p className="display mx-auto mt-10 max-w-3xl text-2xl leading-relaxed text-ivory/95 md:text-[2.1rem] md:leading-[1.45]">
             Une allure ne s&apos;improvise pas, elle se compose. GOUNASS LUXURY réunit des pièces choisies avec exigence pour l&apos;homme
             et la femme qui font de leur style une signature.
           </p>
