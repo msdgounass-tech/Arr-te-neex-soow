@@ -23,3 +23,16 @@ begin
     end loop;
   end loop;
 end $do$;
+
+-- Promotions de démonstration : le 2e produit de chaque catégorie à -20 %
+update public.products
+   set compare_at_price = (ceil(price / 0.8 / 1000.0) * 1000)::int
+ where reference like 'GL-%-02' and compare_at_price is null;
+update public.products set is_new = true where reference like 'GL-%-03';
+
+-- Codes de réduction de démonstration (à saisir dans le panier)
+insert into public.coupons (code, description, discount_type, value, min_order, max_uses, is_active) values
+  ('BIENVENUE10', 'Démo : -10 % sur toute la commande', 'percent', 10, 0, null, true),
+  ('GOUNASS5000', 'Démo : -5 000 FCFA dès 50 000 FCFA d''achat', 'fixed', 5000, 50000, null, true),
+  ('VIP20', 'Démo : -20 % dès 150 000 FCFA d''achat', 'percent', 20, 150000, null, true)
+on conflict (code) do nothing;
