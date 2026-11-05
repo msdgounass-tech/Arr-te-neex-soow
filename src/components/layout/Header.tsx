@@ -11,6 +11,8 @@ import { cartCount, useCart } from "@/store/cart";
 import { useFavorites } from "@/store/favorites";
 import { useUI } from "@/store/ui";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useStaffRole } from "@/hooks/useStaffRole";
+import { adminItemsFor } from "@/lib/admin-nav";
 
 export function Header({ announcement, logoUrl }: { announcement?: string; logoUrl?: string }) {
   const pathname = usePathname();
@@ -20,6 +22,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
   const setCartOpen = useCart((s) => s.setOpen);
   const favCount = useFavorites((s) => s.ids.length);
   const { menuOpen, setMenu, setSearch } = useUI();
+  const staffRole = useStaffRole();
   const count = hydrated ? cartCount(lines) : 0;
   const overHero = pathname === "/" && !scrolled && !menuOpen;
 
@@ -98,6 +101,11 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             <button aria-label="Rechercher" onClick={() => setSearch(true)} className="hidden p-2.5 text-ivory/90 hover:text-gold xl:block">
               <SearchIcon />
             </button>
+            {staffRole && (
+              <Link href="/admin" className="hidden border border-gold/50 px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-gold hover:bg-gold hover:text-ink xl:block">
+                Admin
+              </Link>
+            )}
             <Link href="/compte" aria-label="Mon compte" className="hidden p-2.5 text-ivory/90 hover:text-gold sm:block">
               <UserIcon />
             </Link>
@@ -138,6 +146,23 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             className="fixed inset-0 top-[72px] z-[55] overflow-y-auto bg-ink lg:top-[84px] xl:hidden"
           >
             <div className="container-luxe flex min-h-full flex-col py-8">
+              {staffRole && (
+                <div className="mb-8 border border-gold/40 bg-gold/[0.06] p-4">
+                  <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-gold">Espace administration</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {adminItemsFor(staffRole).map((a) => (
+                      <Link
+                        key={a.href}
+                        href={a.href}
+                        onClick={() => setMenu(false)}
+                        className="flex min-h-11 items-center border border-white/[0.14] bg-ink px-3 text-[0.8rem] text-ivory hover:border-gold hover:text-gold"
+                      >
+                        {a.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
               <nav aria-label="Menu mobile" className="flex flex-col">
                 {NAV.map((n, i) => (
                   <motion.div
