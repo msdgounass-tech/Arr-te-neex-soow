@@ -53,7 +53,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
         )}
       >
         <div className="container-luxe flex h-[72px] items-center justify-between gap-4 lg:h-[84px]">
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2 xl:hidden">
             <button aria-label="Ouvrir le menu" onClick={() => setMenu(!menuOpen)} className="-ml-2 p-2 text-ivory">
               {menuOpen ? <CloseIcon width={22} height={22} /> : <MenuIcon width={22} height={22} />}
             </button>
@@ -67,7 +67,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             <Wordmark compact logoUrl={logoUrl} className="sm:hidden [&>span:last-child]:hidden" />
           </Link>
 
-          <nav aria-label="Navigation principale" className="hidden items-center gap-7 xl:gap-9 lg:flex">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-8 2xl:gap-10 xl:flex">
             {NAV.map((n) => (
               <div key={n.href} className="group relative">
                 <Link
@@ -95,7 +95,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
           </nav>
 
           <div className="flex items-center gap-0.5 sm:gap-1.5">
-            <button aria-label="Rechercher" onClick={() => setSearch(true)} className="hidden p-2.5 text-ivory/90 hover:text-gold lg:block">
+            <button aria-label="Rechercher" onClick={() => setSearch(true)} className="hidden p-2.5 text-ivory/90 hover:text-gold xl:block">
               <SearchIcon />
             </button>
             <Link href="/compte" aria-label="Mon compte" className="hidden p-2.5 text-ivory/90 hover:text-gold sm:block">
@@ -135,7 +135,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 top-[72px] z-[55] overflow-y-auto bg-ink lg:hidden"
+            className="fixed inset-0 top-[72px] z-[55] overflow-y-auto bg-ink lg:top-[84px] xl:hidden"
           >
             <div className="container-luxe flex min-h-full flex-col py-8">
               <nav aria-label="Menu mobile" className="flex flex-col">

@@ -16,6 +16,7 @@ import { commonFreeThreshold, minFreeThreshold } from "@/lib/delivery";
 import { DEFAULT_IMAGES } from "@/lib/site";
 
 export const revalidate = 60;
+export const metadata = { alternates: { canonical: "/" } };
 
 const MEN = [
   { label: "Vêtements", slug: "homme-vetements" },

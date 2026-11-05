@@ -28,7 +28,6 @@ export const metadata: Metadata = {
     description: BRAND.description,
   },
   twitter: { card: "summary_large_image" },
-  alternates: { canonical: "/" },
   keywords: ["boutique de luxe Sénégal", "mode de luxe Dakar", "montres de luxe", "sacs de luxe", "parfums", "bijoux", "GOUNASS LUXURY"],
   robots: { index: true, follow: true },
 };
