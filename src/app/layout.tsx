@@ -7,7 +7,8 @@ import { Toast } from "@/components/ui/Toast";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  // Seule la graisse 500 est utilisée (titres et italiques) : 2 fichiers au lieu de 8.
+  weight: ["500"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
   display: "swap",
@@ -27,7 +28,6 @@ export const metadata: Metadata = {
     description: BRAND.description,
   },
   twitter: { card: "summary_large_image" },
-  alternates: { canonical: "/" },
   keywords: ["boutique de luxe Sénégal", "mode de luxe Dakar", "montres de luxe", "sacs de luxe", "parfums", "bijoux", "GOUNASS LUXURY"],
   robots: { index: true, follow: true },
 };
