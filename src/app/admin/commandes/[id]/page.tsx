@@ -6,6 +6,7 @@ import { formatDate, formatPrice, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, toWh
 import { Card, PageTitle, PaymentBadge, StatusBadge } from "@/components/admin/ui";
 import { DeliveryFeeForm, DeliveryForm, ManualPaymentForm, StatusForm } from "@/components/admin/OrderForms";
 import { markCodPaid } from "../../actions";
+import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import type { Order } from "@/lib/types";
 import { WhatsAppIcon } from "@/components/ui/Icons";
 
@@ -29,6 +30,17 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
       <PageTitle title={o.order_number} subtitle={formatDate(o.created_at, true)}>
         <StatusBadge status={o.status} />
       </PageTitle>
+      {o.status !== "livree" && o.status !== "annulee" && (
+        <Card className="mb-4 border-gold/40">
+          <p className="label mb-3">Action suivante</p>
+          <OrderQuickActions id={o.id} status={o.status} />
+          {o.payment_method !== "livraison" && o.payment_status !== "reussi" && (
+            <p className="mt-3 text-xs leading-relaxed text-mist">
+              Confirmer la commande ne valide pas le paiement : pour un paiement Wave par lien, vérifiez la réception puis saisissez la référence dans la section Paiement ci-dessous.
+            </p>
+          )}
+        </Card>
+      )}
       <div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
         <div className="space-y-4">
           <Card>
@@ -37,9 +49,8 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               {(o.order_items || []).map((it) => (
                 <li key={it.id} className="flex items-center gap-4 py-3">
                   <span className="relative h-16 w-12 shrink-0 overflow-hidden bg-ink-3">{it.image_url && <Image src={it.image_url} alt="" fill sizes="48px" className="object-cover" />}</span>
-                  <span className="flex-1 text-sm">{it.product_name}<span className="block text-xs text-mist">SKU {it.sku} {it.color ? `· ${it.color}` : ""} {it.size ? `· ${it.size}` : ""}</span></span>
-                  <span className="text-sm text-mist">{it.quantity} × {formatPrice(it.unit_price)}</span>
-                  <span className="w-28 text-right text-sm">{formatPrice(it.line_total)}</span>
+                  <span className="min-w-0 flex-1 text-sm">{it.product_name}<span className="block text-xs text-mist">{it.color ? `${it.color} · ` : ""}{it.size ? `Taille ${it.size} · ` : ""}{it.quantity} × {formatPrice(it.unit_price)}</span><span className="block text-[0.7rem] text-mist/80">SKU {it.sku}</span></span>
+                  <span className="shrink-0 whitespace-nowrap text-right text-sm">{formatPrice(it.line_total)}</span>
                 </li>
               ))}
             </ul>
