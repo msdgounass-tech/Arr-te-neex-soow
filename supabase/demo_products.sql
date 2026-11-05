@@ -44,3 +44,11 @@ update public.products set tags = array['classique'] where reference = 'GL-H-MON
 update public.products set tags = array['luxe'] where reference = 'GL-F-MON-01';
 update public.products set tags = array['classique', 'luxe'] where reference = 'GL-F-MON-02';
 update public.products set tags = array['classique'] where reference = 'GL-F-MON-03';
+
+-- Illustrations « tenues africaines » (scripts/gen-african-illustrations.py)
+update public.product_images pi set url = x.url
+  from (values
+    ('GL-H-VET-03', 0, '/images/produits/boubou-1.svg'), ('GL-H-VET-03', 1, '/images/produits/boubou-2.svg'),
+    ('GL-F-VET-03', 0, '/images/produits/kaftan-1.svg'), ('GL-F-VET-03', 1, '/images/produits/kaftan-3.svg')
+  ) as x(ref, pos, url), public.products p
+ where p.reference = x.ref and pi.product_id = p.id and pi.position = x.pos and pi.url like '/images/produits/%';

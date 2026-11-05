@@ -18,6 +18,8 @@ export const DEFAULT_LOGO = "/images/logo/gounass-logo.png";
 export const DEFAULT_IMAGES = {
   hero: "/images/hero.jpg",
   accessories: "/images/accessoires.jpg",
+  /** Visuel de collection par défaut (motifs wax, grand boubou et robe wax). */
+  collection: "/images/collection-wouro-maama.svg",
 };
 
 export const EMPTY_STORE: StoreSettings = {

@@ -126,7 +126,7 @@ export default async function HomePage() {
       <CategoryRail tone="soft" eyebrow="Solaires" title="Lunettes" href="/accessories?type=lunettes" products={glasses.items} />
 
       {/* 7. Collection vedette */}
-      {featured && <FeaturedCollection collection={featured} products={featuredProducts} fallbackImage={heroImg} />}
+      {featured && <FeaturedCollection collection={featured} products={featuredProducts} fallbackImage={DEFAULT_IMAGES.collection} />}
 
       {/* 8. Promotions */}
       {promos.items.length > 0 && (

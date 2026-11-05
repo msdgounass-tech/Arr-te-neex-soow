@@ -23,7 +23,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
   return (
     <>
       <section className="relative -mt-[72px] h-[80vh] min-h-[520px] overflow-hidden lg:-mt-[84px]">
-        <Image src={c.image_url || DEFAULT_IMAGES.hero} alt={c.name} fill priority sizes="100vw" className="object-cover" />
+        <Image src={c.image_url || DEFAULT_IMAGES.collection} alt={c.name} fill priority sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/50" />
         <div className="container-luxe relative flex h-full flex-col items-center justify-end pb-20 text-center">
           <Reveal>
