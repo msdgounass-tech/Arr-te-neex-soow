@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth";
 import { formatDate, formatPrice, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL } from "@/lib/format";
 import { Card, PageTitle, PaymentBadge, StatusBadge, td, th } from "@/components/admin/ui";
 import type { Order, OrderStatus } from "@/lib/types";
+import { OrderCards } from "@/components/admin/OrderCards";
+import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 
 const PER = 30;
 
@@ -28,7 +30,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
     <>
       <PageTitle title="Commandes" subtitle={`${count ?? 0} commande(s)`} />
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="no-scrollbar flex gap-1 overflow-x-auto">
+        <div className="flex flex-wrap gap-1.5">
           <Link href={link({ statut: undefined, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${!sp.statut ? "bg-gold text-ink" : "text-ivory/90"}`}>Toutes</Link>
           {(Object.keys(ORDER_STATUS_LABEL) as OrderStatus[]).map((s) => (
             <Link key={s} href={link({ statut: s, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${sp.statut === s ? "bg-gold text-ink" : "text-ivory/90"}`}>{ORDER_STATUS_LABEL[s]}</Link>
@@ -36,13 +38,16 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
         </div>
         <form className="flex gap-2">
           {sp.statut && <input type="hidden" name="statut" value={sp.statut} />}
-          <input name="q" defaultValue={sp.q} placeholder="N°, client, téléphone" className="field-box w-64" />
+          <input name="q" defaultValue={sp.q} placeholder="N°, client, téléphone" className="field-box min-w-0 flex-1 md:w-64 md:flex-none" />
           <button className="btn btn-ghost-gold min-h-10 px-4">Rechercher</button>
         </form>
       </div>
-      <Card className="overflow-x-auto p-0 md:p-0">
+      <div className="md:hidden">
+        <OrderCards orders={orders} />
+      </div>
+      <Card className="hidden overflow-x-auto p-0 md:block md:p-0">
         <table className="w-full min-w-[820px] text-sm">
-          <thead className="border-b border-white/[0.1]"><tr className="[&>th]:px-4"><th className={th}>N°</th><th className={th}>Date</th><th className={th}>Client</th><th className={th}>Ville</th><th className={th}>Paiement</th><th className={th}>Statut</th><th className={`${th} text-right`}>Total</th></tr></thead>
+          <thead className="border-b border-white/[0.1]"><tr className="[&>th]:px-4"><th className={th}>N°</th><th className={th}>Date</th><th className={th}>Client</th><th className={th}>Ville</th><th className={th}>Paiement</th><th className={th}>Statut</th><th className={`${th} text-right`}>Total</th><th className={th}>Action</th></tr></thead>
           <tbody className="divide-y divide-white/[0.05]">
             {orders.map((o) => (
               <tr key={o.id} className="hover:bg-ink-3 [&>td]:px-4">
@@ -53,9 +58,10 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
                 <td className={td}>{PAYMENT_METHOD_LABEL[o.payment_method]}<span className="block"><PaymentBadge status={o.payment_status} /></span></td>
                 <td className={td}><StatusBadge status={o.status} /></td>
                 <td className={`${td} text-right`}>{formatPrice(o.total)}</td>
+                <td className={td}><OrderQuickActions id={o.id} status={o.status} size="sm" withCancel={false} /></td>
               </tr>
             ))}
-            {!orders.length && <tr><td colSpan={7} className="p-8 text-center text-mist">Aucune commande.</td></tr>}
+            {!orders.length && <tr><td colSpan={8} className="p-8 text-center text-mist">Aucune commande.</td></tr>}
           </tbody>
         </table>
       </Card>

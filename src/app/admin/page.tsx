@@ -4,6 +4,7 @@ import { formatDate, formatPrice } from "@/lib/format";
 import { Card, PageTitle, PaymentBadge, StatusBadge, td, th } from "@/components/admin/ui";
 import { SalesChart } from "@/components/admin/SalesChart";
 import type { Order } from "@/lib/types";
+import { OrderCards } from "@/components/admin/OrderCards";
 
 interface Stats {
   revenue: number;
@@ -24,7 +25,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
   const canStats = hasRole(role, "manager");
   const [{ data: stats }, { data: recent }] = await Promise.all([
     canStats ? sb.rpc("admin_stats", { p_days: days }) : Promise.resolve({ data: null }),
-    sb.from("orders").select("id, order_number, customer_name, total, status, payment_status, created_at").order("created_at", { ascending: false }).limit(8),
+    sb.from("orders").select("id, order_number, customer_name, phone, city, total, status, payment_status, payment_method, created_at").order("created_at", { ascending: false }).limit(8),
   ]);
   const s = stats as Stats | null;
 
@@ -85,13 +86,15 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         </>
       )}
 
-      <Card className="mt-4 overflow-x-auto">
+      <Card className="mt-4 overflow-x-auto p-4 md:p-6">
         <div className="mb-4 flex items-baseline justify-between">
           <p className="label">Dernières commandes</p>
           <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-gold">Toutes les commandes</Link>
         </div>
         {recent && recent.length ? (
-          <table className="w-full min-w-[640px] text-sm">
+          <>
+          <div className="md:hidden"><OrderCards orders={recent as Order[]} /></div>
+          <table className="hidden w-full min-w-[640px] text-sm md:table">
             <thead><tr><th className={th}>N°</th><th className={th}>Client</th><th className={th}>Date</th><th className={th}>Statut</th><th className={th}>Paiement</th><th className={`${th} text-right`}>Total</th></tr></thead>
             <tbody className="divide-y divide-white/[0.05]">
               {(recent as Order[]).map((o) => (
@@ -106,6 +109,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
               ))}
             </tbody>
           </table>
+          </>
         ) : (
           <p className="text-sm text-mist">Aucune commande pour le moment.</p>
         )}

@@ -137,6 +137,19 @@ export async function updateOrderStatus(_: ActionResult, fd: FormData): Promise<
   return { ok: true, message: "Statut mis à jour." };
 }
 
+/** Action rapide (boutons « Confirmer », « Expédier »…) : change le statut et prévient le client. */
+export async function quickSetStatus(fd: FormData) {
+  const { sb } = await requireRole("staff");
+  const id = String(fd.get("id"));
+  const status = String(fd.get("status")) as OrderStatus;
+  if (!STATUSES.includes(status as (typeof STATUSES)[number])) return;
+  const { error } = await sb.from("orders").update({ status }).eq("id", id);
+  if (!error) after(() => notifyOrder(id, eventForStatus(status)));
+  revalidatePath(`/admin/commandes/${id}`);
+  revalidatePath("/admin/commandes");
+  revalidatePath("/admin");
+}
+
 export async function updateDelivery(_: ActionResult, fd: FormData): Promise<ActionResult> {
   const { sb } = await requireRole("staff");
   const orderId = String(fd.get("order_id"));
