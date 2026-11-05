@@ -41,7 +41,7 @@ export default async function CollectionsPage() {
           {collections.map((c, i) => (
             <Reveal key={c.id} delay={(i % 2) * 0.1} className={i % 3 === 0 ? "md:col-span-2" : ""}>
               <Link href={`/collections/${c.slug}`} className="group relative block aspect-[4/5] overflow-hidden md:aspect-auto md:h-[70vh]">
-                <Image src={c.image_url || DEFAULT_IMAGES.hero} alt={c.name} fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover transition-transform duration-[2000ms] group-hover:scale-105" />
+                <Image src={c.image_url || DEFAULT_IMAGES.collection} alt={c.name} fill sizes="(min-width:768px) 50vw, 100vw" className="object-cover transition-transform duration-[2000ms] group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
                   {c.is_exclusive && <p className="eyebrow">Exclusive</p>}

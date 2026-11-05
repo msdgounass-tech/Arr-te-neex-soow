@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="42%" r="75%"><stop offset="0" stop-color="#55402e"/><stop offset="1" stop-color="#24180f"/></radialGradient>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9C7C3F"/><stop offset=".45" stop-color="#F1DFB4"/><stop offset=".7" stop-color="#C6A15B"/><stop offset="1" stop-color="#8A6A32"/></linearGradient>
+  <pattern id="wax" width="44" height="44" patternUnits="userSpaceOnUse">
+    <circle cx="22" cy="22" r="9" fill="none" stroke="#C6A15B" stroke-opacity=".55" stroke-width="1.6"/>
+    <circle cx="22" cy="22" r="3" fill="#C6A15B" fill-opacity=".55"/>
+    <path d="M0 0 L8 0 L0 8 Z M44 44 L36 44 L44 36 Z M44 0 L44 8 L36 0 Z M0 44 L0 36 L8 44 Z" fill="#C6A15B" fill-opacity=".45"/>
+  </pattern>
+  <pattern id="waxbg" width="60" height="60" patternUnits="userSpaceOnUse">
+    <path d="M30 6 L54 30 L30 54 L6 30 Z" fill="none" stroke="#C6A15B" stroke-opacity=".10" stroke-width="1.2"/>
+    <circle cx="30" cy="30" r="4" fill="#C6A15B" fill-opacity=".08"/>
+  </pattern>
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<rect width="600" height="800" fill="url(#waxbg)"/>
+<rect x="24" y="24" width="552" height="752" fill="none" stroke="#C6A15B" stroke-opacity=".28" stroke-width="1.5"/>
+<g transform="translate(300 410) scale(1.08) translate(-300 -410)">
+<path fill="url(#wax)" d="M248 330 Q215 470 165 610 Q300 640 435 610 Q385 470 352 330 Z"/>
+<path stroke="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M262 182 L276 250 Q300 268 324 250 L338 182"/>
+<path stroke="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M262 182 Q238 225 248 300 L248 330 Q300 348 352 330 L352 300 Q362 225 338 182"/>
+<path stroke="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M248 330 Q215 470 165 610 Q300 640 435 610 Q385 470 352 330"/>
+<path stroke="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M244 336 Q300 356 356 336"/>
+<path stroke="url(#g)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M250 345 Q232 352 226 372 M350 345 Q368 352 374 372"/>
+</g>
+<text x="300" y="720" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="9" fill="#C6A15B" fill-opacity=".75">GOUNASS LUXURY</text>
+</svg>
