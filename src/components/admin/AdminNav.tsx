@@ -6,33 +6,30 @@ import clsx from "clsx";
 import { Wordmark } from "@/components/brand/Logo";
 import { CloseIcon, MenuIcon } from "@/components/ui/Icons";
 import type { UserRole } from "@/lib/types";
+import { adminItemsFor } from "@/lib/admin-nav";
 
-const RANK: Record<UserRole, number> = { customer: 0, staff: 1, manager: 2, admin: 3 };
-const ITEMS: { href: string; label: string; min: UserRole }[] = [
-  { href: "/admin", label: "Tableau de bord", min: "staff" },
-  { href: "/admin/commandes", label: "Commandes", min: "staff" },
-  { href: "/admin/produits", label: "Produits", min: "manager" },
-  { href: "/admin/categories", label: "Catégories", min: "manager" },
-  { href: "/admin/collections", label: "Collections", min: "manager" },
-  { href: "/admin/coupons", label: "Codes promo", min: "manager" },
-  { href: "/admin/livraison", label: "Livraison", min: "admin" },
-  { href: "/admin/clients", label: "Clients & équipe", min: "staff" },
-  { href: "/admin/messages", label: "Messages", min: "staff" },
-  { href: "/admin/parametres", label: "Paramètres", min: "admin" },
-];
 const ROLE_LABEL: Record<UserRole, string> = { customer: "Client", staff: "Équipe", manager: "Gérant", admin: "Administrateur" };
 
 export function AdminNav({ role, name }: { role: UserRole; name: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const items = ITEMS.filter((i) => RANK[role] >= RANK[i.min]);
+  const items = adminItemsFor(role);
   const active = (href: string) => (href === "/admin" ? pathname === "/admin" : pathname.startsWith(href));
   return (
     <>
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/[0.1] bg-ink px-5 py-4 lg:hidden">
         <Wordmark compact />
-        <button aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <CloseIcon /> : <MenuIcon />}</button>
+        <button aria-label="Menu" onClick={() => setOpen(!open)} className="flex items-center gap-2 border border-gold/40 px-3 py-2 text-[0.72rem] uppercase tracking-[0.2em] text-gold">
+          {open ? <CloseIcon width={18} height={18} /> : <MenuIcon width={18} height={18} />} Menu
+        </button>
       </div>
+      <nav aria-label="Rubriques" className="sticky top-[83px] z-30 flex gap-2 overflow-x-auto border-b border-white/[0.1] bg-ink px-5 py-3 lg:hidden [scrollbar-width:none]">
+        {items.map((i) => (
+          <Link key={i.href} href={i.href} className={clsx("shrink-0 border px-3 py-2 text-[0.74rem] whitespace-nowrap", active(i.href) ? "border-gold bg-gold/10 text-gold" : "border-white/[0.14] text-ivory/90")}>
+            {i.label}
+          </Link>
+        ))}
+      </nav>
       <aside className={clsx("fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/[0.1] bg-ink-2 transition-transform lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
         <div className="border-b border-white/[0.1] p-6">
           <Link href="/"><Wordmark compact /></Link>
