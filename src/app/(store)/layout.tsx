@@ -17,7 +17,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     name: "GOUNASS LUXURY",
     slogan: "Wouro Maama",
     url: SITE_URL,
-    logo: `${SITE_URL}/icon.svg`,
+    logo: `${SITE_URL}/images/logo/gounass-logo.png`,
     areaServed: "SN",
     currenciesAccepted: "XOF",
     ...(store.email ? { email: store.email } : {}),

@@ -6,7 +6,7 @@ import { getSettings } from "@/lib/queries";
 import { formatPrice, PAYMENT_METHOD_LABEL, toWhatsAppNumber } from "@/lib/format";
 import { OrderSummary } from "@/components/order/OrderSummary";
 import { PrintButton, RetryPayment, WhatsAppShare } from "@/components/order/OrderActions";
-import { Emblem } from "@/components/brand/Logo";
+import { BrandLogo } from "@/components/brand/Logo";
 
 export const metadata: Metadata = { title: "Votre commande", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
   return (
     <div className="container-luxe max-w-5xl pt-16 md:pt-24">
       <header className="mb-14 text-center">
-        <Emblem className="mx-auto h-16 w-16" />
+        <BrandLogo size={96} className="mx-auto h-24 w-24" />
         <p className="eyebrow mt-8">Commande {order.order_number}</p>
         <h1 className="display mt-5 text-4xl md:text-6xl">{title}</h1>
         <p className="mx-auto mt-5 max-w-xl text-ivory/90">{text}</p>
