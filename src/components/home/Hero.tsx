@@ -29,7 +29,7 @@ export function Hero({ image, logoUrl }: { image: string; logoUrl?: string }) {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 2.6, ease }}
         >
-          <Image src={image} alt="Mannequins GOUNASS LUXURY en tenues de soirée" fill priority sizes="100vw" className="object-cover object-[60%_center] md:object-center" />
+          <Image src={image} alt="Mannequins GOUNASS LUXURY en tenues de soirée" fill priority sizes="100vw" className="object-cover object-[72%_center] md:object-[60%_center]" />
         </motion.div>
       </motion.div>
 

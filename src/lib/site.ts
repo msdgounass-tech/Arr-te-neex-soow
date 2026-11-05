@@ -10,15 +10,14 @@ export const BRAND = {
 /**
  * Visuels éditoriaux par défaut. Ils sont remplaçables sans redéploiement
  * depuis Admin > Paramètres (stockés dans Supabase Storage).
- * Pour héberger les fichiers vous-même : `npm run fetch-images` puis remplacez
- * les URL ci-dessous par /images/hero.jpg et /images/accessoires.jpg.
+ * Les fichiers sont hébergés avec le site (public/images).
  */
 /** Logo officiel (remplaçable dans Admin › Paramètres). */
 export const DEFAULT_LOGO = "/images/logo/gounass-logo.png";
 
 export const DEFAULT_IMAGES = {
-  hero: "https://cdn.alexya.ai/dd67244e-5214-4dfd-a952-36d82038cb1a/images/output/generated-1793807740525.jpg",
-  accessories: "https://cdn.alexya.ai/dd67244e-5214-4dfd-a952-36d82038cb1a/images/output/generated-1793807737717.jpg",
+  hero: "/images/hero.jpg",
+  accessories: "/images/accessoires.jpg",
 };
 
 export const EMPTY_STORE: StoreSettings = {

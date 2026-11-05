@@ -74,7 +74,7 @@ export default async function HomePage() {
         text="Costumes structurés, chemises de soie, cuirs et montres : un vestiaire masculin pensé pour les grandes occasions comme pour le quotidien."
         href="/men"
         image={home.men_image || heroImg}
-        objectPosition="28% center"
+        objectPosition="64% 30%"
         categories={MEN}
         products={men.items}
       />
@@ -87,7 +87,7 @@ export default async function HomePage() {
         text="Robes fluides, silhouettes affirmées, bijoux et maroquinerie : une garde-robe féminine où chaque détail compte."
         href="/women"
         image={home.women_image || heroImg}
-        objectPosition="72% center"
+        objectPosition="90% 30%"
         categories={WOMEN}
         products={women.items}
       />

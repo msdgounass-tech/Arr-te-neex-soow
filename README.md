@@ -101,7 +101,6 @@ Principes de sécurité :
 │   ├── lib/                     supabase clients, queries, payments/*, notifications,
 │   │                            auth, format, types, rate-limit
 │   └── store/                   panier, favoris, UI (Zustand)
-├── scripts/fetch-images.mjs
 ├── .env.example
 └── legacy/                      ancien fichier HTML du dépôt (conservé, non utilisé)
 ```
@@ -118,7 +117,7 @@ cp .env.example .env.local      # puis renseigner les variables (section 5)
 npm run dev                     # http://localhost:3000
 ```
 
-Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `npm test` (tests unitaires des calculs de prix, remises et livraison), `npm run fetch-images`.
+Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `npm test` (tests unitaires des calculs de prix, remises et livraison).
 
 ### Mise en place de Supabase
 
@@ -206,7 +205,6 @@ Les notifications partent à chaque création de commande, paiement reçu, chang
 - [ ] Clés de paiement de production installées, webhooks déclarés, **une transaction réelle de faible montant testée par moyen de paiement**
 - [ ] Modèle WhatsApp approuvé
 - [ ] Mentions légales complétées dans `/conditions` (raison sociale, NINEA, RCCM, politique de retour)
-- [ ] Visuels éditoriaux hébergés chez vous : `npm run fetch-images` ou envoi depuis `/admin/parametres`
 
 ---
 
