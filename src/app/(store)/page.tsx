@@ -64,7 +64,7 @@ export default async function HomePage() {
   return (
     <>
       {/* 1. Bannière */}
-      <Hero image={heroImg} />
+      <Hero image={heroImg} logoUrl={home.logo_url} />
       <ServicesStrip freeAbove={commonFreeThreshold(zones) ?? minFreeThreshold(zones)} common={commonFreeThreshold(zones) != null} />
 
       {/* 2. Collection Homme */}

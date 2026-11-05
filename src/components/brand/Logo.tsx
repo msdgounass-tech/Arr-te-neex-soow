@@ -1,5 +1,7 @@
 import { useId } from "react";
+import Image from "next/image";
 import clsx from "clsx";
+import { DEFAULT_LOGO } from "@/lib/site";
 
 /** Emblème monogramme « GL » — double anneau, G et L entrelacés, filet doré. */
 export function Emblem({ className, title = "GOUNASS LUXURY" }: { className?: string; title?: string }) {
@@ -46,18 +48,28 @@ export function Emblem({ className, title = "GOUNASS LUXURY" }: { className?: st
   );
 }
 
+/** Logo officiel GOUNASS LUXURY (couronne, monogramme GL, « Wouro Maama »). */
+export function BrandLogo({ size, src, className, priority = false }: { size: number; src?: string; className?: string; priority?: boolean }) {
+  return (
+    <Image
+      src={src || DEFAULT_LOGO}
+      alt="GOUNASS LUXURY — Wouro Maama"
+      width={size}
+      height={size}
+      priority={priority}
+      sizes={`${size}px`}
+      className={clsx("shrink-0 rounded-full object-cover", className)}
+    />
+  );
+}
+
 export function Wordmark({ className, compact = false, logoUrl }: { className?: string; compact?: boolean; logoUrl?: string }) {
   return (
     <span className={clsx("flex items-center gap-3", className)}>
-      {logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt="GOUNASS LUXURY" className={clsx("rounded-full object-cover", compact ? "h-9 w-9" : "h-11 w-11")} />
-      ) : (
-        <Emblem className={compact ? "h-9 w-9" : "h-11 w-11"} />
-      )}
+      <BrandLogo size={compact ? 46 : 56} src={logoUrl} priority className="ring-1 ring-gold/40" />
       <span className="flex flex-col leading-none">
         <span className={clsx("display tracking-[0.28em] text-ivory", compact ? "text-[1.05rem]" : "text-[1.3rem]")}>GOUNASS</span>
-        <span className="mt-1 text-[0.68rem] tracking-[0.62em] text-gold">LUXURY</span>
+        <span className="mt-1 text-[0.55rem] tracking-[0.62em] text-gold">LUXURY</span>
       </span>
     </span>
   );

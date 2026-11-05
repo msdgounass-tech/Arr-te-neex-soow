@@ -3,11 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Emblem } from "@/components/brand/Logo";
+import { BrandLogo } from "@/components/brand/Logo";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-export function Hero({ image }: { image: string }) {
+export function Hero({ image, logoUrl }: { image: string; logoUrl?: string }) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -40,7 +40,7 @@ export function Hero({ image }: { image: string }) {
       <motion.div style={{ opacity: fade }} className="container-luxe relative flex h-full flex-col justify-end pb-20 md:justify-center md:pb-0">
         <div className="max-w-2xl pt-24">
           <motion.div {...item(0.5)} className="flex items-center gap-4">
-            <Emblem className="h-12 w-12 md:h-14 md:w-14" />
+            <BrandLogo size={112} src={logoUrl} priority className="h-20 w-20 shadow-[0_10px_40px_-10px_rgba(198,161,92,.55)] ring-1 ring-gold/50 md:h-28 md:w-28" />
             <div className="leading-none">
               <p className="text-[0.74rem] tracking-[0.5em] text-ivory">GOUNASS LUXURY</p>
               <p className="gold-text animate-shimmer mt-2 text-[0.74rem] font-semibold tracking-[0.62em]">WOURO MAAMA</p>

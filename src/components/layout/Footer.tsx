@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Emblem } from "@/components/brand/Logo";
+import { BrandLogo } from "@/components/brand/Logo";
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import { NewsletterForm } from "./NewsletterForm";
 import { formatPhone, toWhatsAppNumber } from "@/lib/format";
@@ -43,15 +43,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
     <footer className="relative mt-24 border-t border-white/[0.1] bg-ink">
       <div className="container-luxe grid gap-14 py-20 lg:grid-cols-[1.3fr_2fr]">
         <div>
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="GOUNASS LUXURY" className="h-16 w-16 rounded-full object-cover" />
-          ) : (
-            <Emblem className="h-16 w-16" />
-          )}
-          <p className="display mt-6 text-4xl tracking-[0.18em]">GOUNASS</p>
-          <p className="mt-1 text-[0.8rem] tracking-[0.6em] text-gold">LUXURY</p>
-          <p className="display mt-6 text-2xl italic text-ivory/90">« Wouro Maama »</p>
+          <BrandLogo size={176} src={logoUrl} className="h-36 w-36 ring-1 ring-gold/40 md:h-44 md:w-44" />
           <div className="mt-10 max-w-sm">
             <p className="label mb-1">Newsletter privée</p>
             <NewsletterForm />
@@ -110,7 +102,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
       </div>
 
       <div className="hairline" />
-      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.8rem] uppercase tracking-[0.24em] text-mist md:flex-row">
+      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.8rem] uppercase tracking-[0.24em] text-mist text-center md:flex-row md:text-left">
         <p>© {year} GOUNASS LUXURY — Tous droits réservés</p>
         <div className="flex flex-wrap justify-center gap-6">
           <Link href="/conditions" className="hover:text-ivory">Conditions de vente</Link>
