@@ -7,7 +7,8 @@ import { Toast } from "@/components/ui/Toast";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  // Seule la graisse 500 est utilisée (titres et italiques) : 2 fichiers au lieu de 8.
+  weight: ["500"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
   display: "swap",
