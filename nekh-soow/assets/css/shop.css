@@ -306,8 +306,9 @@ body.shop .nav a, body.shop .nav button {
 body.shop .nav a:hover, body.shop .nav button:hover { background: rgba(255, 255, 255, .15); color: #fff; }
 body.shop .nav a.on { background: var(--or); color: var(--vert); font-weight: 700; }
 body.shop .nav .nav-admin { font-size: 19px; padding: 5px 9px; }
-body.shop .nav .cart-count { background: none; color: var(--or); min-width: 0; height: auto; padding: 0; font-size: 15px; font-weight: 800; }
-body.shop .nav .cart-count::before { content: "("; } body.shop .nav .cart-count::after { content: ")"; }
+body.shop .nav button, body.shop .nav a { white-space: nowrap; }
+body.shop .nav .cart-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: var(--or); color: var(--brun); font-size: 12.5px; font-weight: 800; line-height: 1; margin-left: 2px; }
+body.shop .nav .cart-count[hidden] { display: none; }
 @media (max-width: 520px) {
   body.shop .top .brand b { font-size: 24px; }
   body.shop .nav { gap: 0; }
