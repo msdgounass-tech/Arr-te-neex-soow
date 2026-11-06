@@ -102,7 +102,8 @@ Principes de sécurité :
 │   │                            auth, format, types, rate-limit
 │   └── store/                   panier, favoris, UI (Zustand)
 ├── .env.example
-└── legacy/                      ancien fichier HTML du dépôt (conservé, non utilisé)
+├── nekh-soow/                   site « Arrêt nekh soow » (boutique + back-office, statique + Supabase) — voir nekh-soow/README.md
+└── legacy/                      ancien fichier HTML d'Arrêt nekh soow (remplacé par nekh-soow/, conservé pour mémoire)
 ```
 
 ---
