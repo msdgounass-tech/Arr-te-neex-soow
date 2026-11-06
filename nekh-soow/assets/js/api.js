@@ -5,7 +5,15 @@ export const IS_DEMO = !(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
 
 let apiPromise;
 export function getApi() {
-  if (!apiPromise) apiPromise = IS_DEMO ? import('./demo.js').then((m) => m.createDemoApi()) : createSupabaseApi();
+  if (!apiPromise) {
+    apiPromise = IS_DEMO ? import('./demo.js').then((m) => m.createDemoApi()) : createSupabaseApi().then(async (api) => {
+      // Base pas encore installée : la boutique reste utilisable, les commandes partent sur WhatsApp.
+      try { await api.getCatalog(); return api; } catch (e) {
+        if (/does not exist|could not find the table|schema cache|PGRST20|42P01/i.test(`${e?.message} ${e?.code}`)) return (await import('./demo.js')).createOfflineApi();
+        throw e;
+      }
+    });
+  }
   return apiPromise;
 }
 

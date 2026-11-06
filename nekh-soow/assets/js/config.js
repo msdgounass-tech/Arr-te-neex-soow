@@ -7,5 +7,5 @@ export const CONFIG = {
   SUPABASE_URL: 'https://ejutptsipygbnobkrowt.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_PgdoHL0wEIOvmsKFfZqBHg_-SSHfew3',
   // Adresse publique du site (pour les liens de suivi envoyés sur WhatsApp). Vide = adresse courante.
-  SITE_URL: '',
+  SITE_URL: 'https://arret-nekh-soow.vercel.app/',
 };

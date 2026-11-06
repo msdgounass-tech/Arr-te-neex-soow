@@ -237,3 +237,36 @@ export function createDemoApi() {
     resetDemo() { store.del(KEY); db = seed(); store.set(KEY, db); },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Mode « commande WhatsApp » : utilisé automatiquement quand la base Supabase
+// n'est pas encore installée. Catalogue de départ, commandes envoyées sur WhatsApp.
+// ---------------------------------------------------------------------------
+export function createOfflineApi() {
+  const base = seed(); let k = 0; const id = (x) => `off-${x}-${++k}`;
+  const products = base.products.map((p) => ({ ...p, id: id('p'), formats: p.formats.map((f) => ({ ...f, id: id('f') })) }));
+  const zones = base.zones.map((z) => ({ ...z, id: id('z') }));
+  const off = () => fail('HORS_LIGNE', 'Disponible très bientôt. En attendant, commandez directement : votre commande part sur WhatsApp.');
+  return {
+    offline: true, demo: false,
+    async getCatalog() { return clone({ settings: base.settings, products, zones, closedDates: [], closedSlots: [] }); },
+    async getSlotLoad() { return []; },
+    async placeOrder(o) {
+      const name = String(o.name || '').trim(); if (name.length < 2) fail('NOM', 'Indiquez votre nom');
+      const phone = normalizePhone(o.phone); if (!phone) fail('TEL', 'Numéro de téléphone sénégalais invalide');
+      const zone = o.fulfillment === 'livraison' ? zones.find((z) => z.id === o.zone) : null;
+      if (o.fulfillment === 'livraison' && (!zone || String(o.address || '').trim().length < 5)) fail('ADRESSE', 'Indiquez votre zone et votre adresse de livraison');
+      const lines = o.items.map((it) => { const p = products.find((x) => x.formats.some((f) => f.id === it.format_id)); const f = p.formats.find((x) => x.id === it.format_id); return { p, f, qty: it.qty }; });
+      const total = lines.reduce((a, l) => a + l.f.price * l.qty, 0) + (zone?.fee || 0);
+      const n = dakarNow(); const number = `WA-${n.day.slice(2).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
+      return { offline: true, number, total, name, phone, lines, zone, address: String(o.address || '').trim(), note: String(o.note || '').trim(), day: o.day, slot: o.slot, payment: o.payment, fulfillment: o.fulfillment };
+    },
+    async trackOrder() { return null; },
+    async cancelOrder() { off(); },
+    async customer() { return null; },
+    async signUp() { off(); }, async customerSignIn() { off(); }, async customerSignOut() {}, async updateProfile() {}, async myOrders() { return []; },
+    onAuth() {},
+    async session() { return null; }, async isAdmin() { return false; }, async signIn() { fail('INSTALL', 'La base de données n’est pas encore installée : exécutez supabase/installer.sql dans Supabase.'); },
+    async signOut() {}, async resetPassword() { off(); }, async userEmail() { return ''; },
+  };
+}

@@ -885,6 +885,15 @@ async function resync() {
 async function boot() {
   if (IS_DEMO) { $('#demo').hidden = false; $('#demo-hint').hidden = false; }
   try { A.api = await getApi(); } catch (e) { document.body.innerHTML = `<div class="empty"><h3>Chargement impossible</h3><p>${esc(errMsg(e))}</p></div>`; return; }
+  if (A.api.offline) {
+    $('#login').hidden = false;
+    $('#login-form').innerHTML = `<img src="assets/img/logo.webp" alt="" width="84" height="84"><h1>Installation à terminer</h1>
+      <p class="hint" style="margin:8px 0 14px">La base de données de la boutique n’est pas encore installée dans Supabase. En attendant, les clients commandent par WhatsApp.</p>
+      <ol style="text-align:left;font-size:14.5px;line-height:1.6;margin:0 0 16px;padding-left:20px"><li>Ouvrez l’éditeur SQL du projet <b>gounass-luxury</b></li><li>Collez le fichier <code>nekh-soow/supabase/installer.sql</code></li><li>Cliquez sur <b>Run</b>, puis rechargez cette page</li></ol>
+      <a class="btn btn-block" href="https://supabase.com/dashboard/project/ejutptsipygbnobkrowt/sql/new" target="_blank" rel="noopener">Ouvrir l’éditeur SQL</a>
+      <a class="link" href="./">← Retour à la boutique</a>`;
+    return;
+  }
   const ses = await A.api.session();
   if (ses && (await A.api.isAdmin().catch(() => false))) await start();
   else { $('#login').hidden = false; $('#login-form').email.focus(); }

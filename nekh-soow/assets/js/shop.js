@@ -331,6 +331,7 @@ async function submitOrder(form) {
       items: cartLines().map((l) => ({ format_id: l.fid, qty: l.qty })), payment: String(fd.get('payment') || 'retrait'),
       fulfillment: S.co.mode, zone: liv ? S.co.zone : null, address: liv ? address : '',
     });
+    if (res.offline) { showWhatsAppOrder(res); return; }
     const my = store.get(MY_KEY, []);
     my.unshift({ token: res.token, number: res.number, day: S.co.day, slot: S.co.slot, total: res.total, at: new Date().toISOString() });
     store.set(MY_KEY, my.slice(0, 20));
@@ -431,9 +432,35 @@ function viewMyOrders() {
   </div></div>`;
 }
 
+// ---------- Commande envoyée sur WhatsApp (base pas encore installée) ----------
+function showWhatsAppOrder(r) {
+  const s = settings(); const liv = r.fulfillment === 'livraison';
+  const txt = `Bonjour ${s.shop_name} 👋 Je souhaite commander :\n${r.lines.map((l) => `• ${l.qty} × ${l.p.name} (${l.f.name}) – ${money(l.f.price * l.qty)}`).join('\n')}`
+    + `${liv ? `\nLivraison (${r.zone.name}) : ${money(r.zone.fee)}\nAdresse : ${r.address}` : ''}\nTotal : ${money(r.total)}`
+    + `\n${liv ? 'Livraison' : 'Retrait'} : ${relDay(r.day).toLowerCase()} (${fmtDay(r.day)}) à ${fmtSlot(r.slot)}\nNom : ${r.name}\nTéléphone : ${fmtPhone(r.phone)}`
+    + `${r.payment === 'wave' ? '\nPaiement : Wave' : r.payment === 'orange_money' ? '\nPaiement : Orange Money' : ''}${r.note ? `\nNote : ${r.note}` : ''}`;
+  const wa = waLink(s.whatsapp, txt); const pay = r.payment === 'wave' && waveUrl(r.total);
+  cart = []; saveCart(); S.co.slot = null;
+  $('#view').innerHTML = `<div class="view"><div class="wrap" style="padding-top:24px;max-width:640px">
+    <div class="success-hero"><div class="tick">${icon('wa')}</div><h1>Dernière étape !</h1>
+      <p>Envoyez votre commande sur WhatsApp : nous la confirmons tout de suite.</p><p style="margin-top:8px"><b>Total : ${money(r.total)}</b></p></div>
+    <div class="actions"><a class="btn btn-wa btn-lg btn-block" href="${wa}" target="_blank" rel="noopener">${icon('wa')} Envoyer ma commande sur WhatsApp</a>
+      ${pay ? `<a class="btn btn-wave btn-lg btn-block" href="${esc(pay)}" target="_blank" rel="noopener">Payer ${money(r.total)} avec Wave</a>` : ''}
+      <a class="btn btn-light" href="#/">Retour à l’accueil</a></div></div></div>`;
+  scrollTo(0, 0); confetti();
+  setTimeout(() => { location.href = wa; }, 900);
+}
+
 // ---------- Compte client (facultatif) ----------
 async function viewAccount() {
   const view = $('#view');
+  if (S.api.offline) {
+    view.innerHTML = `<div class="view"><div class="wrap account"><div class="page-head"><h1 class="page-title">Mon compte</h1></div>
+      <div class="card" style="text-align:center"><div class="big" style="font-size:42px">👤</div><h2 style="font-size:20px;margin:8px 0">Bientôt disponible</h2>
+      <p class="hint">Les comptes clients arrivent très bientôt. Vous pouvez déjà commander sans compte : votre commande part sur WhatsApp.</p>
+      <p style="margin-top:16px"><a class="btn" href="#/menu">Commander</a></p></div></div></div>`;
+    return;
+  }
   if (!S.user) {
     const tab = S.authTab || 'login';
     view.innerHTML = `<div class="view"><div class="wrap account">
