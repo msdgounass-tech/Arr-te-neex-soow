@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Arrêt nekh soow · Soow, Thiakry, Ngallakh à Thiès – commande en ligne</title>
   <meta name="description" content="Commandez vos spécialités sénégalaises (Soow Piir, Thiakry, Ngallakh, Lakh, yaourt maison) et récupérez-les sans attendre à Thiès Mbour 3, à l'heure que vous choisissez.">
-  <meta name="theme-color" content="#1b3f8b">
+  <meta name="theme-color" content="#1B3F8B">
   <link rel="canonical" href="./">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -17,12 +17,9 @@
   <meta property="og:description" content="Soow Piir, Thiakry, Ngallakh, Lakh et yaourt maison à Thiès Mbour 3. Choisissez votre heure, récupérez sans faire la queue.">
   <meta property="og:image" content="assets/img/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap">
-  <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/shop.css">
-  <link rel="preload" as="image" href="assets/img/logo.webp">
+  <link rel="preload" as="image" href="assets/img/logo-hero.webp">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -38,40 +35,29 @@
   </script>
   <script type="module" src="assets/js/shop.js"></script>
 </head>
-<body>
+<body class="shop">
   <a class="skip" href="#view">Aller au contenu</a>
   <div id="demo" class="demo-banner" hidden>Mode démonstration – les commandes restent dans ce navigateur. <a href="admin.html">Ouvrir le back-office</a> (demo / demo)</div>
   <div id="announce" class="announce" hidden></div>
 
   <header class="top" id="top">
-    <div class="wrap top-in">
-      <a class="brand" href="#/" aria-label="Arrêt nekh soow – accueil">
-        <img src="assets/img/logo.webp" alt="" width="48" height="48">
-        <span><b>Arrêt nekh soow</b><small>Thiès · Mbour 3</small></span>
-      </a>
-      <nav class="nav" aria-label="Navigation principale">
-        <a href="#/" data-nav="home">Accueil</a>
-        <a href="#/menu" data-nav="menu">La carte</a>
-        <a href="#/mes-commandes" data-nav="suivi">Suivre ma commande</a>
-        <a href="#/contact" data-nav="contact">Contact</a>
-      </nav>
-      <button class="cart-btn" type="button" data-action="open-cart" aria-label="Ouvrir le panier">
-        <svg><use href="#i-bag"/></svg><span class="cart-label">Panier</span><b id="cart-count" class="cart-count" hidden>0</b>
-      </button>
-    </div>
+    <a class="brand" href="#/" aria-label="Arrêt nekh soow – accueil">
+      <img class="logo" src="assets/img/logo-hero.webp" alt="" width="64" height="64"><b>Arrêt nekh soow</b>
+    </a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="#/" data-nav="home">Accueil</a>
+      <a href="#/menu" data-nav="menu">Produits</a>
+      <button type="button" data-action="open-cart">Panier <span class="cart-count" hidden>0</span></button>
+      <a href="#/mes-commandes" data-nav="suivi">Suivi</a>
+      <a href="#/contact" data-nav="contact">Contact</a>
+      <a href="admin.html" class="nav-admin" aria-label="Espace propriétaire" title="Espace propriétaire">⚙️</a>
+    </nav>
   </header>
 
   <main id="view" tabindex="-1" aria-live="polite">
     <div class="wrap"><div class="spinner" role="status" aria-label="Chargement"></div></div>
   </main>
 
-  <nav class="tabbar" aria-label="Navigation mobile">
-    <a href="#/" data-nav="home"><svg><use href="#i-home"/></svg>Accueil</a>
-    <a href="#/menu" data-nav="menu"><svg><use href="#i-menu"/></svg>La carte</a>
-    <button type="button" data-action="open-cart"><svg><use href="#i-bag"/></svg>Panier<b class="cart-count" hidden>0</b></button>
-    <a href="#/mes-commandes" data-nav="suivi"><svg><use href="#i-receipt"/></svg>Suivi</a>
-    <a href="#/contact" data-nav="contact"><svg><use href="#i-pin"/></svg>Contact</a>
-  </nav>
 
   <footer class="foot">
     <div class="wrap foot-in">

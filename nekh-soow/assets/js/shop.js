@@ -90,19 +90,28 @@ function productCard(p) {
       </div>
       ${low ? `<small class="hint">Plus que ${f.stock} disponible${f.stock > 1 ? 's' : ''}</small>` : ''}
       <div class="buy">
-        <div class="stepper" role="group" aria-label="Quantité">
-          <button type="button" data-action="qty" data-pid="${p.id}" data-d="-1" aria-label="Retirer un" ${sel.qty <= 1 ? 'disabled' : ''}>${icon('minus')}</button>
-          <output aria-live="polite">${sel.qty}</output>
-          <button type="button" data-action="qty" data-pid="${p.id}" data-d="1" aria-label="Ajouter un" ${sel.qty >= max ? 'disabled' : ''}>${icon('plus')}</button>
+        <div class="qty-row">
+          <div class="stepper" role="group" aria-label="Quantité">
+            <button type="button" data-action="qty" data-pid="${p.id}" data-d="-1" aria-label="Retirer un" ${sel.qty <= 1 ? 'disabled' : ''}>${icon('minus')}</button>
+            <output aria-live="polite">${sel.qty}</output>
+            <button type="button" data-action="qty" data-pid="${p.id}" data-d="1" aria-label="Ajouter un" ${sel.qty >= max ? 'disabled' : ''}>${icon('plus')}</button>
+          </div>
+          <span class="line-total">${money(f.price * sel.qty)}</span>
         </div>
-        <button class="btn" type="button" data-action="add" data-pid="${p.id}" ${out ? 'disabled' : ''}>
-          ${out ? 'Épuisé' : `Ajouter <span class="p">· ${money(f.price * sel.qty)}</span>`}</button>
+        <button class="btn" type="button" data-action="add" data-pid="${p.id}" ${out ? 'disabled' : ''}>${out ? 'Épuisé' : 'Ajouter à ma commande'}</button>
       </div>
     </div>
   </article>`;
 }
 const skeletonGrid = (n = 3) => `<div class="products">${Array.from({ length: n }, () => '<div class="skeleton skel-product"></div>').join('')}</div>`;
 
+function heroChip() {
+  const s = settings();
+  if (!s.accepting_orders) return '<span class="hero-chip closed"><span class="dot"></span>Commandes en ligne suspendues</span>';
+  const n = nextSlot();
+  if (!n) return '<span class="hero-chip closed"><span class="dot"></span>Aucun créneau libre pour le moment</span>';
+  return `<span class="hero-chip"><span class="dot"></span>Prochain retrait : ${relDay(n.day).toLowerCase()} à ${fmtSlot(n.slot)}</span>`;
+}
 function statusEyebrow() {
   const s = settings();
   if (!s.accepting_orders) return '<span class="eyebrow closed"><span class="dot"></span>Commandes en ligne suspendues</span>';
@@ -117,28 +126,19 @@ function statusEyebrow() {
 function viewHome() {
   const s = settings(); const pop = products().filter((p) => p.popular).slice(0, 6);
   const imgs = products().filter((p) => p.image_url);
-  const n = nextSlot();
   return `<div class="view">
-  <section class="hero"><div class="wrap hero-in">
-    <div>
-      ${statusEyebrow()}
-      <h1>Le goût du Sénégal, <em>sans faire la queue</em>.</h1>
-      <p class="lead">${esc(s.tagline)} Commandez en 1 minute, choisissez votre heure, on prépare tout pour vous.</p>
-      <div class="hero-cta">
-        <a class="btn btn-lg" href="#/menu">Commander maintenant ${icon('arrow')}</a>
-        <a class="btn btn-lg btn-ghost" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} WhatsApp</a>
-      </div>
-      <div class="perks"><span>${icon('leaf')}Fait maison chaque jour</span><span>${icon('clock')}Retrait à l’heure choisie</span><span>${icon('bolt')}Paiement au retrait</span></div>
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      ${imgs[0] ? `<div class="ph ph1"><img src="${esc(imgs[0].image_url)}" alt="" fetchpriority="high"></div>` : ''}
-      ${imgs[1] ? `<div class="ph ph2"><img src="${esc(imgs[1].image_url)}" alt="" loading="lazy"></div>` : ''}
-      ${n ? `<div class="next-slot">${icon('clock')}<div><small>Prochain créneau libre</small><b>${relDay(n.day)} · ${fmtSlot(n.slot)}</b></div></div>` : ''}
+  <section><div class="wrap">
+    <div class="hero-card">
+      <img class="logo-hero" src="assets/img/logo-hero.webp" alt="Arrêt nekh soow" width="130" height="130" fetchpriority="high">
+      <h1>${esc(s.shop_name)}</h1>
+      <p>${esc(s.tagline)}</p>
+      ${heroChip()}
+      <a class="btn btn-gold" href="#/menu">COMMANDER MAINTENANT</a>
     </div>
   </div></section>
 
   <section class="section"><div class="wrap">
-    <div class="sec-head"><div><h2>Les favoris de nos clients</h2><p>Préparés le jour même, servis bien frais.</p></div><a class="link-arrow" href="#/menu">Toute la carte ${icon('arrow')}</a></div>
+    <div class="sec-head"><div><h2>Nos produits populaires</h2><p>Préparés le jour même, servis bien frais.</p></div><a class="link-arrow" href="#/menu">Toute la carte ${icon('arrow')}</a></div>
     <div class="products">${pop.map(productCard).join('') || '<p class="empty">La carte arrive bientôt.</p>'}</div>
   </div></section>
 
@@ -149,6 +149,7 @@ function viewHome() {
       <li class="reveal"><h3>Réservez votre heure</h3><p>Aujourd’hui ou les jours suivants, selon les créneaux disponibles.</p></li>
       <li class="reveal"><h3>Récupérez sans attendre</h3><p>Votre commande est prête à votre arrivée. Vous payez sur place.</p></li>
     </ol>
+    <p style="margin-top:16px"><a class="btn btn-block btn-lg" href="#/menu">COMMANDER MAINTENANT</a></p>
   </div></section>
 
   <section class="section"><div class="wrap">
