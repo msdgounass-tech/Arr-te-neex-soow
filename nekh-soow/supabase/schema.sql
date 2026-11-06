@@ -327,6 +327,15 @@ grant execute on function public.ns_place_order(text, text, text, date, text, js
 grant execute on function public.ns_track_order(uuid)                              to anon, authenticated;
 grant execute on function public.ns_cancel_order(uuid)                             to anon, authenticated;
 
+-- Droits sur les tables (filtrés ensuite par les règles RLS ci-dessous)
+grant usage on schema public to anon, authenticated;
+grant select on public.ns_settings, public.ns_products, public.ns_formats, public.ns_closed_dates, public.ns_closed_slots to anon;
+grant select, insert, update, delete on public.ns_settings, public.ns_products, public.ns_formats, public.ns_closed_dates,
+  public.ns_closed_slots, public.ns_orders, public.ns_order_items, public.ns_order_history to authenticated;
+grant select on public.ns_admins to authenticated;
+revoke insert, update, delete on public.ns_settings, public.ns_products, public.ns_formats, public.ns_closed_dates,
+  public.ns_closed_slots, public.ns_orders, public.ns_order_items, public.ns_order_history, public.ns_admins from anon;
+
 -- -----------------------------------------------------------------------------
 -- Row Level Security
 -- -----------------------------------------------------------------------------
