@@ -31,7 +31,10 @@ function seed() {
     opening_hours: 'Tous les jours · 10h – 22h', announcement: '', accepting_orders: true,
     slot_times: ['10:00', '11:00', '12:00', '13:00', '16:00', '17:00', '20:00', '21:00'],
     slot_capacity: 5, lead_minutes: 30, days_ahead: 4, closed_weekdays: [], updated_at: new Date().toISOString(),
+    wave_link: 'https://pay.wave.com/m/M_sn_Rb6z4J8BYSDP/c/sn/', orange_money_link: '', delivery_enabled: true,
+    delivery_info: 'Livraison à domicile : le livreur vous appelle avant d’arriver.', delivery_min_order: 0,
   };
+  const zones = [['Mbour 3 et environs', 500], ['Thiès ville', 1000], ['Périphérie de Thiès', 1500]].map(([name, fee], i) => ({ id: uid(), name, fee, active: true, position: i + 1 }));
 
   // Historique fictif sur 21 jours pour que le tableau de bord soit parlant.
   const names = ['Awa Diop', 'Moussa Ndiaye', 'Fatou Sarr', 'Ibrahima Fall', 'Mariama Ba', 'Cheikh Sy', 'Aminata Faye', 'Ousmane Gueye', 'Khady Ndour', 'Mamadou Sow', 'Ndeye Kane', 'Abdou Diallo', 'Seynabou Mbaye', 'Pape Cissé'];
@@ -55,24 +58,27 @@ function seed() {
       else if (d === 0) status = slotMinutes(slot) < dakarNow().minutes ? (rnd() < 0.85 ? 'recuperee' : 'prete') : pick(['nouvelle', 'confirmee', 'preparation', 'prete', 'confirmee']);
       else status = pick(['nouvelle', 'confirmee']);
       const created = new Date(`${addDays(day, d > 0 ? -1 : 0)}T${String(8 + Math.floor(rnd() * 3)).padStart(2, '0')}:${String(Math.floor(rnd() * 60)).padStart(2, '0')}:00Z`);
-      const name = pick(names);
+      const name = pick(names); const deliv = rnd() < 0.3; const zone = pick(zones);
       orders.push({
+        fulfillment: deliv ? 'livraison' : 'retrait', delivery_zone: deliv ? zone.name : '', delivery_fee: deliv ? zone.fee : 0,
+        delivery_address: deliv ? pick(['Cité Lamy, villa 12', 'Mbour 3, près de la mosquée', 'Randoulène nord', 'Grand Thiès, rue 4']) : '', payment_ref: '', user_id: null,
         id: uid(), number: `NS-${addDays(day, d > 0 ? -1 : 0).slice(2).replace(/-/g, '')}-${seq++}`, tracking_token: uid(),
         customer_name: name, phone: `7${pick(['0', '6', '7', '8'])}${String(Math.floor(rnd() * 1e7)).padStart(7, '0')}`,
         note: pick(notes), pickup_day: day, pickup_slot: slot, status,
-        total: lines.reduce((a, l) => a + l.unit_price * l.qty, 0), items_count: lines.reduce((a, l) => a + l.qty, 0),
+        total: lines.reduce((a, l) => a + l.unit_price * l.qty, 0) + (deliv ? zone.fee : 0), items_count: lines.reduce((a, l) => a + l.qty, 0),
         paid: status === 'recuperee', payment_method: pick(['retrait', 'retrait', 'wave', 'orange_money']), admin_note: '',
         created_at: created.toISOString(), updated_at: created.toISOString(), items: lines,
         history: [{ status: 'nouvelle', changed_at: created.toISOString() }, ...(status !== 'nouvelle' ? [{ status, changed_at: created.toISOString() }] : [])],
       });
     }
   }
-  return { settings, products, closedDates: [], closedSlots: [], orders, seq };
+  return { settings, products, zones, closedDates: [], closedSlots: [], orders, seq };
 }
 
 export function createDemoApi() {
   let db = store.get(KEY);
-  if (!db || !db.settings) { db = seed(); store.set(KEY, db); }
+  if (!db || !db.settings || !db.zones) { db = seed(); store.set(KEY, db); }
+  const CUST = 'ns-demo-customer';
   const listeners = new Set();
   const bc = 'BroadcastChannel' in window ? new BroadcastChannel('ns-demo') : null;
   const save = (evt) => {
@@ -92,7 +98,7 @@ export function createDemoApi() {
     async getCatalog() {
       reload();
       const products = db.products.filter((p) => p.active).map((p) => ({ ...p, formats: p.formats.filter((f) => f.active) }));
-      return delay({ settings: db.settings, products, closedDates: db.closedDates, closedSlots: db.closedSlots });
+      return delay({ settings: db.settings, products, closedDates: db.closedDates, closedSlots: db.closedSlots, zones: db.zones.filter((z) => z.active) });
     },
     async getSlotLoad(from, to) {
       reload();
@@ -114,6 +120,12 @@ export function createDemoApi() {
       const recent = db.orders.filter((x) => x.phone === phone && x.status !== 'annulee' && Date.now() - new Date(x.created_at) < 36e5).length;
       if (recent >= 4) fail('LIMITE', 'Trop de commandes récentes avec ce numéro, contactez-nous sur WhatsApp');
       if (!o.items?.length) fail('PANIER', 'Votre panier est vide');
+      let zone = null;
+      if (o.fulfillment === 'livraison') {
+        if (!s.delivery_enabled) fail('LIVRAISON', 'La livraison à domicile est momentanément indisponible');
+        zone = db.zones.find((z) => z.id === o.zone && z.active); if (!zone) fail('ZONE', 'Choisissez votre zone de livraison');
+        if (String(o.address || '').trim().length < 5) fail('ADRESSE', 'Indiquez votre adresse de livraison');
+      }
       const items = o.items.map((it) => {
         const p = db.products.find((x) => x.active && x.formats.some((f) => f.id === it.format_id && f.active));
         if (!p) fail('PRODUIT', 'Un produit de votre panier n’est plus disponible');
@@ -127,7 +139,9 @@ export function createDemoApi() {
       const order = {
         id: uid(), number: `NS-${now.day.slice(2).replace(/-/g, '')}-${db.seq++}`, tracking_token: uid(),
         customer_name: name, phone, note: String(o.note || '').trim().slice(0, 500), pickup_day: o.day, pickup_slot: o.slot,
-        status: 'nouvelle', total: items.reduce((a, i) => a + i.f.price * i.qty, 0), items_count: items.reduce((a, i) => a + i.qty, 0),
+        fulfillment: zone ? 'livraison' : 'retrait', delivery_zone: zone?.name || '', delivery_fee: zone?.fee || 0,
+        delivery_address: zone ? String(o.address).trim().slice(0, 300) : '', payment_ref: '', user_id: store.get(CUST)?.id || null,
+        status: 'nouvelle', total: items.reduce((a, i) => a + i.f.price * i.qty, 0) + (zone?.fee || 0), items_count: items.reduce((a, i) => a + i.qty, 0),
         paid: false, payment_method: o.payment || 'retrait', admin_note: '', created_at: created, updated_at: created,
         items: items.map(({ p, f, qty }) => ({ id: uid(), product_id: p.id, format_id: f.id, product_name: p.name, format_name: f.name, unit_price: f.price, qty })),
         history: [{ status: 'nouvelle', changed_at: created }],
@@ -151,6 +165,21 @@ export function createDemoApi() {
       o.status = status; o.updated_at = new Date().toISOString(); o.history.push({ status, changed_at: o.updated_at });
     },
 
+    // ---------- Comptes clients (démo) ----------
+    async customer() { return store.get(CUST); },
+    async signUp({ email, password, name, phone }) {
+      if (!/^\S+@\S+\.\S+$/.test(email)) fail('EMAIL', 'Adresse e-mail invalide'); if (String(password).length < 6) fail('MDP', 'Mot de passe : 6 caractères minimum');
+      const users = store.get('ns-demo-users', []); if (users.some((u) => u.email === email)) fail('EMAIL', 'Un compte existe déjà avec cet e-mail');
+      const u = { id: uid(), email, password, name, phone }; users.push(u); store.set('ns-demo-users', users); store.set(CUST, { id: u.id, email, name, phone });
+    },
+    async customerSignIn(email, password) {
+      const u = store.get('ns-demo-users', []).find((x) => x.email === email && x.password === password); if (!u) fail('AUTH', 'E-mail ou mot de passe incorrect');
+      store.set(CUST, { id: u.id, email: u.email, name: u.name, phone: u.phone });
+    },
+    async customerSignOut() { store.del(CUST); },
+    async updateProfile({ name, phone }) { const c = store.get(CUST); store.set(CUST, { ...c, name, phone }); },
+    async myOrders() { reload(); const c = store.get(CUST); return delay(c ? db.orders.filter((o) => o.user_id === c.id).sort((a, b) => b.created_at.localeCompare(a.created_at)) : []); },
+
     // ---------- Authentification (démo) ----------
     async session() { return store.get(AUTH); },
     async signIn(email, password) {
@@ -165,7 +194,9 @@ export function createDemoApi() {
     async userEmail() { return 'demo'; },
 
     // ---------- Administration ----------
-    async adminCatalog() { needAdmin(); reload(); return delay({ settings: db.settings, products: [...db.products].sort((a, b) => a.position - b.position), closedDates: db.closedDates, closedSlots: db.closedSlots }); },
+    async adminCatalog() { needAdmin(); reload(); return delay({ settings: db.settings, products: [...db.products].sort((a, b) => a.position - b.position), closedDates: db.closedDates, closedSlots: db.closedSlots, zones: db.zones }); },
+    async saveZone(z) { needAdmin(); reload(); if (z.id) Object.assign(db.zones.find((x) => x.id === z.id), z); else db.zones.push({ ...z, id: uid(), position: db.zones.length + 1 }); save(); },
+    async deleteZone(id) { needAdmin(); reload(); db.zones = db.zones.filter((z) => z.id !== id); save(); },
     async listOrders({ from, to } = {}) {
       needAdmin(); reload();
       return delay(db.orders.filter((o) => (!from || o.pickup_day >= from) && (!to || o.pickup_day <= to))
@@ -176,7 +207,7 @@ export function createDemoApi() {
     async updateOrder(id, patch) {
       needAdmin(); reload(); const o = db.orders.find((x) => x.id === id); if (!o) fail('INTROUVABLE', 'Commande introuvable');
       if (patch.status) this._setStatus(o, patch.status);
-      ['paid', 'admin_note', 'payment_method'].forEach((k) => { if (k in patch) o[k] = patch[k]; });
+      ['paid', 'admin_note', 'payment_method', 'payment_ref'].forEach((k) => { if (k in patch) o[k] = patch[k]; });
       o.updated_at = new Date().toISOString(); save({ type: 'UPDATE', order: o }); return delay(o);
     },
     async saveProduct(p) {

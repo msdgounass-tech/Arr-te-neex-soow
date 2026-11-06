@@ -16,7 +16,8 @@ const S = {
   load: [],             // occupation des créneaux
   sel: {},              // choix en cours sur chaque fiche : { [productId]: { fid, qty } }
   filter: 'TOUT',
-  co: { day: null, slot: null, payment: 'retrait', busy: false },
+  co: { day: null, slot: null, payment: 'retrait', mode: 'retrait', zone: null, address: '', busy: false },
+  user: null,
   timers: [],
 };
 let cart = store.get(CART_KEY, []);
@@ -78,7 +79,7 @@ function productCard(p) {
   const out = f.stock === 0; const allOut = fs.every((x) => x.stock === 0);
   const max = f.stock == null ? 99 : f.stock;
   const low = f.stock != null && f.stock > 0 && f.stock <= 5;
-  return `<article class="product reveal ${allOut ? 'unavailable' : ''}" data-pid="${p.id}">
+  return `<article class="product reveal ${allOut ? 'unavailable' : ''}" data-pid="${p.id}" style="transition-delay:${(S.cardIdx = ((S.cardIdx || 0) + 1) % 3) * 90}ms">
     <div class="media">${media(p)}
       ${allOut ? '<span class="tag">Épuisé</span>' : p.popular ? '<span class="tag gold">★ Populaire</span>' : ''}
     </div>
@@ -130,7 +131,7 @@ function viewHome() {
   <section><div class="wrap">
     <div class="hero-card">
       <img class="logo-hero" src="assets/img/logo-hero.webp" alt="Arrêt nekh soow" width="130" height="130" fetchpriority="high">
-      <h1>${esc(s.shop_name)}</h1>
+      <h1 class="split">${esc(s.shop_name).split(' ').map((w, i) => `<span style="animation-delay:${0.25 + i * 0.12}s">${w}</span>`).join(' ')}</h1>
       <p>${esc(s.tagline)}</p>
       ${heroChip()}
       <a class="btn btn-gold" href="#/menu">COMMANDER MAINTENANT</a>
@@ -187,45 +188,78 @@ function viewMenu() {
   </div></div>`;
 }
 
+const zones = () => (S.cat.zones || []).filter((z) => z.active);
+const deliveryOn = () => settings().delivery_enabled && zones().length > 0;
+const coFee = () => (S.co.mode === 'livraison' ? (zones().find((z) => z.id === S.co.zone)?.fee || 0) : 0);
+const waveUrl = (amount) => { const l = settings().wave_link; if (!l) return ''; return `${l}${l.includes('?') ? '&' : '?'}amount=${Math.round(amount)}`; };
+
 function viewCheckout() {
   const lines = cartLines(); const s = settings();
   if (!lines.length) {
-    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">🛍️</div><h3>Votre panier est vide</h3><p>Ajoutez quelques douceurs avant de commander.</p><p style="margin-top:18px"><a class="btn" href="#/menu">Voir la carte</a></p></div></div></div>`;
+    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">🛍️</div><h3>Votre panier est vide</h3><p>Ajoutez quelques douceurs avant de commander.</p><p style="margin-top:18px"><a class="btn" href="#/menu">Voir les produits</a></p></div></div></div>`;
   }
   if (!s.accepting_orders) {
     return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">⏸️</div><h3>Commandes en ligne suspendues</h3><p>${esc(s.announcement || 'Revenez un peu plus tard ou contactez-nous sur WhatsApp.')}</p><p style="margin-top:18px"><a class="btn btn-wa" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></p></div></div></div>`;
   }
-  const me = store.get(ME_KEY, {});
+  if (!deliveryOn()) S.co.mode = 'retrait';
+  const me = S.user || store.get(ME_KEY, {});
+  const z = zones();
+  if (S.co.mode === 'livraison' && !z.find((x) => x.id === S.co.zone)) S.co.zone = z[0]?.id || null;
+  const minFee = z.length ? Math.min(...z.map((x) => x.fee)) : 0;
   return `<div class="view"><div class="wrap">
     <div class="page-head"><a class="back" href="#/menu">${icon('back')} Continuer mes achats</a><h1 class="page-title">Finaliser la commande</h1></div>
+    ${S.user ? '' : `<a class="login-hint" href="#/compte">👤 <span><b>Vous avez un compte ?</b> Connectez-vous pour remplir vos informations automatiquement (facultatif).</span></a>`}
     <form class="checkout" id="co-form" novalidate>
       <div>
-        <section class="co-step" aria-labelledby="h-slot"><h2 id="h-slot"><span class="n" id="n1">1</span>Quand passez-vous la récupérer ?</h2><div id="slot-picker"></div></section>
-        <section class="co-step" aria-labelledby="h-me"><h2 id="h-me"><span class="n">2</span>Vos coordonnées</h2>
+        <section class="co-step" aria-labelledby="h-mode"><h2 id="h-mode"><span class="n">1</span>Retrait ou livraison ?</h2>
+          <div class="mode-opts">
+            <label class="mode-opt"><input type="radio" name="mode" value="retrait" ${S.co.mode !== 'livraison' ? 'checked' : ''}><span class="mi">🏪</span><b>Retrait sur place</b><small>Gratuit · ${esc(s.address)}</small></label>
+            <label class="mode-opt ${deliveryOn() ? '' : 'off'}"><input type="radio" name="mode" value="livraison" ${S.co.mode === 'livraison' ? 'checked' : ''} ${deliveryOn() ? '' : 'disabled'}><span class="mi">🛵</span><b>Livraison à domicile</b><small>${deliveryOn() ? `À partir de ${money(minFee)}` : 'Indisponible pour le moment'}</small></label>
+          </div>
+          <div id="delivery-box" class="delivery-box" ${S.co.mode === 'livraison' ? '' : 'hidden'}>
+            <label class="field"><span>Zone de livraison</span><select name="zone">${z.map((x) => `<option value="${x.id}" ${x.id === S.co.zone ? 'selected' : ''}>${esc(x.name)} — ${x.fee ? money(x.fee) : 'gratuit'}</option>`).join('')}</select></label>
+            <label class="field" id="f-addr"><span>Adresse de livraison</span><textarea name="address" rows="2" maxlength="300" placeholder="Quartier, rue, repère (ex : Cité Lamy, villa 12, près de la pharmacie)">${esc(S.co.address || '')}</textarea><em class="err" hidden></em></label>
+            <p class="hint">🛵 ${esc(s.delivery_info)}</p>
+          </div>
+        </section>
+        <section class="co-step" aria-labelledby="h-slot"><h2 id="h-slot"><span class="n" id="n1">2</span><span id="slot-title">${S.co.mode === 'livraison' ? 'Quand souhaitez-vous être livré(e) ?' : 'Quand passez-vous la récupérer ?'}</span></h2><div id="slot-picker"></div></section>
+        <section class="co-step" aria-labelledby="h-me"><h2 id="h-me"><span class="n">3</span>Vos coordonnées</h2>
           <label class="field" id="f-name"><span>Nom et prénom</span><input name="name" autocomplete="name" required maxlength="80" value="${esc(me.name || '')}" placeholder="Ex : Awa Diop"><em class="err" hidden></em></label>
           <div class="field" id="f-phone"><span id="lbl-phone">Numéro WhatsApp / téléphone</span>
             <div class="input-group"><span>+221</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" required aria-labelledby="lbl-phone" placeholder="77 123 45 67" value="${esc(fmtPhone(me.phone || ''))}"></div>
             <small>Nous vous prévenons sur ce numéro quand votre commande est prête.</small><em class="err" hidden></em></div>
           <label class="field"><span>Note pour la cuisine <small>(facultatif)</small></span><textarea name="note" maxlength="500" placeholder="Ex : bien frais, sans raisins secs…"></textarea></label>
-          <label class="check"><input type="checkbox" name="remember" ${me.name ? 'checked' : ''}> Se souvenir de mes coordonnées sur cet appareil</label>
+          ${S.user ? '' : `<label class="check"><input type="checkbox" name="remember" ${me.name ? 'checked' : ''}> Se souvenir de mes coordonnées sur cet appareil</label>`}
         </section>
-        <section class="co-step" aria-labelledby="h-pay"><h2 id="h-pay"><span class="n">3</span>Paiement</h2>
-          <div class="pay-opts">
-            ${[['retrait', 'Au retrait', 'Espèces, Wave ou Orange Money sur place'], ['wave', 'Wave', `Envoyez le montant au ${fmtPhone(s.phone)} et présentez la confirmation`], ['orange_money', 'Orange Money', `Envoyez le montant au ${fmtPhone(s.phone)} et présentez la confirmation`]]
-              .map(([k, t, d]) => `<label class="pay-opt"><input type="radio" name="payment" value="${k}" ${S.co.payment === k ? 'checked' : ''}><div><b>${t}</b><small>${esc(d)}</small></div></label>`).join('')}
-          </div>
+        <section class="co-step" aria-labelledby="h-pay"><h2 id="h-pay"><span class="n">4</span>Paiement</h2>
+          <div class="pay-opts" id="pay-opts"></div>
         </section>
       </div>
       <aside class="summary"><div class="card">
         <h2>Récapitulatif</h2>
         ${lines.map((l) => `<div class="sum-line"><span>${l.qty} × ${esc(l.p.name)} <small>(${esc(l.f.name)})</small></span><b>${money(l.f.price * l.qty)}</b></div>`).join('')}
         <div id="sum-pick"></div>
-        <div class="totals"><div class="row grand"><span>Total</span><span>${money(cartTotal())}</span></div></div>
+        <div class="totals" id="sum-totals"></div>
         <button class="btn btn-block btn-lg btn-gold" type="submit" id="co-submit">Confirmer ma commande</button>
         <p class="legal">En confirmant, vous acceptez d’être contacté(e) au sujet de cette commande. <a href="#/confidentialite">Confidentialité</a></p>
       </div></aside>
     </form>
   </div></div>`;
+}
+
+function renderPayOpts() {
+  const box = $('#pay-opts'); if (!box) return; const s = settings(); const liv = S.co.mode === 'livraison';
+  const opts = [['retrait', liv ? 'À la livraison' : 'Au retrait', liv ? 'Espèces, Wave ou Orange Money à la réception' : 'Espèces, Wave ou Orange Money sur place']];
+  if (s.wave_link) opts.push(['wave', 'Wave · payer maintenant', 'Un bouton de paiement Wave s’affiche après la commande, avec le montant déjà rempli']);
+  opts.push(['orange_money', 'Orange Money', `Envoyez le montant au ${fmtPhone(s.phone)} et présentez la confirmation`]);
+  if (!opts.some(([k]) => k === S.co.payment)) S.co.payment = 'retrait';
+  box.innerHTML = opts.map(([k, t, d]) => `<label class="pay-opt ${k === 'wave' ? 'wave' : ''}"><input type="radio" name="payment" value="${k}" ${S.co.payment === k ? 'checked' : ''}><div><b>${k === 'wave' ? '<span class="wave-logo">Wave</span> ' : ''}${t.replace(/^Wave · /, '')}</b><small>${esc(d)}</small></div></label>`).join('');
+}
+function renderTotals() {
+  const el = $('#sum-totals'); if (!el) return; const sub = cartTotal(); const fee = coFee();
+  el.innerHTML = `<div class="row"><span>Sous-total</span><span>${money(sub)}</span></div>
+    ${S.co.mode === 'livraison' ? `<div class="row"><span>Livraison</span><span>${fee ? money(fee) : 'Gratuite'}</span></div>` : ''}
+    <div class="row grand"><span>Total</span><span class="count-up">${money(sub + fee)}</span></div>`;
 }
 
 function renderSlotPicker() {
@@ -242,26 +276,35 @@ function renderSlotPicker() {
     toast('Le créneau choisi n’est plus disponible, merci d’en choisir un autre.', 'error'); S.co.slot = null;
   }
   const lab = { past: 'Passé', closed: 'Fermé', full: 'Complet' };
-  box.innerHTML = `<div class="days" role="group" aria-label="Jour de retrait">
+  box.innerHTML = `<div class="days" role="group" aria-label="Jour">
     ${daysInfo.map(({ d, free }) => `<button type="button" class="day ${free ? '' : 'full'}" data-action="day" data-day="${d}" aria-pressed="${d === S.co.day}" ${free ? '' : 'disabled'}>
       <b>${relDay(d).split(' ')[0]}</b><span>${fmtDay(d, { day: 'numeric', month: 'short' })}${free ? '' : ' · complet'}</span></button>`).join('')}
   </div>
-  <div class="slots" role="group" aria-label="Heure de retrait">
-    ${states.map((x) => {
+  <div class="slots" role="group" aria-label="Heure">
+    ${states.map((x, i) => {
       const ok = x.state === 'ok' || x.state === 'few';
-      return `<button type="button" class="slot ${x.state}" data-action="slot" data-slot="${x.slot}" aria-pressed="${x.slot === S.co.slot}" ${ok ? '' : 'disabled'}>
+      return `<button type="button" class="slot ${x.state}" style="animation-delay:${i * 35}ms" data-action="slot" data-slot="${x.slot}" aria-pressed="${x.slot === S.co.slot}" ${ok ? '' : 'disabled'}>
         <b>${fmtSlot(x.slot)}</b><span>${ok ? (x.state === 'few' ? `Plus que ${x.left}` : 'Disponible') : lab[x.state]}</span></button>`;
     }).join('')}
   </div>`;
   updatePick();
 }
 function updatePick() {
-  const el = $('#sum-pick'); if (!el) return;
+  const el = $('#sum-pick'); if (!el) return; const liv = S.co.mode === 'livraison';
+  const zone = zones().find((z) => z.id === S.co.zone);
   el.innerHTML = S.co.slot
-    ? `<div class="sum-pick">${icon('cal')}<div>Retrait <b>${relDay(S.co.day).toLowerCase()}</b> à <b>${fmtSlot(S.co.slot)}</b><br><small>${esc(settings().address)}</small></div></div>`
-    : '<div class="sum-pick" style="background:var(--amber-s)">' + icon('clock') + '<div>Choisissez une heure de retrait</div></div>';
+    ? `<div class="sum-pick">${icon('cal')}<div>${liv ? 'Livraison' : 'Retrait'} <b>${relDay(S.co.day).toLowerCase()}</b> à <b>${fmtSlot(S.co.slot)}</b><br><small>${liv ? esc(zone?.name || '') : esc(settings().address)}</small></div></div>`
+    : `<div class="sum-pick" style="background:var(--amber-s)">${icon('clock')}<div>Choisissez une heure de ${liv ? 'livraison' : 'retrait'}</div></div>`;
   $('#n1')?.classList.toggle('done', !!S.co.slot);
-  if ($('#n1')) $('#n1').innerHTML = S.co.slot ? icon('check') : '1';
+  if ($('#n1')) $('#n1').innerHTML = S.co.slot ? icon('check') : '2';
+  renderTotals();
+}
+function setMode(mode) {
+  S.co.mode = mode; const liv = mode === 'livraison';
+  const box = $('#delivery-box'); if (box) box.hidden = !liv;
+  if (liv && !S.co.zone) S.co.zone = zones()[0]?.id || null;
+  const t = $('#slot-title'); if (t) t.textContent = liv ? 'Quand souhaitez-vous être livré(e) ?' : 'Quand passez-vous la récupérer ?';
+  renderPayOpts(); updatePick();
 }
 
 function setFieldError(id, msg) {
@@ -273,22 +316,26 @@ async function submitOrder(form) {
   if (S.co.busy) return;
   const fd = new FormData(form);
   const name = String(fd.get('name') || '').trim(); const phone = normalizePhone(fd.get('phone'));
+  const liv = S.co.mode === 'livraison'; const address = String(fd.get('address') || '').trim();
   let bad = false;
   setFieldError('#f-name', name.length < 2 ? 'Indiquez votre nom' : ''); if (name.length < 2) bad = true;
   setFieldError('#f-phone', phone ? '' : 'Numéro invalide : 9 chiffres commençant par 70, 75, 76, 77, 78 ou 33'); if (!phone) bad = true;
-  if (!S.co.slot) { toast('Choisissez une heure de retrait', 'error'); $('#slot-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-  if (bad) { $('.invalid input')?.focus(); return; }
-  if (fd.get('remember')) store.set(ME_KEY, { name, phone }); else store.del(ME_KEY);
+  if (liv) { setFieldError('#f-addr', address.length < 5 ? 'Indiquez votre adresse (quartier, rue, repère)' : ''); if (address.length < 5) bad = true; }
+  if (!S.co.slot) { toast(`Choisissez une heure de ${liv ? 'livraison' : 'retrait'}`, 'error'); $('#slot-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  if (bad) { $('.invalid input, .invalid textarea')?.focus(); return; }
+  if (!S.user) { if (fd.get('remember')) store.set(ME_KEY, { name, phone }); else store.del(ME_KEY); }
   const btn = $('#co-submit'); btn.classList.add('is-loading'); S.co.busy = true;
   try {
     const res = await S.api.placeOrder({
       name, phone, note: String(fd.get('note') || ''), day: S.co.day, slot: S.co.slot,
       items: cartLines().map((l) => ({ format_id: l.fid, qty: l.qty })), payment: String(fd.get('payment') || 'retrait'),
+      fulfillment: S.co.mode, zone: liv ? S.co.zone : null, address: liv ? address : '',
     });
     const my = store.get(MY_KEY, []);
     my.unshift({ token: res.token, number: res.number, day: S.co.day, slot: S.co.slot, total: res.total, at: new Date().toISOString() });
     store.set(MY_KEY, my.slice(0, 20));
-    cart = []; saveCart(); S.co.slot = null;
+    if (S.user && (!S.user.phone || !S.user.name)) S.api.updateProfile({ name: S.user.name || name, phone: S.user.phone || phone }).catch(() => {});
+    cart = []; saveCart(); S.co.slot = null; S.co.address = '';
     location.hash = `#/suivi/${res.token}?new=1`;
   } catch (e) {
     const m = errMsg(e); toast(m, 'error', 5000);
@@ -313,27 +360,34 @@ async function viewTrack(token, isNew) {
   const at = (k) => o.history.filter((h) => h.status === k).pop()?.at;
   const cancelled = o.status === 'annulee';
   const title = cancelled ? 'Commande annulée' : isNew ? 'Merci, commande envoyée !' : o.status === 'prete' ? 'Votre commande est prête !' : o.status === 'recuperee' ? 'Bonne dégustation !' : 'Suivi de commande';
-  const waText = `Bonjour ${s.shop_name} 👋\nVoici ma commande ${o.number} :\n${o.items.map((i) => `• ${i.qty} × ${i.product_name} (${i.format_name}) – ${money(i.unit_price * i.qty)}`).join('\n')}\nTotal : ${money(o.total)}\nRetrait : ${relDay(o.pickup_day).toLowerCase()} (${fmtDay(o.pickup_day)}) à ${fmtSlot(o.pickup_slot)}\nNom : ${o.customer_name}\nSuivi : ${trackUrl(o.tracking_token)}`;
+  const liv = o.fulfillment === 'livraison'; const modeLbl = liv ? 'Livraison' : 'Retrait';
+  const waText = `Bonjour ${s.shop_name} 👋\nVoici ma commande ${o.number} :\n${o.items.map((i) => `• ${i.qty} × ${i.product_name} (${i.format_name}) – ${money(i.unit_price * i.qty)}`).join('\n')}${liv ? `\nLivraison (${o.delivery_zone}) : ${money(o.delivery_fee)}\nAdresse : ${o.delivery_address}` : ''}\nTotal : ${money(o.total)}\n${modeLbl} : ${relDay(o.pickup_day).toLowerCase()} (${fmtDay(o.pickup_day)}) à ${fmtSlot(o.pickup_slot)}\nNom : ${o.customer_name}${o.payment_method === 'wave' ? '\nPaiement : Wave' : ''}\nSuivi : ${trackUrl(o.tracking_token)}`;
+  const payWave = o.payment_method === 'wave' && !o.paid && !cancelled && waveUrl(o.total);
   view.innerHTML = `<div class="view"><div class="wrap" style="padding-top:24px">
     <div class="track">
       <div>
         <div class="success-hero ${cancelled ? 'cancel' : ''}">
           <div class="tick">${cancelled ? icon('x') : icon('check')}</div>
           <h1>${title}</h1>
-          <p>${cancelled ? 'Cette commande ne sera pas préparée.' : `Retrait <b>${relDay(o.pickup_day).toLowerCase()}</b>, ${fmtDay(o.pickup_day)} à <b>${fmtSlot(o.pickup_slot)}</b>`}</p>
+          <p>${cancelled ? 'Cette commande ne sera pas préparée.' : `${modeLbl} <b>${relDay(o.pickup_day).toLowerCase()}</b>, ${fmtDay(o.pickup_day)} à <b>${fmtSlot(o.pickup_slot)}</b>`}</p>
+          ${liv && !cancelled ? `<p class="hint" style="margin-top:6px">🛵 ${esc(o.delivery_zone)} · ${esc(o.delivery_address)}</p>` : ''}
           <span class="order-num">${esc(o.number)}</span>
           ${!['recuperee', 'annulee'].includes(o.status) ? '<p style="margin-top:12px"><span class="live">Mise à jour en direct</span></p>' : ''}
         </div>
+        ${payWave ? `<div class="card wave-card"><div class="wave-top"><span class="wave-logo big">Wave</span><div><b>Payez maintenant ${money(o.total)}</b><small>Le montant est déjà rempli. Après le paiement, envoyez-nous la capture sur WhatsApp.</small></div></div>
+          <a class="btn btn-wave btn-block btn-lg" href="${esc(payWave)}" target="_blank" rel="noopener">Payer ${money(o.total)} avec Wave</a>
+          <a class="btn btn-light btn-block" style="margin-top:8px" href="${waLink(s.whatsapp, `Bonjour, je viens de payer la commande ${o.number} (${money(o.total)}) avec Wave. Voici la capture :`)}" target="_blank" rel="noopener">${icon('wa')} J’ai payé : envoyer la capture</a></div>` : ''}
         ${cancelled ? '' : `<div class="card"><h2 style="font-size:18px;margin-bottom:16px">Où en est ma commande ?</h2><ol class="timeline">
           ${flow.map((x, i) => `<li class="${i < idx ? 'done' : i === idx ? (x.k === 'recuperee' ? 'done' : 'current') : ''}"><span class="dot">${i < idx || (i === idx && x.k === 'recuperee') ? icon('check') : i + 1}</span>
-            <div><b>${x.k === 'nouvelle' ? 'Commande reçue' : x.label}</b><small>${at(x.k) ? fmtDateTime(at(x.k)) : i === idx + 1 ? 'Étape suivante' : ''}</small></div></li>`).join('')}
+            <div><b>${x.k === 'nouvelle' ? 'Commande reçue' : liv && x.k === 'prete' ? 'Prête · en route' : liv && x.k === 'recuperee' ? 'Livrée' : x.label}</b><small>${at(x.k) ? fmtDateTime(at(x.k)) : i === idx + 1 ? 'Étape suivante' : ''}</small></div></li>`).join('')}
         </ol></div>`}
       </div>
       <aside>
         <div class="card" style="margin-bottom:14px">
           <h2 style="font-size:18px;margin-bottom:8px">Détail</h2>
           ${o.items.map((i) => `<div class="sum-line"><span>${i.qty} × ${esc(i.product_name)} <small>(${esc(i.format_name)})</small></span><b>${money(i.unit_price * i.qty)}</b></div>`).join('')}
-          <div class="totals" style="margin-top:8px"><div class="row grand"><span>Total</span><span>${money(o.total)}</span></div><div class="row"><span>Paiement</span><span>${o.paid ? '✅ Payé' : 'Au retrait'}</span></div></div>
+          ${liv ? `<div class="sum-line"><span>Livraison <small>(${esc(o.delivery_zone)})</small></span><b>${o.delivery_fee ? money(o.delivery_fee) : 'Gratuite'}</b></div>` : ''}
+          <div class="totals" style="margin-top:8px"><div class="row grand"><span>Total</span><span>${money(o.total)}</span></div><div class="row"><span>Paiement</span><span>${o.paid ? '✅ Payé' : { wave: 'Wave', orange_money: 'Orange Money' }[o.payment_method] || (liv ? 'À la livraison' : 'Au retrait')}</span></div></div>
           ${o.note ? `<p class="hint">Note : ${esc(o.note)}</p>` : ''}
         </div>
         <div class="actions no-print">
@@ -342,7 +396,7 @@ async function viewTrack(token, isNew) {
             ${cancelled ? '' : `<button class="btn btn-light" type="button" data-action="ics">${icon('cal')} Calendrier</button>`}
             <button class="btn btn-light" type="button" data-action="print">${icon('print')} Reçu</button>
           </div>
-          <a class="btn btn-light" href="${esc(s.maps_url)}" target="_blank" rel="noopener">${icon('pin')} Itinéraire</a>
+          ${liv ? '' : `<a class="btn btn-light" href="${esc(s.maps_url)}" target="_blank" rel="noopener">${icon('pin')} Itinéraire</a>`}
           ${o.status === 'nouvelle' ? '<button class="btn btn-ghost" type="button" data-action="cancel-order">Annuler la commande</button>' : ''}
         </div>
       </aside>
@@ -350,14 +404,15 @@ async function viewTrack(token, isNew) {
     <div class="receipt">
       <img src="assets/img/logo.webp" alt="">
       <h2>${esc(s.shop_name)}</h2><p class="c">${esc(s.address)} · ${esc(fmtPhone(s.phone))}</p>
-      <p style="margin-top:12px"><b>Commande ${esc(o.number)}</b><br>Passée le ${fmtDateTime(o.created_at)}<br>Client : ${esc(o.customer_name)}<br>Retrait : ${fmtDay(o.pickup_day)} à ${fmtSlot(o.pickup_slot)}</p>
+      <p style="margin-top:12px"><b>Commande ${esc(o.number)}</b><br>Passée le ${fmtDateTime(o.created_at)}<br>Client : ${esc(o.customer_name)}<br>${modeLbl} : ${fmtDay(o.pickup_day)} à ${fmtSlot(o.pickup_slot)}${liv ? `<br>Adresse : ${esc(o.delivery_address)} (${esc(o.delivery_zone)})` : ''}</p>
       <table><thead><tr><th>Article</th><th>Qté</th><th>Montant</th></tr></thead><tbody>
         ${o.items.map((i) => `<tr><td>${esc(i.product_name)} (${esc(i.format_name)})</td><td>${i.qty}</td><td>${money(i.unit_price * i.qty)}</td></tr>`).join('')}
-      </tbody></table>
+      ${liv ? `<tr><td>Livraison</td><td></td><td>${money(o.delivery_fee)}</td></tr>` : ''}</tbody></table>
       <p class="tot">Total : ${money(o.total)}</p><p class="c" style="margin-top:14px">Statut : ${st.label} · Merci et à bientôt !</p>
     </div>
   </div></div>`;
   S.current = o;
+  if (isNew && !cancelled) confetti();
   if (!['recuperee', 'annulee'].includes(o.status)) {
     S.timers.push(setInterval(async () => {
       try { const n = await S.api.trackOrder(token); if (n && n.status !== S.current.status) { toast(`Votre commande est maintenant : ${ST[n.status].label}`, 'success'); viewTrack(token, false); } } catch { /* réseau */ }
@@ -368,13 +423,121 @@ async function viewTrack(token, isNew) {
 function viewMyOrders() {
   const my = store.get(MY_KEY, []); const s = settings();
   return `<div class="view"><div class="wrap">
-    <div class="page-head"><h1 class="page-title">Mes commandes</h1><p>Les commandes passées depuis cet appareil.</p></div>
-    ${my.length ? `<div class="my-orders">${my.map((o) => `<a class="my-order" href="#/suivi/${esc(o.token)}"><div><b>${esc(o.number)}</b><small>Retrait ${relDay(o.day).toLowerCase()} à ${fmtSlot(o.slot)} · ${money(o.total)}</small></div>${icon('arrow')}</a>`).join('')}</div>`
+    <div class="page-head"><h1 class="page-title">Suivre ma commande</h1><p>Les commandes passées depuis cet appareil.${S.user ? '' : ' <a href="#/compte">Connectez-vous</a> pour les retrouver sur tous vos appareils.'}</p></div>
+    ${my.length ? `<div class="my-orders">${my.map((o) => orderRow(o)).join('')}</div>`
       : '<div class="empty"><div class="big">🧾</div><h3>Aucune commande sur cet appareil</h3><p>Vos commandes apparaîtront ici automatiquement.</p></div>'}
-    <div class="card" style="margin-top:20px"><b>Vous avez commandé depuis un autre téléphone ?</b><p class="hint" style="margin:4px 0 12px">Ouvrez le lien de suivi reçu après la commande, ou écrivez-nous avec votre numéro de commande.</p>
+    <div class="card" style="margin-top:20px"><b>Vous avez commandé depuis un autre téléphone ?</b><p class="hint" style="margin:4px 0 12px">Ouvrez le lien de suivi reçu après la commande${S.user ? ', ou consultez <a href="#/compte">Mon compte</a>' : ''}, ou écrivez-nous avec votre numéro de commande.</p>
       <a class="btn btn-wa btn-sm" href="${waLink(s.whatsapp, 'Bonjour, je voudrais suivre ma commande n° ')}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></div>
   </div></div>`;
 }
+
+// ---------- Compte client (facultatif) ----------
+async function viewAccount() {
+  const view = $('#view');
+  if (!S.user) {
+    const tab = S.authTab || 'login';
+    view.innerHTML = `<div class="view"><div class="wrap account">
+      <div class="page-head"><h1 class="page-title">Mon compte</h1><p>Facultatif : vous pouvez commander sans compte. Avec un compte, vos informations sont remplies automatiquement et vous retrouvez vos commandes sur tous vos appareils.</p></div>
+      <div class="card auth-card">
+        <div class="seg-tabs" role="tablist">
+          <button type="button" role="tab" data-action="auth-tab" data-t="login" aria-selected="${tab === 'login'}">Se connecter</button>
+          <button type="button" role="tab" data-action="auth-tab" data-t="signup" aria-selected="${tab === 'signup'}">Créer un compte</button>
+          <span class="seg-ink ${tab}"></span>
+        </div>
+        ${tab === 'login' ? `<form id="login-form" class="auth-form" novalidate>
+          <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+          <label class="field"><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required></label>
+          <button class="btn btn-block btn-lg" type="submit">Se connecter</button>
+        </form>` : `<form id="signup-form" class="auth-form" novalidate>
+          <label class="field"><span>Nom et prénom</span><input name="name" autocomplete="name" required maxlength="80"></label>
+          <div class="field"><span>Téléphone</span><div class="input-group"><span>+221</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="77 123 45 67" aria-label="Téléphone"></div></div>
+          <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+          <label class="field"><span>Mot de passe <small>(6 caractères minimum)</small></span><input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+          <button class="btn btn-block btn-lg btn-gold" type="submit">Créer mon compte</button>
+          <p class="hint" style="text-align:center;margin-top:10px">✓ Aucun e-mail de vérification : votre compte est actif immédiatement.</p>
+        </form>`}
+      </div>
+      <p style="text-align:center;margin-top:16px"><a class="btn btn-light" href="#/menu">Commander sans compte</a></p>
+    </div></div>`;
+    return;
+  }
+  view.innerHTML = `<div class="view"><div class="wrap account">
+    <div class="page-head"><h1 class="page-title">Bonjour ${esc(firstName(S.user.name) || '👋')}</h1><p>${esc(S.user.email)}</p></div>
+    <div class="grid-2">
+      <div class="card"><h2 style="font-size:19px;margin-bottom:12px">Mes informations</h2>
+        <form id="profile-form" novalidate>
+          <label class="field"><span>Nom et prénom</span><input name="name" value="${esc(S.user.name)}" maxlength="80"></label>
+          <div class="field"><span>Téléphone</span><div class="input-group"><span>+221</span><input name="phone" type="tel" inputmode="tel" value="${esc(fmtPhone(S.user.phone))}" aria-label="Téléphone"></div></div>
+          <button class="btn" type="submit">Enregistrer</button>
+          <button class="btn btn-light" type="button" data-action="logout" style="margin-left:6px">Se déconnecter</button>
+        </form></div>
+      <div class="card"><h2 style="font-size:19px;margin-bottom:12px">Mes commandes</h2><div id="acc-orders"><div class="spinner"></div></div></div>
+    </div>
+  </div></div>`;
+  try {
+    const list = await S.api.myOrders();
+    $('#acc-orders').innerHTML = list.length ? `<div class="my-orders">${list.map((o) => orderRow(o)).join('')}</div>`
+      : '<div class="empty" style="padding:20px"><div class="big">🧾</div><p>Pas encore de commande avec ce compte.</p><p style="margin-top:12px"><a class="btn btn-sm" href="#/menu">Commander</a></p></div>';
+  } catch (e) { $('#acc-orders').innerHTML = `<p class="hint">${esc(errMsg(e))}</p>`; }
+}
+const firstName = (n) => String(n || '').trim().split(/\s+/)[0];
+const orderRow = (o) => `<a class="my-order" href="#/suivi/${esc(o.tracking_token || o.token)}"><div><b>${esc(o.number)}</b>
+  <small>${o.fulfillment === 'livraison' ? '🛵 Livraison' : '🏪 Retrait'} ${relDay(o.pickup_day || o.day).toLowerCase()} à ${fmtSlot(o.pickup_slot || o.slot)} · ${money(o.total)}</small></div>
+  ${o.status ? `<span class="badge st-${o.status}">${ST[o.status].label}</span>` : icon('arrow')}</a>`;
+
+async function authSubmit(form) {
+  const fd = new FormData(form); const b = $('button[type=submit]', form); b.classList.add('is-loading');
+  try {
+    const email = String(fd.get('email') || '').trim(); const password = String(fd.get('password') || '');
+    if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('NS_EMAIL: Adresse e-mail invalide');
+    if (form.id === 'signup-form') {
+      const name = String(fd.get('name') || '').trim(); const raw = String(fd.get('phone') || '').trim(); const phone = raw ? normalizePhone(raw) : '';
+      if (name.length < 2) throw new Error('NS_NOM: Indiquez votre nom');
+      if (raw && !phone) throw new Error('NS_TEL: Numéro de téléphone sénégalais invalide');
+      if (password.length < 6) throw new Error('NS_MDP: Mot de passe : 6 caractères minimum');
+      await S.api.signUp({ email, password, name, phone: phone || '' });
+      toast('Compte créé, bienvenue ! 🎉', 'success');
+    } else {
+      await S.api.customerSignIn(email, password); toast('Vous êtes connecté(e)', 'success');
+    }
+    S.user = await S.api.customer(); renderAccountTab();
+    if (cart.length) location.hash = '#/commande'; else render();
+  } catch (e) { toast(/already registered|already exists/i.test(e?.message) ? 'Un compte existe déjà avec cet e-mail : connectez-vous.' : errMsg(e), 'error', 4500); }
+  finally { b.classList.remove('is-loading'); }
+}
+function renderAccountTab() { $$('[data-nav="compte"] .tab-lbl').forEach((el) => { el.textContent = S.user ? firstName(S.user.name) || 'Compte' : 'Compte'; }); }
+
+// ---------- Effets ----------
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas'); c.className = 'confetti'; document.body.appendChild(c);
+  const ctx = c.getContext('2d'); const W = (c.width = innerWidth), H = (c.height = innerHeight);
+  const colors = ['#D9951F', '#2F6FD6', '#1B3F8B', '#D2492E', '#1f8a5b', '#F4C66A'];
+  const parts = Array.from({ length: 140 }, () => ({ x: W / 2, y: H * 0.35, vx: (Math.random() - 0.5) * 14, vy: Math.random() * -14 - 4, s: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: colors[Math.floor(Math.random() * colors.length)] }));
+  let t = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, W, H); t++;
+    parts.forEach((p) => { p.vy += 0.38; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); });
+    if (t < 160) requestAnimationFrame(tick); else c.remove();
+  }());
+}
+function flyToCart(fromEl) {
+  if (!fromEl || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const target = [...$$('[data-action="open-cart"]')].find((b) => b.offsetParent !== null); if (!target) return;
+  const a = fromEl.getBoundingClientRect(); const b = target.getBoundingClientRect();
+  const ghost = fromEl.cloneNode(true); ghost.className = 'fly-ghost';
+  Object.assign(ghost.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px`, height: `${a.height}px` });
+  document.body.appendChild(ghost);
+  const dx = b.left + b.width / 2 - (a.left + a.width / 2); const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+  ghost.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 80}px) scale(.45)`, opacity: .9, offset: .55 }, { transform: `translate(${dx}px, ${dy}px) scale(.08)`, opacity: .3 }],
+    { duration: 750, easing: 'cubic-bezier(.5,0,.3,1)' }).onfinish = () => { ghost.remove(); target.classList.remove('shake'); void target.offsetWidth; target.classList.add('shake'); };
+}
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.btn, .tabbar a, .tabbar button'); if (!b) return;
+  const r = b.getBoundingClientRect(); const d = document.createElement('span'); d.className = 'ripple';
+  const size = Math.max(r.width, r.height) * 2; Object.assign(d.style, { width: `${size}px`, height: `${size}px`, left: `${e.clientX - r.left - size / 2}px`, top: `${e.clientY - r.top - size / 2}px` });
+  b.appendChild(d); setTimeout(() => d.remove(), 650);
+});
 
 function viewContact() {
   const s = settings();
@@ -452,10 +615,10 @@ function reveal() {
   $$('.reveal:not(.in)').forEach((el) => (observer ? observer.observe(el) : el.classList.add('in')));
 }
 function setNav(name) {
-  const key = { home: 'home', menu: 'menu', 'mes-commandes': 'suivi', suivi: 'suivi', contact: 'contact' }[name];
+  const key = { home: 'home', menu: 'menu', 'mes-commandes': 'suivi', suivi: 'suivi', contact: 'contact', compte: 'compte' }[name];
   $$('[data-nav]').forEach((a) => { const on = a.dataset.nav === key; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
-const TITLES = { home: '', menu: 'La carte', commande: 'Commande', suivi: 'Suivi de commande', 'mes-commandes': 'Mes commandes', contact: 'Contact', confidentialite: 'Confidentialité' };
+const TITLES = { home: '', menu: 'La carte', commande: 'Commande', suivi: 'Suivi de commande', 'mes-commandes': 'Suivre ma commande', contact: 'Contact', confidentialite: 'Confidentialité', compte: 'Mon compte' };
 
 function render(scroll = false) {
   S.timers.forEach(clearInterval); S.timers = [];
@@ -463,11 +626,12 @@ function render(scroll = false) {
   document.title = TITLES[r.name] ? `${TITLES[r.name]} · Arrêt nekh soow` : 'Arrêt nekh soow · Soow, Thiakry, Ngallakh à Thiès – commande en ligne';
   const view = $('#view');
   if (r.name === 'suivi' && r.arg) viewTrack(r.arg, r.query.get('new') === '1');
+  else if (r.name === 'compte') viewAccount();
   else {
     const fn = { home: viewHome, menu: viewMenu, commande: viewCheckout, 'mes-commandes': viewMyOrders, contact: viewContact, confidentialite: viewPrivacy }[r.name] || viewHome;
     view.innerHTML = fn();
     if (r.name === 'commande') {
-      renderSlotPicker();
+      renderPayOpts(); renderSlotPicker();
       S.timers.push(setInterval(async () => { await refreshLoad(); renderSlotPicker(); }, 30000));
     }
   }
@@ -499,6 +663,7 @@ document.addEventListener('click', async (e) => {
       const line = cart.find((l) => l.fid === s.fid); const max = f.stock == null ? 99 : f.stock;
       const qty = Math.min(max, (line?.qty || 0) + s.qty);
       if (line) line.qty = qty; else cart.push({ fid: s.fid, qty });
+      flyToCart(t.closest('.product')?.querySelector('.media img, .media .emoji'));
       saveCart(); s.qty = 1; updateCard(d.pid);
       toast(`${p.name} (${f.name}) ajouté au panier`, 'success', 2200);
       break;
@@ -521,15 +686,31 @@ document.addEventListener('click', async (e) => {
     }
     case 'forget': [CART_KEY, ME_KEY, MY_KEY].forEach(store.del); cart = []; renderCartBadge(); toast('Données effacées de cet appareil', 'success'); break;
     case 'reload': location.reload(); break;
+    case 'auth-tab': S.authTab = d.t; viewAccount(); break;
+    case 'logout': await S.api.customerSignOut(); S.user = null; renderAccountTab(); toast('Vous êtes déconnecté(e)', 'info'); render(); break;
     default:
   }
 });
-document.addEventListener('submit', (e) => { if (e.target.id === 'co-form') { e.preventDefault(); submitOrder(e.target); } });
+document.addEventListener('submit', async (e) => {
+  const f = e.target;
+  if (f.id === 'co-form') { e.preventDefault(); submitOrder(f); }
+  if (f.id === 'login-form' || f.id === 'signup-form') { e.preventDefault(); authSubmit(f); }
+  if (f.id === 'profile-form') {
+    e.preventDefault(); const fd = new FormData(f); const raw = String(fd.get('phone') || '').trim(); const phone = raw ? normalizePhone(raw) : '';
+    if (raw && !phone) return toast('Numéro de téléphone invalide', 'error');
+    try { await S.api.updateProfile({ name: String(fd.get('name') || '').trim(), phone }); S.user = await S.api.customer(); renderAccountTab(); toast('Informations enregistrées', 'success'); } catch (err) { toast(errMsg(err), 'error'); }
+  }
+});
 document.addEventListener('input', debounce((e) => {
   if (e.target.name === 'phone') setFieldError('#f-phone', '');
   if (e.target.name === 'name') setFieldError('#f-name', '');
+  if (e.target.name === 'address') { S.co.address = e.target.value; setFieldError('#f-addr', ''); }
 }, 50));
-document.addEventListener('change', (e) => { if (e.target.name === 'payment') S.co.payment = e.target.value; });
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'payment') S.co.payment = e.target.value;
+  if (e.target.name === 'mode') setMode(e.target.value);
+  if (e.target.name === 'zone') { S.co.zone = e.target.value; updatePick(); }
+});
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
 window.addEventListener('hashchange', () => { closeCart(); render(true); });
 window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 8), { passive: true });
@@ -541,10 +722,12 @@ window.addEventListener('storage', (e) => { if (e.key === CART_KEY) { cart = sto
 async function boot() {
   $('#year').textContent = new Date().getFullYear();
   if (IS_DEMO) $('#demo').hidden = false;
+  document.body.classList.add('shop');
   if (['home', 'menu', ''].includes(route().name)) $('#view').innerHTML = `<div class="wrap" style="padding-top:30px">${skeletonGrid(3)}</div>`;
   try {
     S.api = await getApi();
-    [S.cat] = await Promise.all([S.api.getCatalog(), refreshLoad()]);
+    [S.cat, , S.user] = await Promise.all([S.api.getCatalog(), refreshLoad(), S.api.customer().catch(() => null)]);
+    S.api.onAuth?.(async () => { S.user = await S.api.customer().catch(() => null); renderAccountTab(); });
   } catch (e) {
     $('#view').innerHTML = `<div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">📡</div><h3>Impossible de charger la boutique</h3><p>${esc(errMsg(e))}</p><p style="margin-top:16px"><button class="btn" type="button" data-action="reload">Réessayer</button></p></div></div>`;
     return;
@@ -554,7 +737,8 @@ async function boot() {
   if (!s.accepting_orders) { ann.hidden = false; ann.classList.add('closed'); ann.textContent = s.announcement || 'Les commandes en ligne sont momentanément suspendues.'; }
   else if (s.announcement) { ann.hidden = false; ann.textContent = s.announcement; }
   $('#foot-addr').textContent = `${s.address} · ${fmtPhone(s.phone)}`;
-  sanitizeCart(); renderCartBadge(); render();
+  $('#wa-float').href = waLink(s.whatsapp, `Bonjour ${s.shop_name} 👋 `);
+  sanitizeCart(); renderCartBadge(); renderAccountTab(); render();
   // Rafraîchit le catalogue quand l'onglet redevient visible (prix / stock à jour)
   document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState !== 'visible') return;

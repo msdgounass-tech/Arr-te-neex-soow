@@ -50,6 +50,7 @@
       <button type="button" data-action="open-cart">Panier <span class="cart-count" hidden>0</span></button>
       <a href="#/mes-commandes" data-nav="suivi">Suivi</a>
       <a href="#/contact" data-nav="contact">Contact</a>
+      <a href="#/compte" data-nav="compte" class="nav-acc">👤 <span class="tab-lbl">Compte</span></a>
       <a href="admin.html" class="nav-admin" aria-label="Espace propriétaire" title="Espace propriétaire">⚙️</a>
     </nav>
   </header>
@@ -58,6 +59,17 @@
     <div class="wrap"><div class="spinner" role="status" aria-label="Chargement"></div></div>
   </main>
 
+
+  <a id="wa-float" class="wa-float" href="#" target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp"><svg aria-hidden="true"><use href="#i-wa"/></svg><span>WhatsApp</span></a>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <a href="#/" data-nav="home"><svg><use href="#i-home"/></svg><span>Accueil</span></a>
+    <a href="#/menu" data-nav="menu"><svg><use href="#i-menu"/></svg><span>Produits</span></a>
+    <button type="button" data-action="open-cart"><svg><use href="#i-bag"/></svg><span>Panier</span><b class="cart-count tab-badge" hidden>0</b></button>
+    <a href="#/mes-commandes" data-nav="suivi"><svg><use href="#i-receipt"/></svg><span>Suivi</span></a>
+    <a href="#/compte" data-nav="compte"><svg><use href="#i-user"/></svg><span class="tab-lbl">Compte</span></a>
+    <a href="#/contact" data-nav="contact"><svg><use href="#i-pin"/></svg><span>Contact</span></a>
+  </nav>
 
   <footer class="foot">
     <div class="wrap foot-in">
@@ -68,6 +80,7 @@
       <div class="foot-links">
         <a href="#/menu">La carte</a>
         <a href="#/mes-commandes">Suivre une commande</a>
+        <a href="#/compte">Mon compte</a>
         <a href="#/contact">Contact &amp; accès</a>
         <a href="#/confidentialite">Confidentialité</a>
       </div>
@@ -102,6 +115,7 @@
       <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
       <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
       <symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19 13 11"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol>
       <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></symbol>
     </defs>
   </svg>

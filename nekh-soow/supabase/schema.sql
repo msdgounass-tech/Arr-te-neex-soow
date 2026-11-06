@@ -432,3 +432,197 @@ end $$;
 --   select id from auth.users where email = 'votre-email@exemple.com'
 --   on conflict do nothing;
 -- -----------------------------------------------------------------------------
+
+-- =============================================================================
+--  Version 2 : livraison à domicile, comptes clients facultatifs, paiement Wave
+-- =============================================================================
+alter table public.ns_settings add column if not exists wave_link text not null default '';
+alter table public.ns_settings add column if not exists orange_money_link text not null default '';
+alter table public.ns_settings add column if not exists delivery_enabled boolean not null default true;
+alter table public.ns_settings add column if not exists delivery_info text not null default 'Livraison à domicile : le livreur vous appelle avant d''arriver.';
+alter table public.ns_settings add column if not exists delivery_min_order int not null default 0;
+update public.ns_settings set wave_link = 'https://pay.wave.com/m/M_sn_Rb6z4J8BYSDP/c/sn/' where id = 1 and wave_link = '';
+
+create table if not exists public.ns_delivery_zones (
+  id       uuid primary key default gen_random_uuid(),
+  name     text not null check (char_length(name) between 1 and 60),
+  fee      int  not null default 0 check (fee between 0 and 100000),
+  active   boolean not null default true,
+  position int not null default 0
+);
+insert into public.ns_delivery_zones(name, fee, position)
+select * from (values ('Mbour 3 et environs', 500, 1), ('Thiès ville', 1000, 2), ('Périphérie de Thiès', 1500, 3)) v
+where not exists (select 1 from public.ns_delivery_zones);
+
+alter table public.ns_orders add column if not exists fulfillment text not null default 'retrait';
+alter table public.ns_orders add column if not exists delivery_zone text not null default '';
+alter table public.ns_orders add column if not exists delivery_address text not null default '';
+alter table public.ns_orders add column if not exists delivery_fee int not null default 0;
+alter table public.ns_orders add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table public.ns_orders add column if not exists payment_ref text not null default '';
+do $$ begin
+  alter table public.ns_orders add constraint ns_orders_fulfillment_chk check (fulfillment in ('retrait','livraison'));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.ns_orders add constraint ns_orders_v2_len_chk check (char_length(delivery_address) <= 300 and char_length(payment_ref) <= 100 and delivery_fee >= 0);
+exception when duplicate_object then null; end $$;
+create index if not exists ns_orders_user_idx on public.ns_orders(user_id);
+
+-- Garde-fou : les frais de livraison sont figés comme le total
+create or replace function public.ns_orders_guard() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.total <> old.total or new.items_count <> old.items_count or new.number <> old.number or new.delivery_fee <> old.delivery_fee
+     or new.tracking_token <> old.tracking_token or new.created_at <> old.created_at or new.user_id is distinct from old.user_id then
+    raise exception 'Les montants et l''identifiant d''une commande ne sont pas modifiables';
+  end if;
+  if old.status in ('annulee','recuperee') and new.status <> old.status then
+    raise exception 'Cette commande est clôturée';
+  end if;
+  new.updated_at := now();
+  if new.status <> old.status then
+    insert into public.ns_order_history(order_id, status, changed_by) values (new.id, new.status, auth.uid());
+    if new.status = 'annulee' then
+      update public.ns_formats f set stock = f.stock + i.qty
+        from public.ns_order_items i
+       where i.order_id = new.id and i.format_id = f.id and f.stock is not null;
+    end if;
+  end if;
+  return new;
+end $$;
+revoke all on function public.ns_orders_guard() from public, anon, authenticated;
+
+drop function if exists public.ns_place_order(text, text, text, date, text, jsonb, text);
+create or replace function public.ns_place_order(
+  p_name text, p_phone text, p_note text, p_day date, p_slot text,
+  p_items jsonb, p_payment text default 'retrait',
+  p_fulfillment text default 'retrait', p_zone uuid default null, p_address text default ''
+) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare
+  s        public.ns_settings%rowtype;
+  z        public.ns_delivery_zones%rowtype;
+  v_phone  text := public.ns_normalize_phone(p_phone);
+  v_name   text := btrim(coalesce(p_name,''));
+  v_note   text := left(btrim(coalesce(p_note,'')), 500);
+  v_addr   text := left(btrim(coalesce(p_address,'')), 300);
+  v_now    timestamp := (now() at time zone 'Africa/Dakar');
+  v_today  date := v_now::date;
+  v_total  int := 0;
+  v_count  int := 0;
+  v_fee    int := 0;
+  v_order  uuid;
+  v_number text;
+  v_token  uuid;
+  it       jsonb;
+  f        record;
+  v_qty    int;
+  v_lines  jsonb := '[]'::jsonb;
+begin
+  select * into s from public.ns_settings where id = 1;
+  if not s.accepting_orders then raise exception 'NS_FERME: Les commandes sont momentanément suspendues'; end if;
+  if char_length(v_name) < 2 or char_length(v_name) > 80 then raise exception 'NS_NOM: Indiquez votre nom'; end if;
+  if v_phone is null then raise exception 'NS_TEL: Numéro de téléphone sénégalais invalide'; end if;
+  if p_payment not in ('retrait','wave','orange_money','especes') then raise exception 'NS_PAIEMENT: Moyen de paiement inconnu'; end if;
+  if p_fulfillment not in ('retrait','livraison') then raise exception 'NS_MODE: Mode de récupération inconnu'; end if;
+  if p_fulfillment = 'livraison' then
+    if not s.delivery_enabled then raise exception 'NS_LIVRAISON: La livraison à domicile est momentanément indisponible'; end if;
+    select * into z from public.ns_delivery_zones where id = p_zone and active;
+    if not found then raise exception 'NS_ZONE: Choisissez votre zone de livraison'; end if;
+    if char_length(v_addr) < 5 then raise exception 'NS_ADRESSE: Indiquez votre adresse de livraison'; end if;
+    v_fee := z.fee;
+  end if;
+
+  if p_day < v_today or p_day >= v_today + s.days_ahead then raise exception 'NS_JOUR: Ce jour n''est pas ouvert à la commande'; end if;
+  if extract(dow from p_day)::int = any(s.closed_weekdays) or exists (select 1 from public.ns_closed_dates where day = p_day) then
+    raise exception 'NS_JOUR: Nous sommes fermés ce jour-là';
+  end if;
+  if not (p_slot = any(s.slot_times)) or exists (select 1 from public.ns_closed_slots where day = p_day and slot = p_slot) then
+    raise exception 'NS_CRENEAU: Ce créneau n''est pas disponible';
+  end if;
+  if p_day = v_today and (p_day + p_slot::time) < v_now + make_interval(mins => s.lead_minutes) then
+    raise exception 'NS_CRENEAU: Ce créneau est trop proche, choisissez-en un plus tard';
+  end if;
+
+  if (select count(*) from public.ns_orders where phone = v_phone and status <> 'annulee' and created_at > now() - interval '1 hour') >= 4 then
+    raise exception 'NS_LIMITE: Trop de commandes récentes avec ce numéro, contactez-nous sur WhatsApp';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('ns_slot:' || p_day || ' ' || p_slot));
+  if (select count(*) from public.ns_orders where pickup_day = p_day and pickup_slot = p_slot and status <> 'annulee') >= s.slot_capacity then
+    raise exception 'NS_COMPLET: Ce créneau vient d''être complet, choisissez-en un autre';
+  end if;
+
+  if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 or jsonb_array_length(p_items) > 30 then
+    raise exception 'NS_PANIER: Votre panier est vide';
+  end if;
+
+  for it in select * from jsonb_array_elements(p_items) loop
+    v_qty := (it->>'qty')::int;
+    if v_qty is null or v_qty < 1 or v_qty > 99 then raise exception 'NS_QTE: Quantité invalide'; end if;
+    select fo.id, fo.name as fname, fo.price, fo.stock, p.id as pid, p.name as pname
+      into f
+      from public.ns_formats fo join public.ns_products p on p.id = fo.product_id
+     where fo.id = (it->>'format_id')::uuid and fo.active and p.active
+       for update of fo;
+    if not found then raise exception 'NS_PRODUIT: Un produit de votre panier n''est plus disponible'; end if;
+    if f.stock is not null then
+      if f.stock < v_qty then raise exception 'NS_STOCK: Stock insuffisant pour % (%) : il en reste %', f.pname, f.fname, f.stock; end if;
+      update public.ns_formats set stock = stock - v_qty where id = f.id;
+    end if;
+    v_lines := v_lines || jsonb_build_object('pid', f.pid, 'fid', f.id, 'pname', f.pname, 'fname', f.fname, 'price', f.price, 'qty', v_qty);
+    v_total := v_total + f.price * v_qty;
+    v_count := v_count + v_qty;
+  end loop;
+
+  if p_fulfillment = 'livraison' and v_total < s.delivery_min_order then
+    raise exception 'NS_MINIMUM: Commande minimum de % FCFA pour la livraison', s.delivery_min_order;
+  end if;
+
+  v_number := 'NS-' || to_char(v_today, 'YYMMDD') || '-' || nextval('public.ns_order_seq');
+  insert into public.ns_orders(number, customer_name, phone, note, pickup_day, pickup_slot, total, items_count, payment_method,
+                               fulfillment, delivery_zone, delivery_address, delivery_fee, user_id)
+       values (v_number, v_name, v_phone, v_note, p_day, p_slot, v_total + v_fee, v_count, p_payment,
+               p_fulfillment, coalesce(z.name, ''), case when p_fulfillment = 'livraison' then v_addr else '' end, v_fee, auth.uid())
+    returning id, tracking_token into v_order, v_token;
+  insert into public.ns_order_items(order_id, product_id, format_id, product_name, format_name, unit_price, qty)
+  select v_order, (l->>'pid')::uuid, (l->>'fid')::uuid, l->>'pname', l->>'fname', (l->>'price')::int, (l->>'qty')::int
+    from jsonb_array_elements(v_lines) l;
+  insert into public.ns_order_history(order_id, status) values (v_order, 'nouvelle');
+
+  return jsonb_build_object('number', v_number, 'token', v_token, 'total', v_total + v_fee);
+end $$;
+grant execute on function public.ns_place_order(text, text, text, date, text, jsonb, text, text, uuid, text) to anon, authenticated;
+
+create or replace function public.ns_track_order(p_token uuid) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'number', o.number, 'token', o.tracking_token, 'status', o.status,
+    'customer_name', o.customer_name, 'pickup_day', o.pickup_day, 'pickup_slot', o.pickup_slot,
+    'total', o.total, 'note', o.note, 'paid', o.paid, 'created_at', o.created_at, 'payment_method', o.payment_method,
+    'fulfillment', o.fulfillment, 'delivery_zone', o.delivery_zone, 'delivery_address', o.delivery_address, 'delivery_fee', o.delivery_fee,
+    'items', coalesce((select jsonb_agg(jsonb_build_object('product_name', i.product_name, 'format_name', i.format_name,
+                         'unit_price', i.unit_price, 'qty', i.qty) order by i.id) from public.ns_order_items i where i.order_id = o.id), '[]'::jsonb),
+    'history', coalesce((select jsonb_agg(jsonb_build_object('status', h.status, 'at', h.changed_at) order by h.changed_at)
+                         from public.ns_order_history h where h.order_id = o.id), '[]'::jsonb))
+  from public.ns_orders o where o.tracking_token = p_token;
+$$;
+
+-- Zones de livraison : lecture publique des zones actives, gestion admin
+alter table public.ns_delivery_zones enable row level security;
+grant select on public.ns_delivery_zones to anon;
+grant select, insert, update, delete on public.ns_delivery_zones to authenticated;
+drop policy if exists ns_admin_all on public.ns_delivery_zones;
+create policy ns_admin_all on public.ns_delivery_zones for all to authenticated using (public.ns_is_admin()) with check (public.ns_is_admin());
+drop policy if exists ns_public_read on public.ns_delivery_zones;
+create policy ns_public_read on public.ns_delivery_zones for select to anon, authenticated using (active);
+
+-- Comptes clients (facultatifs) : chaque client lit uniquement ses propres commandes
+drop policy if exists ns_customer_read on public.ns_orders;
+create policy ns_customer_read on public.ns_orders for select to authenticated using (user_id = auth.uid());
+drop policy if exists ns_customer_read on public.ns_order_items;
+create policy ns_customer_read on public.ns_order_items for select to authenticated
+  using (exists (select 1 from public.ns_orders o where o.id = order_id and o.user_id = auth.uid()));
+drop policy if exists ns_customer_read on public.ns_order_history;
+create policy ns_customer_read on public.ns_order_history for select to authenticated
+  using (exists (select 1 from public.ns_orders o where o.id = order_id and o.user_id = auth.uid()));

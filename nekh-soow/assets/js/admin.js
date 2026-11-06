@@ -15,6 +15,7 @@ const ACTIVE = ['nouvelle', 'confirmee', 'preparation', 'prete'];
 const icon = (id) => `<svg aria-hidden="true"><use href="#a-${id}"/></svg>`;
 const today = () => dakarNow().day;
 const S = () => A.cat.settings;
+const waveLink = (amount) => { const l = S().wave_link; return l ? `${l}${l.includes('?') ? '&' : '?'}amount=${Math.round(amount)}` : ''; };
 
 // ---------------------------------------------------------------------------
 // Données
@@ -112,69 +113,199 @@ function ask(message, { ok = 'Confirmer', danger = false } = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Statistiques communes (tableau de bord, historique, rapport du jour)
+// ---------------------------------------------------------------------------
+const PAY_LBL = { retrait: 'Au retrait / livraison', especes: 'Espèces', wave: 'Wave', orange_money: 'Orange Money' };
+function dayStats(list) {
+  const ok = list.filter(valid);
+  const ca = ok.reduce((a, o) => a + o.total, 0);
+  const paid = ok.filter((o) => o.paid).reduce((a, o) => a + o.total, 0);
+  return {
+    n: ok.length, ca, paid, due: ca - paid, cancelled: list.length - ok.length,
+    items: ok.reduce((a, o) => a + o.items_count, 0), deliveries: ok.filter((o) => o.fulfillment === 'livraison').length,
+    fees: ok.reduce((a, o) => a + (o.delivery_fee || 0), 0), avg: ok.length ? Math.round(ca / ok.length) : 0,
+    clients: new Set(ok.map((o) => o.phone)).size,
+  };
+}
+const byDay = (list) => list.reduce((m, o) => { (m[o.pickup_day] ||= []).push(o); return m; }, {});
+const countUp = (v, fmt = 'n') => `<span data-count="${Math.round(v)}" data-fmt="${fmt}">${fmt === 'm' ? money(0) : 0}</span>`;
+function animateCounts(root = document) {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $$('[data-count]', root).forEach((el) => {
+    const to = Number(el.dataset.count); const fmt = el.dataset.fmt; const f = (v) => (fmt === 'm' ? money(v) : Math.round(v).toLocaleString('fr-FR'));
+    if (reduce || !to) { el.textContent = f(to); return; }
+    const t0 = performance.now(); const dur = 900;
+    const step = (t) => { const k = Math.min(1, (t - t0) / dur); el.textContent = f(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+const delta = (a, b, suffix) => {
+  if (!b) return '<div class="delta muted">—</div>';
+  const p = Math.round(((a - b) / b) * 100);
+  return `<div class="delta ${p >= 0 ? 'up' : 'down'}">${p >= 0 ? '▲' : '▼'} ${Math.abs(p)} % ${suffix}</div>`;
+};
+function barChart(days, vals, { clickable = true, H = 200 } = {}) {
+  const t = today(); const max = Math.max(1, ...vals); const W = 700; const bw = W / days.length;
+  const every = Math.ceil(days.length / 10);
+  return `<svg class="chart" viewBox="0 0 ${W} ${H + 24}" role="img" aria-label="Chiffre d'affaires par jour">
+    ${[0.25, 0.5, 0.75, 1].map((r) => `<line class="grid-l" x1="0" x2="${W}" y1="${H - r * (H - 20)}" y2="${H - r * (H - 20)}"/>`).join('')}
+    <text x="0" y="12" class="axis">${money(max)}</text>
+    ${vals.map((v, i) => { const h = Math.max(v ? 3 : 1, (v / max) * (H - 20)); return `<g class="bar-g ${clickable ? 'clk' : ''}" ${clickable ? `data-action="open-day" data-d="${days[i]}" tabindex="0" role="button" aria-label="${fmtDay(days[i])} : ${money(v)}"` : ''}>
+      <rect class="bar-hit" x="${i * bw}" y="0" width="${bw}" height="${H}" fill="transparent"/>
+      <rect class="bar-r ${days[i] === t ? 'today' : ''}" style="animation-delay:${i * 25}ms" x="${i * bw + bw * 0.14}" y="${H - h}" width="${bw * 0.72}" height="${h}" rx="${Math.min(5, bw * 0.2)}"><title>${fmtDay(days[i])} : ${money(v)}</title></rect></g>`; }).join('')}
+    ${days.map((k, i) => (i % every === (days.length - 1) % every ? `<text x="${i * bw + bw / 2}" y="${H + 18}" text-anchor="middle">${fmtDay(k, { day: 'numeric', month: 'short' })}</text>` : '')).join('')}
+  </svg>`;
+}
+
+// ---------------------------------------------------------------------------
 // Tableau de bord
 // ---------------------------------------------------------------------------
 function pageDashboard() {
-  const t = today(); const yd = addDays(t, -1);
-  const day = (k) => A.orders.filter((o) => o.pickup_day === k && valid(o));
-  const sum = (arr) => arr.reduce((a, o) => a + o.total, 0);
-  const tod = day(t), yes = day(yd);
-  const toPrep = A.orders.filter((o) => o.pickup_day >= t && ['nouvelle', 'confirmee', 'preparation'].includes(o.status));
-  const last30 = A.orders.filter((o) => valid(o) && o.pickup_day > addDays(t, -30) && o.pickup_day <= t);
-  const prev30 = A.orders.filter((o) => valid(o) && o.pickup_day > addDays(t, -60) && o.pickup_day <= addDays(t, -30));
-  const avg = last30.length ? sum(last30) / last30.length : 0; const avgPrev = prev30.length ? sum(prev30) / prev30.length : 0;
-  const clients = new Set(last30.map((o) => o.phone)).size;
-  const delta = (a, b, suffix = 'vs hier') => {
-    if (!b) return `<div class="delta muted">—</div>`;
-    const p = Math.round(((a - b) / b) * 100);
-    return `<div class="delta ${p >= 0 ? 'up' : 'down'}">${p >= 0 ? '▲' : '▼'} ${Math.abs(p)} % ${suffix}</div>`;
-  };
+  const t = today(); const P = A.period || 14;
+  const inRange = (o, a, b) => o.pickup_day >= a && o.pickup_day <= b;
+  const from = addDays(t, -(P - 1)); const pFrom = addDays(from, -P); const pTo = addDays(from, -1);
+  const cur = A.orders.filter((o) => inRange(o, from, t)); const prev = A.orders.filter((o) => inRange(o, pFrom, pTo));
+  const sc = dayStats(cur); const sp = dayStats(prev);
+  const tod = dayStats(A.orders.filter((o) => o.pickup_day === t)); const yes = dayStats(A.orders.filter((o) => o.pickup_day === addDays(t, -1)));
   const news = A.orders.filter((o) => o.status === 'nouvelle').sort(byPick);
-
-  // Graphique 14 jours
-  const days = Array.from({ length: 14 }, (_, i) => addDays(t, i - 13));
-  const vals = days.map((k) => sum(day(k)));
-  const max = Math.max(1, ...vals); const W = 700, H = 200, bw = W / days.length;
-  const nice = Math.ceil(max / 5000) * 5000 || 5000;
-  const chart = `<svg class="chart" viewBox="0 0 ${W} ${H + 24}" role="img" aria-label="Chiffre d'affaires des 14 derniers jours">
-    ${[0, .5, 1].map((r) => `<line class="grid-l" x1="0" x2="${W}" y1="${H - r * H * (max / nice)}" y2="${H - r * H * (max / nice)}"/>`).join('')}
-    ${vals.map((v, i) => { const h = Math.max(2, (v / max) * (H - 20)); return `<rect class="bar-r ${days[i] === t ? 'today' : ''}" x="${i * bw + 6}" y="${H - h}" width="${bw - 12}" height="${h}" rx="5"><title>${fmtDay(days[i])} : ${money(v)}</title></rect>`; }).join('')}
-    ${days.map((k, i) => (i % 2 === 1 || days.length <= 7 ? `<text x="${i * bw + bw / 2}" y="${H + 18}" text-anchor="middle">${fmtDay(k, { day: 'numeric', month: 'short' })}</text>` : '')).join('')}
-  </svg>`;
-
-  // Top produits (30 jours)
-  const top = {}; last30.forEach((o) => o.items.forEach((i) => { top[i.product_name] = (top[i.product_name] || 0) + i.qty; }));
-  const topArr = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 6); const topMax = topArr[0]?.[1] || 1;
-
-  // Répartition des statuts aujourd'hui
+  const toPrep = A.orders.filter((o) => o.pickup_day >= t && ['nouvelle', 'confirmee', 'preparation'].includes(o.status));
+  const days = Array.from({ length: P }, (_, i) => addDays(from, i)); const bd = byDay(cur);
+  const vals = days.map((k) => dayStats(bd[k] || []).ca);
+  const top = {}; cur.filter(valid).forEach((o) => o.items.forEach((i) => { const r = (top[i.product_name] ||= { q: 0, ca: 0 }); r.q += i.qty; r.ca += i.qty * i.unit_price; }));
+  const topArr = Object.entries(top).sort((a, b) => b[1].ca - a[1].ca).slice(0, 6); const topMax = topArr[0]?.[1].ca || 1;
+  const pays = {}; cur.filter(valid).forEach((o) => { pays[o.payment_method] = (pays[o.payment_method] || 0) + o.total; });
   const stToday = STATUSES.map((s) => ({ ...s, n: A.orders.filter((o) => o.pickup_day === t && o.status === s.k).length })).filter((s) => s.n);
   const colors = { nouvelle: '#2f6fd6', confirmee: '#1b3f8b', preparation: '#d9951f', prete: '#1f8a5b', recuperee: '#9aa1b5', annulee: '#c23a2e' };
   const tot = stToday.reduce((a, s) => a + s.n, 0); let acc = 0;
-  const donut = tot ? `<svg viewBox="0 0 42 42" width="130" height="130" aria-hidden="true">${stToday.map((s) => { const v = (s.n / tot) * 100; const el = `<circle r="15.915" cx="21" cy="21" fill="none" stroke="${colors[s.k]}" stroke-width="6" stroke-dasharray="${v} ${100 - v}" stroke-dashoffset="${25 - acc}"/>`; acc += v; return el; }).join('')}
+  const donut = tot ? `<svg viewBox="0 0 42 42" width="140" height="140" aria-hidden="true" class="donut">${stToday.map((s) => { const v = (s.n / tot) * 100; const el = `<circle r="15.915" cx="21" cy="21" fill="none" stroke="${colors[s.k]}" stroke-width="6" stroke-dasharray="${v} ${100 - v}" stroke-dashoffset="${25 - acc}"/>`; acc += v; return el; }).join('')}
     <text x="21" y="23.5" text-anchor="middle" font-size="8" font-weight="800" fill="#0e1b3d">${tot}</text></svg>` : '';
-
   const upcoming = A.orders.filter((o) => o.pickup_day >= t && ACTIVE.includes(o.status)).sort(byPick).slice(0, 7);
+  const best = days.reduce((b, k, i) => (vals[i] > (b.v || 0) ? { k, v: vals[i] } : b), {});
   return `
   ${news.length ? `<a class="panel mb alert-new" href="#/commandes" data-action="filter-new">
-     <span style="font-size:28px">🔔</span><div style="flex:1"><b>${news.length} nouvelle${news.length > 1 ? 's' : ''} commande${news.length > 1 ? 's' : ''} à confirmer</b><div class="muted" style="font-size:14px">La plus ancienne : ${esc(news[0].customer_name)}, retrait ${relDay(news[0].pickup_day).toLowerCase()} à ${fmtSlot(news[0].pickup_slot)}</div></div>${icon('arrow')}</a>` : ''}
-  <div class="grid g4 mb">
-    <div class="panel kpi"><div class="ic g">${icon('cash')}</div><div class="lbl">Chiffre d’affaires du jour</div><div class="val">${money(sum(tod))}</div>${delta(sum(tod), sum(yes))}</div>
-    <div class="panel kpi"><div class="ic">${icon('box')}</div><div class="lbl">Commandes du jour</div><div class="val">${tod.length}</div>${delta(tod.length, yes.length)}</div>
-    <div class="panel kpi"><div class="ic o">${icon('hour')}</div><div class="lbl">À préparer</div><div class="val">${toPrep.length}</div><div class="delta muted">aujourd’hui et à venir</div></div>
-    <div class="panel kpi"><div class="ic r">${icon('cart')}</div><div class="lbl">Panier moyen · 30 j</div><div class="val">${money(avg)}</div>${delta(avg, avgPrev, 'vs 30 j préc.')}</div>
+     <span class="bell-ring">🔔</span><div style="flex:1"><b>${news.length} nouvelle${news.length > 1 ? 's' : ''} commande${news.length > 1 ? 's' : ''} à confirmer</b><div class="muted" style="font-size:14px">La plus ancienne : ${esc(news[0].customer_name)}, ${news[0].fulfillment === 'livraison' ? 'livraison' : 'retrait'} ${relDay(news[0].pickup_day).toLowerCase()} à ${fmtSlot(news[0].pickup_slot)}</div></div>${icon('arrow')}</a>` : ''}
+  <div class="panel mb today-strip stagger">
+    <div><span class="lbl">Aujourd’hui</span><b>${countUp(tod.ca, 'm')}</b>${delta(tod.ca, yes.ca, 'vs hier')}</div>
+    <div><span class="lbl">Commandes</span><b>${countUp(tod.n)}</b>${delta(tod.n, yes.n, 'vs hier')}</div>
+    <div><span class="lbl">À préparer</span><b>${countUp(toPrep.length)}</b><div class="delta muted">aujourd’hui et à venir</div></div>
+    <div><span class="lbl">Reste à encaisser</span><b>${countUp(tod.due, 'm')}</b><div class="delta muted">sur les commandes du jour</div></div>
+    <button class="btn btn-sm btn-light" type="button" data-action="open-day" data-d="${t}">Voir le détail du jour ${icon('arrow')}</button>
+  </div>
+  <div class="toolbar"><h2 style="font-size:18px" class="grow">Période</h2>
+    <div class="seg" role="group" aria-label="Période">${[[7, '7 jours'], [14, '14 jours'], [30, '30 jours'], [60, '60 jours']].map(([k, l]) => `<button type="button" data-action="period" data-p="${k}" aria-pressed="${P === k}">${l}</button>`).join('')}</div></div>
+  <div class="grid g4 mb stagger">
+    <div class="panel kpi"><div class="ic g">${icon('cash')}</div><div class="lbl">Chiffre d’affaires</div><div class="val">${countUp(sc.ca, 'm')}</div>${delta(sc.ca, sp.ca, `vs ${P} j préc.`)}</div>
+    <div class="panel kpi"><div class="ic">${icon('box')}</div><div class="lbl">Commandes</div><div class="val">${countUp(sc.n)}</div>${delta(sc.n, sp.n, `vs ${P} j préc.`)}</div>
+    <div class="panel kpi"><div class="ic r">${icon('cart')}</div><div class="lbl">Panier moyen</div><div class="val">${countUp(sc.avg, 'm')}</div>${delta(sc.avg, sp.avg, `vs ${P} j préc.`)}</div>
+    <div class="panel kpi"><div class="ic o">${icon('users')}</div><div class="lbl">Clients différents</div><div class="val">${countUp(sc.clients)}</div><div class="delta muted">${sc.deliveries} livraison${sc.deliveries > 1 ? 's' : ''} · ${money(sc.fees)} de frais</div></div>
   </div>
   <div class="grid g-main mb">
-    <div class="panel"><div class="panel-head"><div><h2>Chiffre d’affaires · 14 jours</h2><p>${money(sum(last30))} sur 30 jours · ${last30.length} commandes · ${clients} clients</p></div></div>${chart}</div>
-    <div class="panel"><div class="panel-head"><h2>Prochains retraits</h2><a class="link" href="#/commandes">Tout voir</a></div>
-      <div class="upcoming">${upcoming.map((o) => `<a class="up-row" href="#/commandes" data-action="open-order" data-id="${o.id}"><span class="t">${fmtSlot(o.pickup_slot)}</span><div><b>${esc(o.customer_name)}</b><small>${o.pickup_day === t ? '' : relDay(o.pickup_day) + ' · '}${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></div><span class="badge st-${o.status}">${ST[o.status].label}</span></a>`).join('') || '<div class="empty"><div class="big">☕</div><p>Aucun retrait prévu.</p></div>'}</div>
+    <div class="panel"><div class="panel-head"><div><h2>Chiffre d’affaires par jour</h2><p>Touchez une barre pour vérifier les ventes de la journée${best.k ? ` · meilleur jour : ${fmtDay(best.k, { weekday: 'short', day: 'numeric', month: 'short' })} (${money(best.v)})` : ''}</p></div><a class="link" href="#/historique">Historique ${icon('arrow')}</a></div>${barChart(days, vals)}
+      <div class="money-split"><div><span class="dot g"></span>Encaissé <b>${money(sc.paid)}</b></div><div><span class="dot o"></span>À encaisser <b>${money(sc.due)}</b></div><div><span class="dot r"></span>Annulées <b>${sc.cancelled}</b></div></div>
+      <div class="meter big"><i style="width:${sc.ca ? (sc.paid / sc.ca) * 100 : 0}%"></i></div></div>
+    <div class="panel"><div class="panel-head"><h2>Prochains retraits & livraisons</h2><a class="link" href="#/commandes">Tout voir</a></div>
+      <div class="upcoming stagger">${upcoming.map((o) => `<a class="up-row" href="#/commandes" data-action="open-order" data-id="${o.id}"><span class="t">${fmtSlot(o.pickup_slot)}</span><div><b>${o.fulfillment === 'livraison' ? '🛵 ' : ''}${esc(o.customer_name)}</b><small>${o.pickup_day === t ? '' : relDay(o.pickup_day) + ' · '}${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></div><span class="badge st-${o.status}">${ST[o.status].label}</span></a>`).join('') || '<div class="empty"><div class="big">☕</div><p>Aucun retrait prévu.</p></div>'}</div>
     </div>
   </div>
-  <div class="grid g2">
-    <div class="panel"><div class="panel-head"><h2>Meilleures ventes · 30 jours</h2></div>
-      <div class="ranks">${topArr.map(([n, q]) => `<div class="rank"><div class="top"><span>${esc(n)}</span><b>${q} vendus</b></div><div class="meter"><i style="width:${(q / topMax) * 100}%"></i></div></div>`).join('') || '<p class="muted">Pas encore de ventes.</p>'}</div></div>
-    <div class="panel"><div class="panel-head"><h2>Commandes du jour par statut</h2></div>
-      ${tot ? `<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">${donut}<div class="donut-legend" style="flex:1;min-width:160px">${stToday.map((s) => `<div><i style="background:${colors[s.k]}"></i>${s.label}<b>${s.n}</b></div>`).join('')}</div></div>` : '<p class="muted">Aucune commande aujourd’hui pour l’instant.</p>'}</div>
+  <div class="grid g3">
+    <div class="panel"><div class="panel-head"><h2>Meilleures ventes</h2><p>${P} jours</p></div>
+      <div class="ranks">${topArr.map(([n, r], i) => `<div class="rank"><div class="top"><span>${i + 1}. ${esc(n)}</span><b>${money(r.ca)}</b></div><div class="meter"><i style="width:${(r.ca / topMax) * 100}%;animation-delay:${i * 80}ms"></i></div><small class="muted">${r.q} vendus</small></div>`).join('') || '<p class="muted">Pas encore de ventes.</p>'}</div></div>
+    <div class="panel"><div class="panel-head"><h2>Moyens de paiement</h2><p>${P} jours</p></div>
+      <div class="ranks">${Object.entries(pays).sort((a, b) => b[1] - a[1]).map(([k, v], i) => `<div class="rank"><div class="top"><span>${PAY_LBL[k] || k}</span><b>${money(v)}</b></div><div class="meter pay"><i style="width:${sc.ca ? (v / sc.ca) * 100 : 0}%;animation-delay:${i * 80}ms"></i></div></div>`).join('') || '<p class="muted">—</p>'}</div></div>
+    <div class="panel"><div class="panel-head"><h2>Aujourd’hui par statut</h2></div>
+      ${tot ? `<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">${donut}<div class="donut-legend" style="flex:1;min-width:140px">${stToday.map((s) => `<div><i style="background:${colors[s.k]}"></i>${s.label}<b>${s.n}</b></div>`).join('')}</div></div>` : '<p class="muted">Aucune commande aujourd’hui pour l’instant.</p>'}</div>
   </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Historique : vérification des journées passées
+// ---------------------------------------------------------------------------
+async function ensureHistory(from) {
+  if (A.histFrom && A.histFrom <= from) return;
+  const extra = await A.api.listOrders({ from, to: addDays(today(), -61) });
+  extra.forEach((o) => { if (!A.orders.find((x) => x.id === o.id)) A.orders.push(o); });
+  A.histFrom = from;
+}
+function histRange() {
+  const t = today(); const r = A.hr || '30';
+  if (r === 'custom') return [A.hFrom || addDays(t, -30), A.hTo || t];
+  return [addDays(t, -(Number(r) - 1)), t];
+}
+function pageHistory() {
+  const [from, to] = histRange();
+  if (from < addDays(today(), -60) && !(A.histFrom && A.histFrom <= from)) {
+    ensureHistory(from).then(() => render(false)).catch((e) => toast(errMsg(e), 'error'));
+    return '<div class="spinner"></div>';
+  }
+  const list = A.orders.filter((o) => o.pickup_day >= from && o.pickup_day <= to); const bd = byDay(list);
+  const days = []; for (let d = to; d >= from; d = addDays(d, -1)) days.push(d);
+  const rows = days.map((d) => ({ d, ...dayStats(bd[d] || []) })); const T = dayStats(list);
+  const maxCa = Math.max(1, ...rows.map((r) => r.ca));
+  return `<div class="toolbar">
+      <div class="seg" role="group" aria-label="Période">${[['7', '7 jours'], ['30', '30 jours'], ['90', '90 jours'], ['365', '1 an'], ['custom', 'Dates…']].map(([k, l]) => `<button type="button" data-action="hist-range" data-r="${k}" aria-pressed="${(A.hr || '30') === k}">${l}</button>`).join('')}</div>
+      ${(A.hr || '30') === 'custom' ? `<label class="muted">Du <input type="date" data-action="h-from" value="${from}"></label><label class="muted">au <input type="date" data-action="h-to" value="${to}"></label>` : ''}
+      <span class="grow"></span>
+      <button class="btn btn-sm btn-light" type="button" data-action="hist-csv">${icon('dl')} Export CSV</button>
+      <button class="btn btn-sm btn-light" type="button" data-action="print">${icon('print')} Imprimer</button>
+    </div>
+    <div class="print-only"><h2>Historique des ventes · ${fmtDay(from)} → ${fmtDay(to)}</h2></div>
+    <div class="grid g4 mb stagger">
+      <div class="panel kpi"><div class="lbl">Chiffre d’affaires</div><div class="val">${countUp(T.ca, 'm')}</div><div class="delta muted">${T.n} commandes · ${T.items} articles</div></div>
+      <div class="panel kpi"><div class="lbl">Encaissé</div><div class="val" style="color:var(--green)">${countUp(T.paid, 'm')}</div><div class="delta muted">${T.ca ? Math.round((T.paid / T.ca) * 100) : 0} % du CA</div></div>
+      <div class="panel kpi"><div class="lbl">Reste à encaisser</div><div class="val" style="color:${T.due ? '#9a5b00' : 'inherit'}">${countUp(T.due, 'm')}</div><div class="delta muted">commandes non marquées payées</div></div>
+      <div class="panel kpi"><div class="lbl">Moyenne par jour</div><div class="val">${countUp(rows.length ? T.ca / rows.length : 0, 'm')}</div><div class="delta muted">${T.cancelled} annulée${T.cancelled > 1 ? 's' : ''} · ${T.deliveries} livraisons</div></div>
+    </div>
+    <div class="panel"><div class="panel-head"><div><h2>Journée par journée</h2><p>Touchez une journée pour vérifier chaque vente</p></div></div>
+      <div class="table-wrap"><table class="t days"><thead><tr><th>Jour</th><th class="n">Commandes</th><th class="n">Articles</th><th>Chiffre d’affaires</th><th class="n">Encaissé</th><th class="n">À encaisser</th><th class="n">Annulées</th><th></th></tr></thead>
+      <tbody>${rows.map((r, i) => `<tr class="${r.n ? 'clk' : 'empty-day'}" ${r.n || r.cancelled ? `data-action="open-day" data-d="${r.d}" tabindex="0"` : ''} style="animation-delay:${Math.min(i, 20) * 20}ms">
+        <td><b>${relDay(r.d)}</b><br><small class="muted">${fmtDay(r.d, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</small></td>
+        <td class="n">${r.n || '<span class="muted">0</span>'}</td><td class="n">${r.items || ''}</td>
+        <td><div class="cell-bar"><span>${r.ca ? money(r.ca) : '<span class="muted">—</span>'}</span><i style="width:${(r.ca / maxCa) * 100}%"></i></div></td>
+        <td class="n" style="color:var(--green)">${r.paid ? money(r.paid) : ''}</td><td class="n" style="color:#9a5b00">${r.due ? money(r.due) : ''}</td>
+        <td class="n">${r.cancelled || ''}</td><td>${r.n || r.cancelled ? icon('arrow') : ''}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${T.n}</td><td class="n">${T.items}</td><td>${money(T.ca)}</td><td class="n">${money(T.paid)}</td><td class="n">${money(T.due)}</td><td class="n">${T.cancelled}</td><td></td></tr></tfoot></table></div></div>`;
+}
+function histCsv() {
+  const [from, to] = histRange(); const bd = byDay(A.orders.filter((o) => o.pickup_day >= from && o.pickup_day <= to));
+  const rows = [['Jour', 'Commandes', 'Articles', 'Chiffre d’affaires (FCFA)', 'Encaissé', 'À encaisser', 'Annulées', 'Livraisons', 'Frais de livraison']];
+  for (let d = to; d >= from; d = addDays(d, -1)) { const s = dayStats(bd[d] || []); rows.push([d, s.n, s.items, s.ca, s.paid, s.due, s.cancelled, s.deliveries, s.fees]); }
+  const csv = '﻿' + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  download(`ventes-${from}-au-${to}.csv`, csv, 'text/csv;charset=utf-8'); toast('Historique exporté', 'success');
+}
+
+// Rapport détaillé d'une journée : chaque vente est vérifiable
+function openDay(d) {
+  const list = A.orders.filter((o) => o.pickup_day === d).sort(byPick); const s = dayStats(list);
+  const prods = {}; list.filter(valid).forEach((o) => o.items.forEach((i) => { const k = `${i.product_name} (${i.format_name})`; const r = (prods[k] ||= { q: 0, ca: 0 }); r.q += i.qty; r.ca += i.qty * i.unit_price; }));
+  const pays = {}; list.filter(valid).forEach((o) => { const k = o.paid ? (PAY_LBL[o.payment_method] || o.payment_method) : 'Non encaissé'; pays[k] = (pays[k] || 0) + o.total; });
+  A.modalDay = d;
+  openModal({
+    title: `${relDay(d)} · ${fmtDay(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`, wide: true,
+    body: `<div class="grid g4 mb day-kpis">
+        <div class="mini"><span>Chiffre d’affaires</span><b>${countUp(s.ca, 'm')}</b></div>
+        <div class="mini"><span>Commandes</span><b>${countUp(s.n)}</b></div>
+        <div class="mini"><span>Encaissé</span><b style="color:var(--green)">${countUp(s.paid, 'm')}</b></div>
+        <div class="mini"><span>À encaisser</span><b style="color:#9a5b00">${countUp(s.due, 'm')}</b></div></div>
+      <p class="muted mb" style="font-size:13.5px">${s.items} articles · panier moyen ${money(s.avg)} · ${s.deliveries} livraison(s) (${money(s.fees)} de frais) · ${s.cancelled} annulée(s), non comptée(s)</p>
+      <div class="grid g2 mb">
+        <div><h3 class="h3">Par produit</h3><table class="t"><tbody>${Object.entries(prods).sort((a, b) => b[1].ca - a[1].ca).map(([k, r]) => `<tr><td>${esc(k)}</td><td class="n">${r.q}</td><td class="n">${money(r.ca)}</td></tr>`).join('') || '<tr><td class="muted">—</td></tr>'}</tbody></table></div>
+        <div><h3 class="h3">Par encaissement</h3><table class="t"><tbody>${Object.entries(pays).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="n">${money(v)}</td></tr>`).join('') || '<tr><td class="muted">—</td></tr>'}</tbody></table></div>
+      </div>
+      <h3 class="h3">Toutes les ventes de la journée</h3>
+      <div class="table-wrap"><table class="t"><thead><tr><th>Heure</th><th>N°</th><th>Client</th><th>Articles</th><th class="n">Total</th><th>Paiement</th><th>Statut</th></tr></thead><tbody>
+        ${list.map((o) => `<tr class="clk ${o.status === 'annulee' ? 'cancel' : ''}" data-action="open-order" data-id="${o.id}"><td><b>${fmtSlot(o.pickup_slot)}</b>${o.fulfillment === 'livraison' ? '<br>🛵' : ''}</td><td><small>${esc(o.number)}</small></td><td>${esc(o.customer_name)}<br><small class="muted">${esc(fmtPhone(o.phone))}</small></td>
+          <td><small>${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></td><td class="n"><b>${money(o.total)}</b></td>
+          <td>${o.paid ? `<span class="paid">✓ ${PAY_LBL[o.payment_method] || ''}</span>` : '<span class="muted">À encaisser</span>'}${o.payment_ref ? `<br><small>Réf. ${esc(o.payment_ref)}</small>` : ''}</td><td><span class="badge st-${o.status}">${ST[o.status].label}</span></td></tr>`).join('') || '<tr><td colspan="7" class="muted">Aucune commande ce jour-là.</td></tr>'}
+      </tbody><tfoot><tr><td colspan="4">Total (hors annulées)</td><td class="n">${money(s.ca)}</td><td colspan="2"></td></tr></tfoot></table></div>`,
+    foot: `<button class="btn btn-light btn-sm" type="button" data-action="day-csv" data-d="${d}">${icon('dl')} CSV du jour</button><button class="btn btn-sm" type="button" data-action="close-modal">Fermer</button>`,
+  });
+  animateCounts($('#modal'));
+}
+function dayCsv(d) {
+  const list = A.orders.filter((o) => o.pickup_day === d).sort(byPick);
+  const rows = [['Numéro', 'Heure', 'Mode', 'Client', 'Téléphone', 'Articles', 'Total', 'Statut', 'Payé', 'Paiement', 'Référence']];
+  list.forEach((o) => rows.push([o.number, o.pickup_slot, o.fulfillment, o.customer_name, fmtPhone(o.phone), o.items.map((i) => `${i.qty} x ${i.product_name} (${i.format_name})`).join(' | '), o.total, ST[o.status].label, o.paid ? 'oui' : 'non', o.payment_method, o.payment_ref || '']));
+  download(`ventes-${d}.csv`, '﻿' + rows.map((r) => r.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
 
 // ---------------------------------------------------------------------------
@@ -203,9 +334,9 @@ function waMessage(o) {
   const s = S(); const fn = firstName(o.customer_name); const when = `${relDay(o.pickup_day).toLowerCase()} à ${fmtSlot(o.pickup_slot)}`;
   const m = {
     nouvelle: `Bonjour ${fn}, nous avons bien reçu votre commande ${o.number} (${money(o.total)}). Retrait ${when}. Merci !`,
-    confirmee: `Bonjour ${fn} 👋 Votre commande ${o.number} est confirmée ✅ Retrait ${when} à ${s.address}. À tout à l’heure !`,
+    confirmee: o.fulfillment === 'livraison' ? `Bonjour ${fn} 👋 Votre commande ${o.number} est confirmée ✅ Livraison ${when} à ${o.delivery_address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''}` : `Bonjour ${fn} 👋 Votre commande ${o.number} est confirmée ✅ Retrait ${when} à ${s.address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''} À tout à l’heure !`,
     preparation: `Bonjour ${fn}, votre commande ${o.number} est en cours de préparation 👩🏾‍🍳 Elle sera prête pour ${fmtSlot(o.pickup_slot)}.`,
-    prete: `Bonne nouvelle ${fn} ! 🛍️ Votre commande ${o.number} est prête. Vous pouvez passer la récupérer (${s.address}). Total à régler : ${money(o.total)}. Merci !`,
+    prete: o.fulfillment === 'livraison' ? `Bonne nouvelle ${fn} ! 🛵 Votre commande ${o.number} est en route vers ${o.delivery_address}. Le livreur vous appelle à l’arrivée. Total : ${money(o.total)}${o.paid ? ' (déjà payé)' : ''}.` : `Bonne nouvelle ${fn} ! 🛍️ Votre commande ${o.number} est prête. Vous pouvez passer la récupérer (${s.address}). Total à régler : ${money(o.total)}. Merci !`,
     recuperee: `Merci ${fn} pour votre commande ! 🙏 Bonne dégustation et à très bientôt chez ${s.shop_name}.`,
     annulee: `Bonjour ${fn}, votre commande ${o.number} a été annulée. N’hésitez pas à nous écrire pour toute question.`,
   };
@@ -217,7 +348,8 @@ function orderCard(o) {
     <div class="hd"><div><div class="num">${esc(o.number)} · ${timeAgo(o.created_at)}</div><div class="who">${esc(o.customer_name)}</div>
       <a class="tel" href="tel:+221${esc(o.phone)}">${icon('phone')}${esc(fmtPhone(o.phone))}</a></div>
       <span class="badge st-${o.status}">${st.icon} ${st.label}</span></div>
-    <ul>${o.items.map((i) => `<li><span><b>${i.qty}×</b> ${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></span><span>${money(i.unit_price * i.qty)}</span></li>`).join('')}</ul>
+    <ul>${o.items.map((i) => `<li><span><b>${i.qty}×</b> ${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></span><span>${money(i.unit_price * i.qty)}</span></li>`).join('')}${o.delivery_fee ? `<li class="muted"><span>Livraison</span><span>${money(o.delivery_fee)}</span></li>` : ''}</ul>
+    ${o.fulfillment === 'livraison' ? `<a class="deliv" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.delivery_address + ', Thiès, Sénégal')}" target="_blank" rel="noopener">🛵 <span><b>Livraison · ${esc(o.delivery_zone)}</b><br>${esc(o.delivery_address)}</span></a>` : ''}
     ${o.note ? `<div class="note">📝 ${esc(o.note)}</div>` : ''}
     ${o.admin_note ? `<div class="note" style="background:#eef3ff;color:var(--navy)">🔒 ${esc(o.admin_note)}</div>` : ''}
     <div class="ft"><div><div class="total">${money(o.total)}</div><div class="meta">${o.paid ? '<span class="paid">✓ Payé</span>' : 'À encaisser'} · ${{ retrait: 'au retrait', wave: 'Wave', orange_money: 'Orange Money', especes: 'espèces' }[o.payment_method] || ''}</div></div>
@@ -263,20 +395,22 @@ function orderDetail(o) {
       <dl class="kv">
         <dt>Client</dt><dd>${esc(o.customer_name)}</dd>
         <dt>Téléphone</dt><dd><a href="tel:+221${esc(o.phone)}">${esc(fmtPhone(o.phone))}</a> · <a href="${waLink(o.phone, waMessage(o))}" target="_blank" rel="noopener">WhatsApp</a></dd>
-        <dt>Retrait</dt><dd>${relDay(o.pickup_day)} · ${fmtDay(o.pickup_day)} à ${fmtSlot(o.pickup_slot)}</dd>
+        <dt>${o.fulfillment === 'livraison' ? 'Livraison' : 'Retrait'}</dt><dd>${relDay(o.pickup_day)} · ${fmtDay(o.pickup_day)} à ${fmtSlot(o.pickup_slot)}</dd>
+        ${o.fulfillment === 'livraison' ? `<dt>Adresse</dt><dd>${esc(o.delivery_address)} <span class="muted">(${esc(o.delivery_zone)}, ${money(o.delivery_fee)})</span> · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.delivery_address + ', Thiès, Sénégal')}" target="_blank" rel="noopener">Carte</a></dd>` : ''}
         <dt>Passée</dt><dd>${fmtDateTime(o.created_at)}</dd>
         <dt>Statut</dt><dd><span class="badge st-${o.status}">${st.icon} ${st.label}</span></dd>
       </dl>
       <div class="table-wrap mb"><table class="t"><thead><tr><th>Article</th><th class="n">Qté</th><th class="n">P.U.</th><th class="n">Total</th></tr></thead><tbody>
         ${o.items.map((i) => `<tr><td>${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></td><td class="n">${i.qty}</td><td class="n">${money(i.unit_price)}</td><td class="n">${money(i.unit_price * i.qty)}</td></tr>`).join('')}
-      </tbody><tfoot><tr><td colspan="3">Total</td><td class="n">${money(o.total)}</td></tr></tfoot></table></div>
+      ${o.delivery_fee ? `<tr><td>Livraison (${esc(o.delivery_zone)})</td><td class="n"></td><td class="n"></td><td class="n">${money(o.delivery_fee)}</td></tr>` : ''}</tbody><tfoot><tr><td colspan="3">Total</td><td class="n">${money(o.total)}</td></tr></tfoot></table></div>
       ${o.note ? `<div class="note mb" style="background:var(--amber-s);padding:10px 12px;border-radius:10px">📝 Note du client : ${esc(o.note)}</div>` : ''}
       <div class="grid g2 mb">
         <label class="field" style="margin:0"><span>Moyen de paiement</span><select data-action="pay-method" data-id="${o.id}">${[['retrait', 'Au retrait'], ['especes', 'Espèces'], ['wave', 'Wave'], ['orange_money', 'Orange Money']].map(([k, l]) => `<option value="${k}" ${o.payment_method === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
         <div class="field" style="margin:0;align-content:end"><label class="switch"><input type="checkbox" data-action="paid" data-id="${o.id}" ${o.paid ? 'checked' : ''}> Paiement encaissé</label></div>
       </div>
+      <label class="field"><span>Référence de paiement <small>(n° de transaction Wave / Orange Money)</small></span><input id="pay-ref" maxlength="100" value="${esc(o.payment_ref || '')}" placeholder="Ex : T_ABC123…"></label>
       <label class="field"><span>Note interne <small>(invisible pour le client)</small></span><textarea id="admin-note" maxlength="1000">${esc(o.admin_note || '')}</textarea></label>
-      <button class="btn btn-sm btn-light mb" type="button" data-action="save-note" data-id="${o.id}">Enregistrer la note</button>
+      <button class="btn btn-sm btn-light mb" type="button" data-action="save-note" data-id="${o.id}">Enregistrer</button>
       <h3 style="font-size:15px;margin:6px 0 8px">Historique</h3>
       <ul class="hist">${(o.history || []).slice().sort((a, b) => (a.changed_at || '').localeCompare(b.changed_at || '')).map((h) => `<li><span class="badge st-${h.status}">${ST[h.status].label}</span><small>${fmtDateTime(h.changed_at)}</small></li>`).join('')}</ul>
       <div id="ticket" class="print-only"><h2>${esc(S().shop_name)}</h2><p><b>${esc(o.number)}</b> · ${fmtSlot(o.pickup_slot)} ${fmtDay(o.pickup_day)}</p><p>${esc(o.customer_name)} · ${esc(fmtPhone(o.phone))}</p><ul>${o.items.map((i) => `<li>${i.qty} × ${esc(i.product_name)} (${esc(i.format_name)})</li>`).join('')}</ul>${o.note ? `<p>Note : ${esc(o.note)}</p>` : ''}<p><b>Total : ${money(o.total)}</b> ${o.paid ? '(payé)' : ''}</p></div>`,
@@ -483,8 +617,21 @@ function pageSettings() {
         ${f('announcement', 'Bandeau affiché en haut du site', { area: true, rows: 2, max: 200, hint: 'Ex : Fermé exceptionnellement samedi. Laissez vide pour ne rien afficher.' })}
         <label class="switch"><input type="checkbox" name="accepting_orders" ${s.accepting_orders ? 'checked' : ''}> Accepter les commandes en ligne</label></div>
     </div>
+    <div class="panel"><div class="panel-head"><h2>Paiement en ligne</h2></div>
+      ${f('wave_link', 'Lien de paiement Wave', { max: 300, attrs: 'type="url" placeholder="https://pay.wave.com/m/…"', hint: 'Le montant de la commande est ajouté automatiquement au lien.' })}
+      ${f('orange_money_link', 'Lien Orange Money (facultatif)', { max: 300, attrs: 'type="url"' })}</div>
+    <div class="panel"><div class="panel-head"><h2>Livraison à domicile</h2></div>
+      <label class="switch mb"><input type="checkbox" name="delivery_enabled" ${s.delivery_enabled ? 'checked' : ''}> Proposer la livraison à domicile</label>
+      ${f('delivery_info', 'Message affiché au client', { area: true, rows: 2, max: 300 })}
+      <label class="field"><span>Commande minimum pour la livraison (FCFA)</span><input name="delivery_min_order" type="number" min="0" step="100" value="${s.delivery_min_order || 0}"></label></div>
     <div style="grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-lg" type="submit">Enregistrer les réglages</button></div>
   </form>
+  <div class="panel" style="margin-top:16px"><div class="panel-head"><div><h2>Zones et frais de livraison</h2><p>Les modifications sont enregistrées dès que vous quittez un champ.</p></div><button class="btn btn-sm" type="button" data-action="add-zone">${icon('plus')} Ajouter une zone</button></div>
+    <div class="zones">${(A.cat.zones || []).map((z) => `<div class="zone-row" data-zone="${z.id}">
+      <input class="input" data-action="zone" data-f="zname" value="${esc(z.name)}" maxlength="60" aria-label="Nom de la zone">
+      <div class="input-group"><input data-action="zone" data-f="zfee" type="number" min="0" step="100" value="${z.fee}" aria-label="Frais"><span>FCFA</span></div>
+      <label class="switch"><input type="checkbox" data-action="zone" data-f="zactive" ${z.active ? 'checked' : ''}>Active</label>
+      <button class="icon-btn" type="button" data-action="del-zone" data-id="${z.id}" aria-label="Supprimer">${icon('trash')}</button></div>`).join('') || '<p class="muted">Aucune zone : ajoutez-en une pour proposer la livraison.</p>'}</div></div>
   <div class="grid g2" style="margin-top:16px">
     <div class="panel"><div class="panel-head"><h2>Mon compte</h2></div><p class="muted mb">Connecté en tant que <b>${esc(A.email)}</b></p>
       ${A.api.demo ? '<p class="hint">Changement de mot de passe indisponible en mode démonstration.</p>' : `<form id="pwd" class="toolbar" style="margin:0"><input class="input grow" type="password" name="p" minlength="8" autocomplete="new-password" placeholder="Nouveau mot de passe (8 caractères min.)" aria-label="Nouveau mot de passe" required><button class="btn btn-sm" type="submit">Changer</button></form>`}</div>
@@ -499,7 +646,9 @@ const shopUrl = () => (CONFIG.SITE_URL || new URL('./', location.href).href).rep
 
 async function saveSettings(form) {
   const fd = new FormData(form); const patch = {};
-  ['shop_name', 'tagline', 'story', 'opening_hours', 'address', 'maps_url', 'announcement'].forEach((k) => { patch[k] = String(fd.get(k) || '').trim(); });
+  ['shop_name', 'tagline', 'story', 'opening_hours', 'address', 'maps_url', 'announcement', 'wave_link', 'orange_money_link', 'delivery_info'].forEach((k) => { patch[k] = String(fd.get(k) || '').trim(); });
+  for (const k of ['wave_link', 'orange_money_link']) if (patch[k] && !/^https:\/\/\S+$/.test(patch[k])) return toast('Les liens de paiement doivent commencer par https://', 'error');
+  patch.delivery_enabled = fd.get('delivery_enabled') === 'on'; patch.delivery_min_order = Math.max(0, Math.round(Number(fd.get('delivery_min_order')) || 0));
   const phone = normalizePhone(fd.get('phone')); if (!phone) return toast('Téléphone invalide', 'error'); patch.phone = phone;
   const wa = String(fd.get('whatsapp') || '').replace(/\D/g, ''); if (wa.length < 9) return toast('Numéro WhatsApp invalide', 'error');
   patch.whatsapp = wa.length === 9 ? `221${wa}` : wa;
@@ -518,7 +667,7 @@ function updateAcceptLbl() { $('#accepting-lbl').textContent = $('#accepting').c
 // Routage
 // ---------------------------------------------------------------------------
 const PAGES = {
-  tableau: ['Tableau de bord', pageDashboard], commandes: ['Commandes', pageOrders], production: ['Production', pageProduction],
+  tableau: ['Tableau de bord', pageDashboard], commandes: ['Commandes', pageOrders], historique: ['Historique des ventes', pageHistory], production: ['Production', pageProduction],
   produits: ['Produits', pageProducts], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
 };
 const routeName = () => { const r = location.hash.replace(/^#\/?/, '').split('/')[0]; return PAGES[r] ? r : 'tableau'; };
@@ -529,6 +678,8 @@ function render(scroll = true) {
   $$('[data-nav]').forEach((a) => { const on = a.dataset.nav === r; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   const ae = document.activeElement; const keep = ae?.dataset?.action === 'search' ? ae.selectionStart : null;
   $('#page').innerHTML = fn();
+  if (scroll || A.lastRoute !== r) { $('#page').classList.remove('page-in'); void $('#page').offsetWidth; $('#page').classList.add('page-in'); }
+  A.lastRoute = r; animateCounts($('#page'));
   if (keep != null) { const i = $('[data-action=search]'); i?.focus(); i?.setSelectionRange(keep, keep); }
   if (scroll) { scrollTo(0, 0); }
 }
@@ -568,7 +719,14 @@ document.addEventListener('click', async (e) => {
       await patchOrder(o.id, { status: 'annulee' }, 'Commande annulée');
       break;
     }
-    case 'save-note': await patchOrder(d.id, { admin_note: $('#admin-note').value.trim() }, 'Note enregistrée'); break;
+    case 'save-note': await patchOrder(d.id, { admin_note: $('#admin-note').value.trim(), payment_ref: $('#pay-ref').value.trim() }, 'Enregistré'); break;
+    case 'period': A.period = Number(d.p); render(false); break;
+    case 'open-day': e.preventDefault(); openDay(d.d); break;
+    case 'hist-range': A.hr = d.r; render(false); break;
+    case 'hist-csv': histCsv(); break;
+    case 'day-csv': dayCsv(d.d); break;
+    case 'add-zone': await A.api.saveZone({ name: 'Nouvelle zone', fee: 1000, active: true, position: (A.cat.zones || []).length + 1 }); A.cat = await A.api.adminCatalog(); render(false); break;
+    case 'del-zone': if (await ask('Supprimer cette zone de livraison ?', { ok: 'Supprimer', danger: true })) { await A.api.deleteZone(d.id); A.cat = await A.api.adminCatalog(); toast('Zone supprimée', 'success'); render(false); } break;
     case 'export': exportCsv(); break;
     case 'print': window.print(); break;
     case 'print-ticket': document.body.classList.add('print-ticket'); window.print(); setTimeout(() => document.body.classList.remove('print-ticket'), 500); break;
@@ -632,6 +790,15 @@ document.addEventListener('change', async (e) => {
   switch (d.action) {
     case 'date': if (t.value) { A.f.range = 'date'; A.f.date = t.value; render(false); } break;
     case 'prod-date': if (t.value) { A.prodDay = t.value; render(false); } break;
+    case 'h-from': if (t.value) { A.hFrom = t.value; render(false); } break;
+    case 'h-to': if (t.value) { A.hTo = t.value; render(false); } break;
+    case 'zone': {
+      const row = t.closest('[data-zone]'); const z = (A.cat.zones || []).find((x) => x.id === row.dataset.zone);
+      const name = $('[data-f=zname]', row).value.trim(); const fee = Math.max(0, Math.round(Number($('[data-f=zfee]', row).value) || 0));
+      if (!name) return toast('Nom de zone obligatoire', 'error');
+      try { await A.api.saveZone({ ...z, name, fee, active: $('[data-f=zactive]', row).checked }); A.cat = await A.api.adminCatalog(); toast('Zone enregistrée', 'success', 1600); } catch (err) { toast(errMsg(err), 'error'); }
+      break;
+    }
     case 'paid': await patchOrder(d.id, { paid: t.checked }, t.checked ? 'Paiement encaissé' : 'Paiement non encaissé'); break;
     case 'pay-method': await patchOrder(d.id, { payment_method: t.value }, 'Moyen de paiement mis à jour'); break;
     case 'toggle-prod': {

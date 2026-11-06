@@ -24,21 +24,40 @@ async function createSupabaseApi() {
 
     // ---------------- Public ----------------
     async getCatalog() {
-      const [settings, products, closedDates, closedSlots] = await Promise.all([
+      const [settings, products, closedDates, closedSlots, zones] = await Promise.all([
         sb.from('ns_settings').select('*').eq('id', 1).single().then(ok),
         sb.from('ns_products').select('*, formats:ns_formats(*)').order('position').then(ok),
         sb.from('ns_closed_dates').select('*').then(ok),
         sb.from('ns_closed_slots').select('*').then(ok),
+        sb.from('ns_delivery_zones').select('*').order('position').then(ok),
       ]);
-      return { settings, products: products.map(sortFormats), closedDates, closedSlots };
+      return { settings, products: products.map(sortFormats), closedDates, closedSlots, zones };
     },
     getSlotLoad: (from, to) => sb.rpc('ns_slot_load', { p_from: from, p_to: to }).then(ok),
     placeOrder: (o) => sb.rpc('ns_place_order', {
       p_name: o.name, p_phone: o.phone, p_note: o.note, p_day: o.day, p_slot: o.slot,
       p_items: o.items, p_payment: o.payment || 'retrait',
+      p_fulfillment: o.fulfillment || 'retrait', p_zone: o.zone || null, p_address: o.address || '',
     }).then(ok),
     trackOrder: (token) => sb.rpc('ns_track_order', { p_token: token }).then(ok),
     cancelOrder: (token) => sb.rpc('ns_cancel_order', { p_token: token }).then(ok),
+
+    // ---------------- Comptes clients (facultatifs, sans e-mail de vérification) ----------------
+    async customer() {
+      const { data } = await sb.auth.getSession(); const u = data.session?.user; if (!u) return null;
+      return { id: u.id, email: u.email, name: u.user_metadata?.full_name || '', phone: u.user_metadata?.phone || '' };
+    },
+    async signUp({ email, password, name, phone }) {
+      const r = ok(await sb.auth.signUp({ email, password, options: { data: { full_name: name, phone } } }));
+      if (!r.session) ok(await sb.auth.signInWithPassword({ email, password }));
+    },
+    async customerSignIn(email, password) { ok(await sb.auth.signInWithPassword({ email, password })); },
+    async customerSignOut() { await sb.auth.signOut(); },
+    async updateProfile({ name, phone }) { ok(await sb.auth.updateUser({ data: { full_name: name, phone } })); },
+    async myOrders() {
+      const { data } = await sb.auth.getSession(); const uid = data.session?.user?.id; if (!uid) return [];
+      return ok(await sb.from('ns_orders').select('id, number, tracking_token, status, pickup_day, pickup_slot, total, fulfillment, created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(50));
+    },
 
     // ---------------- Authentification ----------------
     async session() { const { data } = await sb.auth.getSession(); return data.session; },
@@ -52,9 +71,14 @@ async function createSupabaseApi() {
 
     // ---------------- Administration ----------------
     async adminCatalog() {
-      // l'admin voit aussi les produits et formats désactivés (RLS ns_admin_all)
+      // l'admin voit aussi les produits, formats et zones désactivés (RLS ns_admin_all)
       return this.getCatalog();
     },
+    async saveZone(z) {
+      const row = { name: z.name, fee: z.fee, active: z.active, position: z.position || 0 };
+      if (z.id) ok(await sb.from('ns_delivery_zones').update(row).eq('id', z.id)); else ok(await sb.from('ns_delivery_zones').insert(row));
+    },
+    async deleteZone(id) { ok(await sb.from('ns_delivery_zones').delete().eq('id', id)); },
     async listOrders({ from, to } = {}) {
       let q = sb.from('ns_orders').select(SELECT_ORDER).order('pickup_day').order('pickup_slot').order('created_at');
       if (from) q = q.gte('pickup_day', from);
