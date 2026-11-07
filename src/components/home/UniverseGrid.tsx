@@ -13,7 +13,7 @@ export function UniverseGrid({ tree, counts }: { tree: CategoryNode[]; counts: R
   return (
     <section className="container-luxe py-20 md:py-28" aria-labelledby="univers">
       <SectionHeading eyebrow="Le catalogue" title="Explorer par univers" href="/shop" linkLabel="Tout le catalogue" id="univers" />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-flow-row-dense md:grid-cols-4 md:gap-4">
         {tree.map((c, i) => {
           const big = i === 0 || i === 3;
           const n = counts[c.slug] ?? 0;

@@ -62,7 +62,7 @@ export function Hero({ whatsapp, freeAbove }: { whatsapp?: string; freeAbove?: s
             {TITLE.map((line, li) => (
               <span key={li} className="block overflow-hidden pb-[0.08em]">
                 {line.map((word) => {
-                  const d = 0.1 + w++ * 0.05;
+                  const d = 0.04 + w++ * 0.04;
                   return (
                     <Fragment key={word.text}>
                     <span className="anim-word inline-block" style={{ animationDelay: `${d}s` }}>

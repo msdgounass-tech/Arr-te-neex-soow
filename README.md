@@ -1,27 +1,41 @@
-# GOUNASS LUXURY — *Wouro Maama*
+# GOUNASS High-Tech — *La technologie, en version premium*
 
-Boutique e-commerce de mode et d'accessoires de luxe pour le Sénégal (homme et femme, prix en FCFA/XOF, site en français).
-Direction artistique **Dark Luxury** : noir profond `#080808`, `#111111`, anthracite `#1C1C1C`, doré `#C6A15B`, blanc cassé `#F5F1E8`.
+Boutique e-commerce **high-tech** pour le Sénégal : smartphones, tablettes, informatique, audio, objets connectés, TV & gaming, accessoires. Prix en FCFA/XOF, site en français, commande en ligne ou sur WhatsApp.
+Direction artistique **« Graphite & Ion »** : fond graphite `#07080B`, surfaces vitrées `#0E1015` / `#161922`, texte `#EEF1F6`, un seul accent bleu ionique `#7EA4FF` (reflet cyan `#63E6D2` utilisé avec parcimonie). Titres en Sora, texte en Manrope.
 
 | Couche | Technologie |
 | --- | --- |
 | Frontend | Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4 |
-| Animations | Framer Motion |
+| Animations | Framer Motion (défilement, transitions), animations CSS (entrées, sans attendre JavaScript) |
+| 3D | Three.js + React Three Fiber (smartphone procédural du Hero, chargé en différé) |
 | Données | Supabase : PostgreSQL, Auth, Storage, Row Level Security |
 | Paiements | Wave Checkout, Orange Money (API Sonatel), carte bancaire (Stripe Checkout), paiement à la livraison |
 | Notifications | WhatsApp Business Cloud API, e-mail (Resend, facultatif) |
+| Tests | Tests unitaires (node:test), tests de bout en bout Playwright (ordinateur et mobile) |
 | Hébergement | Vercel |
+
+Le nom affiché, la signature et le nom commercial légal se règlent à un seul endroit : `BRAND` dans `src/lib/site.ts`.
+
+### Passage de la mode au high-tech : à faire au moment de la mise en ligne
+
+La base de production contient encore le catalogue de mode (51 produits, 3 commandes). La nouvelle version a été préparée **sans rien supprimer** :
+
+1. `supabase/migrations/0010_high_tech.sql` — **déjà appliquée** : ajout de `products.brand`, de `products.specs` (caractéristiques techniques) et des catégories high-tech (6 univers, 15 types). Elle est sans effet sur le site actuel.
+2. `supabase/migrations/0011_bascule_high_tech.sql` — **à exécuter juste après le déploiement** de cette version (SQL Editor de Supabase). Elle **masque** (sans supprimer) les produits, catégories et collections de mode, et remplace le bandeau d'annonce « Wouro Maama ». Les commandes passées restent intactes. Retour en arrière : repasser `is_active` à `true`.
+3. Ajouter les vrais produits dans **Admin › Produits** : marque, photos, versions (128 Go, 8/256 Go…), couleurs, stock et **caractéristiques techniques officielles**. Aucune fiche ni aucune caractéristique n'a été inventée.
 
 ---
 
 ## 1. Fonctionnalités
 
 **Boutique**
-- Page d'accueil en 11 sections : grande bannière avec mannequins, collection Homme, collection Femme, nouveautés, meilleures ventes, accessoires exclusifs, collection vedette, promotions, bannière éditoriale « Wouro Maama », newsletter, footer.
-- Navigation HOME · SHOP · MEN · WOMEN · ACCESSORIES · COLLECTIONS · CONTACT, recherche instantanée, compte, favoris, panier avec compteur animé, menu plein écran sur mobile.
-- Catalogue avec filtres : catégorie, genre, style, prix, tri. Pages dédiées **Montres** (Hommes, Femmes, Connectées, Luxe, Classiques, Sportives) et **Chaussures**.
-- Menus déroulants (ordinateur), menu mobile avec toutes les sous-catégories, bouton WhatsApp flottant. Pages Nouveautés, Meilleures ventes, Promotions, Collections et collection détaillée.
-- Fiche produit : galerie, zoom au survol, plein écran, tailles, couleurs, stock par déclinaison, quantité, favoris, référence, produits similaires et données structurées `schema.org/Product`.
+- Accueil cinématique : Hero avec **smartphone 3D réel** (Three.js) qui pivote, suit la souris, réagit au défilement et au glisser, avec les angles Face / Profil / Dos ; boutons « Découvrir nos produits » et « Commander sur WhatsApp ». Puis : grille des univers, nouveautés, meilleures ventes, engagements révélés au défilement, promotions, un rayon par univers, collection vedette, conseil WhatsApp, newsletter.
+- La 3D est chargée **après** l'affichage de la page, se met en pause hors écran et n'est activée qu'avec une vraie accélération graphique. Sans GPU, en mode économie de données ou sur un appareil très modeste, une silhouette statique la remplace. Ajouter `?3d` à l'adresse force la 3D (démonstration, tests).
+- Navigation : méga-menu « Catalogue » alimenté par les catégories de la base, liens rapides vers les premiers univers, menus Offres et Aide, menu mobile en accordéon, recherche instantanée (**Ctrl+K** ou **/**, flèches et Entrée), compte, favoris, panier animé, bouton WhatsApp flottant.
+- Catalogue : `/shop` et `/categorie/[slug]` (univers ou type), filtres univers, **marque**, prix (fourchettes rapides ou min/max), tri, pagination, fil d'Ariane. Les anciennes adresses de mode (`/men`, `/women`, `/montres`…) sont redirigées.
+- Cartes produit : marque, prix et prix barré, disponibilité, coloris, favoris, **ajout rapide** au panier quand le produit n'a qu'une déclinaison.
+- Fiche produit : galerie (balayage tactile, zoom, plein écran), versions et couleurs avec stock par déclinaison, quantité, ajout au panier, achat immédiat, **commande WhatsApp pré-remplie** (produit, version, couleur, quantité, prix, référence, lien), barre d'achat collante sur mobile, **caractéristiques techniques**, produits similaires, données structurées `Product` et `BreadcrumbList`.
+- Pages d'aide : FAQ (données `FAQPage`), Garanties & retours, Livraison (zones et tarifs de la base), Contact, Suivi de commande.
 - Panier : ajout, suppression, quantités plafonnées au stock, sous-total, code promo. Les prix et le stock sont **revérifiés auprès de la base** à l'ouverture du panier et du formulaire de commande (`/api/cart/validate`).
 - Bouton « Acheter maintenant » sur chaque fiche produit. Un panier latéral et une page panier.
 - Commande en 2 étapes : coordonnées, WhatsApp, adresse, ville, région, informations complémentaires, zone de livraison, moyen de paiement, puis un **récapitulatif avant la validation définitive**. Chaque commande reçoit un **numéro unique** (`GL-AAMMJJ-01001`).
@@ -80,7 +94,10 @@ Principes de sécurité :
 │   │   ├── 0001_schema.sql      tables, types, index
 │   │   ├── 0002_functions.sql   rôles, place_order, webhooks, stats, best-sellers
 │   │   ├── 0003_rls.sql         Row Level Security + buckets Storage
-│   │   └── 0004_guards.sql      garde-fous sur les commandes
+│   │   ├── 0004_guards.sql      garde-fous sur les commandes
+│   │   ├── …                    0005 à 0009 : livraison, paiements, RPC publiques, étiquettes
+│   │   ├── 0010_high_tech.sql   marque, caractéristiques, catégories high-tech (appliquée)
+│   │   └── 0011_bascule_high_tech.sql  masque le catalogue de mode (à la mise en ligne)
 │   └── seed.sql                 catégories, zones (inactives), paramètres vides
 ├── src/
 │   ├── middleware.ts            session Supabase + protection /compte et /admin
@@ -123,7 +140,7 @@ Commandes utiles : `npm run build` (build de production), `npm run typecheck`, `
 
 1. Créez un projet sur https://supabase.com et choisissez une région proche, par exemple `eu-west`.
 2. Ouvrez **SQL Editor** › **New query**, collez **tout** le fichier `supabase/installation_complete.sql`, puis cliquez sur **Run**. Ce fichier regroupe les migrations, `seed.sql` et `config_gounass.sql`.
-   Vous pouvez aussi exécuter **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**.
+   Vous pouvez aussi exécuter **dans l'ordre** `supabase/migrations/0001_schema.sql`, `0002_functions.sql`, `0003_rls.sql`, `0004_guards.sql`, `0005_delivery_payments.sql`, puis `0006` à `0010`, puis `supabase/seed.sql` et enfin **`supabase/config_gounass.sql`**. Pour une nouvelle installation directement en high-tech, exécutez aussi `0011_bascule_high_tech.sql`.
    Ce dernier fichier contient la configuration de la boutique : coordonnées, bandeau, lien Wave, zones du Sénégal actives avec livraison offerte dès 10 000 FCFA, et administrateur `msdgounass@gmail.com`.
    Avec la CLI, c'est `supabase link --project-ref <ref>`, puis `supabase db push`, puis l'exécution de `seed.sql`.
 3. Dans **Authentication › URL Configuration** :
@@ -201,7 +218,8 @@ Les notifications partent à chaque création de commande, paiement reçu, chang
 - [ ] Migrations et seed exécutés, compte administrateur créé
 - [ ] Zones de livraison tarifées et activées
 - [ ] Coordonnées de la boutique renseignées (WhatsApp notamment)
-- [ ] Produits publiés avec photos et stock
+- [ ] `0011_bascule_high_tech.sql` exécutée après le déploiement
+- [ ] Produits publiés avec marque, photos, versions, stock et caractéristiques techniques
 - [ ] Clés de paiement de production installées, webhooks déclarés, **une transaction réelle de faible montant testée par moyen de paiement**
 - [ ] Modèle WhatsApp approuvé
 - [ ] Mentions légales complétées dans `/conditions` (raison sociale, NINEA, RCCM, politique de retour)
@@ -210,4 +228,25 @@ Les notifications partent à chaque création de commande, paiement reçu, chang
 
 ## 7. Visuels
 
-Les deux photographies éditoriales par défaut ont été générées par IA pour ce projet : la bannière avec mannequin homme et mannequin femme, et la nature morte des accessoires. Elles sont référencées dans `src/lib/site.ts`. Pour des photos de vos propres collections, il suffit de les envoyer depuis **Admin › Paramètres** (page d'accueil) et **Admin › Collections**, sans redéploiement. Les photos produits sont stockées dans Supabase Storage et optimisées par `next/image` (AVIF/WebP).
+Le visuel d'accueil est un smartphone 3D générique (sans marque) construit par le code : aucun modèle ni aucune photo à télécharger. Le logo par défaut est un monogramme vectoriel, remplaçable depuis **Admin › Paramètres**. Les photos produits sont stockées dans Supabase Storage et optimisées par `next/image` (AVIF/WebP) ; privilégiez des photos carrées sur fond uni.
+
+## 8. Tests et performance
+
+```bash
+npm test                  # calculs de prix, remises, livraison
+npm run build && npm run e2e   # Playwright : ordinateur (1440 px) et mobile (Pixel 7)
+```
+
+Les tests de bout en bout lisent le catalogue réel mais **ne créent jamais** de commande, de message ni d'inscription. Ils couvrent l'affichage de toutes les pages (statut, titre H1 unique, absence de débordement horizontal et d'erreur console ou réseau), le Hero 3D, `prefers-reduced-motion`, le méga-menu et le menu mobile, la recherche, les filtres et le tri, le panier (ajout, quantités, total, suppression), le formulaire de commande jusqu'à la validation, les favoris, les liens WhatsApp, les redirections et le SEO (robots, sitemap, métadonnées, données structurées).
+
+Mesures Lighthouse 12 (profil mobile, serveur de production local, au moment de la refonte) :
+
+| Page | Performance | Accessibilité | Bonnes pratiques | SEO |
+| --- | --- | --- | --- | --- |
+| Accueil | 88–95 | 100 | 100 | 100 |
+| Catalogue | 90–92 | 100 | 100 | 100 |
+| Catégorie | 94 | 100 | 100 | 100 |
+| Fiche produit | 97 | 100 | 100 | 100 |
+| FAQ | 97 | 100 | 100 | 100 |
+
+Plusieurs passages successifs donnent des écarts de quelques points (fourchettes ci-dessus). Ces chiffres varient aussi selon le réseau et l'hébergement : mesurez-les à nouveau sur le site en ligne. Le navigateur de mesure n'ayant pas de GPU, la scène 3D y est remplacée par sa silhouette statique, comme chez un visiteur sans accélération graphique.

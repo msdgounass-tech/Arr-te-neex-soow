@@ -31,6 +31,8 @@ export function Header({ announcement, logoUrl, categories }: { announcement?: s
   const [mega, setMega] = useState(false);
   const [openUniverse, setOpenUniverse] = useState<string | null>(null);
   const megaTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const headerRef = useRef<HTMLElement>(null);
+  const [menuTop, setMenuTop] = useState(64);
   const lines = useCart((s) => s.lines);
   const setCartOpen = useCart((s) => s.setOpen);
   const favCount = useFavorites((s) => s.ids.length);
@@ -66,6 +68,8 @@ export function Header({ announcement, logoUrl, categories }: { announcement?: s
   }, [pathname, setMenu]);
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
+    // Le menu mobile démarre sous l'en-tête (qui peut être précédé du bandeau d'annonce).
+    if (menuOpen && headerRef.current) setMenuTop(Math.max(0, Math.round(headerRef.current.getBoundingClientRect().bottom)));
   }, [menuOpen]);
 
   const openMega = () => {
@@ -88,6 +92,7 @@ export function Header({ announcement, logoUrl, categories }: { announcement?: s
         </div>
       ) : null}
       <header
+        ref={headerRef}
         onMouseLeave={closeMega}
         className={clsx(
           "sticky top-0 z-[60] transition-[background-color,border-color,backdrop-filter] duration-500",
@@ -258,7 +263,8 @@ export function Header({ announcement, logoUrl, categories }: { announcement?: s
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 top-16 z-[55] overflow-y-auto overscroll-contain bg-ink lg:hidden"
+            style={{ top: menuTop }}
+            className="fixed inset-x-0 bottom-0 z-[55] overflow-y-auto overscroll-contain bg-ink lg:hidden"
           >
             <div className="container-luxe flex min-h-full flex-col gap-6 py-6">
               <button onClick={() => { setMenu(false); setSearch(true); }} className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-left text-mist">

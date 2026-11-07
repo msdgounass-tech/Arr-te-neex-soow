@@ -34,6 +34,8 @@ test.describe("Catalogue, recherche et filtres", () => {
     test.skip(!slug, "catalogue vide");
     const name = (await page.locator(`main a[href="/produit/${slug}"] h3`).first().textContent())!.trim();
     const term = name.split(/\s+/).find((w) => w.length >= 4) || name.slice(0, 4);
+    // le raccourci clavier est actif une fois la page hydratée
+    await page.waitForLoadState("networkidle");
 
     if (isMobile) await page.getByRole("button", { name: "Rechercher", exact: true }).click();
     else await page.keyboard.press("Control+k");
@@ -49,7 +51,7 @@ test.describe("Catalogue, recherche et filtres", () => {
   });
 
   test("recherche sans résultat : message clair", async ({ page, isMobile }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "networkidle" });
     if (isMobile) await page.getByRole("button", { name: "Rechercher", exact: true }).click();
     else await page.getByRole("button", { name: /Rechercher \(Ctrl\+K\)/ }).click();
     await page.getByLabel("Terme de recherche").fill("zzqxwv");
