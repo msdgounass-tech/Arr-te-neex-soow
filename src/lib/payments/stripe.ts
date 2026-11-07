@@ -2,6 +2,7 @@ import "server-only";
 import { SITE_URL } from "@/lib/env";
 import { hmacHex, parseSignatureHeader, safeEqual } from "@/lib/crypto";
 import type { CheckoutResult, PaymentContext } from "./types";
+import { BRAND } from "@/lib/site";
 
 /**
  * Carte bancaire via Stripe Checkout (API REST officielle).
@@ -14,7 +15,7 @@ export async function createStripeCheckout(ctx: PaymentContext): Promise<Checkou
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "xof",
     "line_items[0][price_data][unit_amount]": String(ctx.amount),
-    "line_items[0][price_data][product_data][name]": `Commande ${ctx.orderNumber} — GOUNASS LUXURY`,
+    "line_items[0][price_data][product_data][name]": `Commande ${ctx.orderNumber} — ${BRAND.legalName}`,
     client_reference_id: ctx.paymentId,
     "metadata[payment_id]": ctx.paymentId,
     "metadata[order_number]": ctx.orderNumber,

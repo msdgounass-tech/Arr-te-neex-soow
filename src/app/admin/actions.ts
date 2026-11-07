@@ -41,6 +41,12 @@ const productSchema = z.object({
   seo_title: z.string().trim().max(160).optional().default(""),
   seo_description: z.string().trim().max(320).optional().default(""),
   tags: z.array(z.string().trim().toLowerCase().max(30)).max(12).optional().default([]),
+  brand: z.string().trim().max(60).optional().default(""),
+  specs: z
+    .array(z.object({ label: z.string().trim().min(1).max(60), value: z.string().trim().min(1).max(240) }))
+    .max(60)
+    .optional()
+    .default([]),
   images: z.array(z.object({ id: z.string().uuid().optional(), url: z.string().url(), storage_path: z.string().nullable().optional(), alt: z.string().max(200).nullable().optional() })).max(20),
   variants: z
     .array(
@@ -55,7 +61,7 @@ const productSchema = z.object({
         is_active: z.boolean(),
       }),
     )
-    .min(1, "Ajoutez au moins une déclinaison (taille / couleur / stock).")
+    .min(1, "Ajoutez au moins une déclinaison (version / couleur / stock).")
     .max(120),
 });
 
@@ -65,7 +71,7 @@ export async function saveProduct(input: unknown): Promise<ActionResult> {
   if (!parsed.success) return { error: parsed.error.issues[0]?.message || "Formulaire invalide." };
   const { images, variants, id, ...p } = parsed.data;
   if (p.compare_at_price != null && p.compare_at_price <= p.price) p.compare_at_price = null;
-  const row = { ...p, slug: slugify(p.slug || p.name), reference: p.reference.toUpperCase(), category_id: p.category_id || null, collection_id: p.collection_id || null };
+  const row = { ...p, brand: p.brand || null, slug: slugify(p.slug || p.name), reference: p.reference.toUpperCase(), category_id: p.category_id || null, collection_id: p.collection_id || null };
 
   const { data: saved, error } = id ? await sb.from("products").update(row).eq("id", id).select("id").single() : await sb.from("products").insert(row).select("id").single();
   if (error || !saved) return { error: dbError(error) };

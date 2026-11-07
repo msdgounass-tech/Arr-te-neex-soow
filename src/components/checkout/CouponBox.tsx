@@ -34,9 +34,9 @@ export function CouponBox() {
 
   if (coupon) {
     return (
-      <div className="flex items-center justify-between border border-gold/30 bg-gold/[0.06] px-4 py-3 text-sm">
+      <div className="flex items-center justify-between border border-accent/30 bg-accent/[0.06] px-4 py-3 text-sm">
         <span>
-          Code <strong className="tracking-widest text-gold">{coupon.code}</strong> appliqué ({coupon.message})
+          Code <strong className="tracking-widest text-accent">{coupon.code}</strong> appliqué ({coupon.message})
         </span>
         <button onClick={() => setCoupon(null)} className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-ivory">Retirer</button>
       </div>
@@ -47,7 +47,7 @@ export function CouponBox() {
       <label className="label" htmlFor="coupon">Code promotionnel</label>
       <div className="mt-1 flex items-end gap-3">
         <input id="coupon" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="field uppercase tracking-widest" placeholder="VOTRE CODE" />
-        <button disabled={loading} className="btn btn-ghost-gold min-h-11 px-5">{loading ? "…" : "Appliquer"}</button>
+        <button disabled={loading} className="btn btn-ghost min-h-11 px-5">{loading ? "…" : "Appliquer"}</button>
       </div>
       {msg && <p className="mt-2 text-xs text-danger">{msg}</p>}
     </form>

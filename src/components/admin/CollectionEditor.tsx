@@ -33,13 +33,13 @@ export function CollectionEditor({ initial }: { initial?: Partial<C> & { id: str
       <ImageField label="Visuel de la collection" value={c.image_url || ""} onChange={(u) => set("image_url", u)} bucket="site" folder="collections" />
       <div className="space-y-3 text-sm">
         <label className="block"><span className="label">Ordre d&apos;affichage</span><input type="number" value={c.position} onChange={(e) => set("position", Number(e.target.value))} className="field-box mt-1 w-24" /></label>
-        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_active} onChange={(e) => set("is_active", e.target.checked)} className="accent-[#C6A15B]" /> Visible</label>
-        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_featured} onChange={(e) => set("is_featured", e.target.checked)} className="accent-[#C6A15B]" /> Collection vedette (page d&apos;accueil)</label>
-        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_exclusive} onChange={(e) => set("is_exclusive", e.target.checked)} className="accent-[#C6A15B]" /> Collection exclusive</label>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_active} onChange={(e) => set("is_active", e.target.checked)} className="accent-[#5B8CFF]" /> Visible</label>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_featured} onChange={(e) => set("is_featured", e.target.checked)} className="accent-[#5B8CFF]" /> Collection vedette (page d&apos;accueil)</label>
+        <label className="flex items-center gap-2"><input type="checkbox" checked={c.is_exclusive} onChange={(e) => set("is_exclusive", e.target.checked)} className="accent-[#5B8CFF]" /> Collection exclusive</label>
       </div>
       <div className="flex items-center gap-4 md:col-span-2">
-        <button disabled={busy} className="btn btn-gold min-h-10">{busy ? "…" : initial ? "Enregistrer" : "Créer la collection"}</button>
-        {msg && <p className="text-xs text-gold">{msg}</p>}
+        <button disabled={busy} className="btn btn-primary min-h-10">{busy ? "…" : initial ? "Enregistrer" : "Créer la collection"}</button>
+        {msg && <p className="text-xs text-accent">{msg}</p>}
       </div>
     </form>
   );

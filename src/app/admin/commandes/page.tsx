@@ -31,15 +31,15 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       <PageTitle title="Commandes" subtitle={`${count ?? 0} commande(s)`} />
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-1.5">
-          <Link href={link({ statut: undefined, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${!sp.statut ? "bg-gold text-ink" : "text-ivory/90"}`}>Toutes</Link>
+          <Link href={link({ statut: undefined, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${!sp.statut ? "bg-accent text-ink" : "text-ivory/90"}`}>Toutes</Link>
           {(Object.keys(ORDER_STATUS_LABEL) as OrderStatus[]).map((s) => (
-            <Link key={s} href={link({ statut: s, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${sp.statut === s ? "bg-gold text-ink" : "text-ivory/90"}`}>{ORDER_STATUS_LABEL[s]}</Link>
+            <Link key={s} href={link({ statut: s, page: undefined })} className={`shrink-0 px-3 py-1.5 text-[0.78rem] uppercase tracking-[0.18em] ${sp.statut === s ? "bg-accent text-ink" : "text-ivory/90"}`}>{ORDER_STATUS_LABEL[s]}</Link>
           ))}
         </div>
         <form className="flex gap-2">
           {sp.statut && <input type="hidden" name="statut" value={sp.statut} />}
           <input name="q" defaultValue={sp.q} placeholder="N°, client, téléphone" className="field-box min-w-0 flex-1 md:w-64 md:flex-none" />
-          <button className="btn btn-ghost-gold min-h-10 px-4">Rechercher</button>
+          <button className="btn btn-ghost min-h-10 px-4">Rechercher</button>
         </form>
       </div>
       <div className="md:hidden">
@@ -51,7 +51,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
           <tbody className="divide-y divide-white/[0.05]">
             {orders.map((o) => (
               <tr key={o.id} className="hover:bg-ink-3 [&>td]:px-4">
-                <td className={td}><Link href={`/admin/commandes/${o.id}`} className="text-gold">{o.order_number}</Link></td>
+                <td className={td}><Link href={`/admin/commandes/${o.id}`} className="text-accent">{o.order_number}</Link></td>
                 <td className={`${td} text-mist`}>{formatDate(o.created_at, true)}</td>
                 <td className={td}>{o.customer_name}<span className="block text-xs text-mist">{o.phone}</span></td>
                 <td className={td}>{o.city}</td>
@@ -68,7 +68,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
       {pages > 1 && (
         <div className="mt-6 flex gap-2">
           {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <Link key={p} href={link({ page: String(p) })} className={`flex h-9 w-9 items-center justify-center border text-xs ${p === page ? "border-gold bg-gold text-ink" : "border-white/15"}`}>{p}</Link>
+            <Link key={p} href={link({ page: String(p) })} className={`flex h-9 w-9 items-center justify-center border text-xs ${p === page ? "border-accent bg-accent text-ink" : "border-white/15"}`}>{p}</Link>
           ))}
         </div>
       )}

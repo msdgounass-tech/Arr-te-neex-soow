@@ -6,7 +6,7 @@ const base = (p: SVGProps<SVGSVGElement>) => ({
   viewBox: "0 0 24 24",
   fill: "none",
   stroke: "currentColor",
-  strokeWidth: 1.2,
+  strokeWidth: 1.6,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
   "aria-hidden": true,
@@ -68,4 +68,40 @@ export const CheckIcon = (p: SVGProps<SVGSVGElement>) => (
 );
 export const InstagramIcon = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><rect x="4" y="4" width="16" height="16" rx="4.5" /><circle cx="12" cy="12" r="3.6" /><circle cx="17" cy="7" r=".6" fill="currentColor" /></svg>
+);
+export const TruckIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M3 6.5h11v9H3zM14 9.5h3.6l3 3.2v2.8H14" /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></svg>
+);
+export const ShieldIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M12 3.5 19 6v5.5c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6l7-2.5Z" /><path d="m9 12 2.2 2.2L15.5 10" /></svg>
+);
+export const WalletIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="3.5" y="6" width="17" height="13" rx="3" /><path d="M3.5 10h17M16 14.5h1.5" /></svg>
+);
+export const ChatIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M5 18.5V7a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 7v6.5a2.5 2.5 0 0 1-2.5 2.5H9l-4 2.5Z" /><path d="M9 10h6M9 13h3.5" /></svg>
+);
+export const GridIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="4" y="4" width="6.5" height="6.5" rx="1.6" /><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6" /><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6" /><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6" /></svg>
+);
+export const PhoneIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.8" /><path d="M10.5 18h3" /></svg>
+);
+export const LaptopIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="5" y="5" width="14" height="10" rx="1.6" /><path d="M2.8 18.5h18.4l-1.4-3.5H4.2l-1.4 3.5Z" /></svg>
+);
+export const HeadphonesIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3" /><rect x="3.5" y="13.5" width="4" height="6.5" rx="1.6" /><rect x="16.5" y="13.5" width="4" height="6.5" rx="1.6" /></svg>
+);
+export const WatchIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="6.5" y="6.5" width="11" height="11" rx="3" /><path d="M9 6.5 9.7 3h4.6l.7 3.5M9 17.5l.7 3.5h4.6l.7-3.5M12 9.5V12l1.6 1" /></svg>
+);
+export const GamepadIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M7 7.5h10a4.5 4.5 0 0 1 4.3 5.8l-1 3.3a2.4 2.4 0 0 1-4 1L14.5 15.5h-5L7.7 17.6a2.4 2.4 0 0 1-4-1l-1-3.3A4.5 4.5 0 0 1 7 7.5Z" /><path d="M8 10.5v3M6.5 12h3M15.5 11h.01M17.5 13h.01" /></svg>
+);
+export const PlugIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M9 3.5v4M15 3.5v4M6.5 7.5h11V11a5.5 5.5 0 0 1-11 0V7.5ZM12 16.5v4" /></svg>
+);
+export const SparkIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M12 3.5 13.8 10.2 20.5 12l-6.7 1.8L12 20.5l-1.8-6.7L3.5 12l6.7-1.8L12 3.5Z" /></svg>
 );

@@ -14,8 +14,8 @@ export function OrderTimeline({ order }: { order: Order }) {
         const h = [...history].reverse().find((x) => x.status === s);
         return (
           <li key={s} className="flex flex-col items-center text-center">
-            <span className={clsx("relative flex h-3 w-3 items-center justify-center rounded-full", i <= idx ? "bg-gold" : "bg-white/15")}>
-              {i === idx && <span className="absolute h-6 w-6 animate-ping rounded-full bg-gold/30" />}
+            <span className={clsx("relative flex h-3 w-3 items-center justify-center rounded-full", i <= idx ? "bg-accent" : "bg-white/15")}>
+              {i === idx && <span className="absolute h-6 w-6 animate-ping rounded-full bg-accent/30" />}
             </span>
             <span className={clsx("mt-3 text-[0.68rem] uppercase tracking-[0.16em] sm:text-[0.78rem]", i <= idx ? "text-ivory" : "text-mist")}>{ORDER_STATUS_LABEL[s]}</span>
             {h && <span className="mt-1 hidden text-[0.78rem] text-mist sm:block">{formatDate(h.created_at)}</span>}

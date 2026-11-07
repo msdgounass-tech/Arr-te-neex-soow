@@ -26,7 +26,7 @@ export default async function OrdersPage() {
             <tbody className="divide-y divide-white/[0.06]">
               {orders.map((o) => (
                 <tr key={o.id} className="hover:bg-ink-2">
-                  <td className="py-4"><Link href={`/compte/commandes/${o.id}`} className="tracking-wider text-gold">{o.order_number}</Link></td>
+                  <td className="py-4"><Link href={`/compte/commandes/${o.id}`} className="tracking-wider text-accent">{o.order_number}</Link></td>
                   <td className="text-mist">{formatDate(o.created_at)}</td>
                   <td>{ORDER_STATUS_LABEL[o.status]}</td>
                   <td className="text-mist">{PAYMENT_STATUS_LABEL[o.payment_status]}</td>

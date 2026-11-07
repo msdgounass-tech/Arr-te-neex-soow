@@ -1,25 +1,23 @@
 import type { DeliverySettings, HomeSettings, PaymentSettings, StoreSettings } from "./types";
 
 export const BRAND = {
-  name: "GOUNASS LUXURY",
-  slogan: "Wouro Maama",
+  /** Nom affiché partout sur le site (un seul endroit à modifier). */
+  name: "GOUNASS",
+  /** Signature affichée sous le nom. */
+  tagline: "High-Tech",
+  /** Nom commercial légal (conditions de vente, paiements). */
+  legalName: "GOUNASS LUXURY",
+  slogan: "La technologie, en version premium",
   description:
-    "GOUNASS LUXURY — mode, habillement et accessoires de luxe pour homme et femme au Sénégal. Une sélection exclusive pour affirmer votre style.",
+    "GOUNASS High-Tech : smartphones, ordinateurs, audio, objets connectés et accessoires au Sénégal. Prix en FCFA, livraison à Dakar et dans les régions, commande en ligne ou sur WhatsApp.",
 };
 
-/**
- * Visuels éditoriaux par défaut. Ils sont remplaçables sans redéploiement
- * depuis Admin > Paramètres (stockés dans Supabase Storage).
- * Les fichiers sont hébergés avec le site (public/images).
- */
-/** Logo officiel (remplaçable dans Admin › Paramètres). */
-export const DEFAULT_LOGO = "/images/logo/gounass-logo.png";
+/** Logo par défaut (remplaçable dans Admin › Paramètres). Vide : monogramme vectoriel. */
+export const DEFAULT_LOGO = "";
 
 export const DEFAULT_IMAGES = {
-  hero: "/images/hero-tenue-africaine.jpg",
-  accessories: "/images/accessoires.jpg",
-  /** Visuel de collection par défaut (motifs wax, grand boubou et robe wax). */
-  collection: "/images/collection-wouro-maama.svg",
+  /** Visuel par défaut d'une collection sans photo. */
+  collection: "/images/collection-tech.svg",
 };
 
 export const EMPTY_STORE: StoreSettings = {
@@ -53,57 +51,26 @@ export interface NavItem {
   children?: { href: string; label: string }[];
 }
 
-export const NAV: NavItem[] = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
+/** Liens fixes de la navigation ; les univers de catégories sont ajoutés depuis la base. */
+export const NAV_TAIL: NavItem[] = [
   {
-    href: "/men",
-    label: "Men",
+    href: "/promotions",
+    label: "Offres",
     children: [
-      { href: "/men?categorie=homme-vetements", label: "Vêtements" },
-      { href: "/men?categorie=homme-chaussures", label: "Chaussures" },
-      { href: "/montres?genre=homme", label: "Montres" },
-      { href: "/men?categorie=homme-sacs", label: "Sacs" },
-      { href: "/men?categorie=homme-lunettes", label: "Lunettes" },
-      { href: "/men?categorie=homme-parfums", label: "Parfums" },
-      { href: "/men?categorie=homme-bijoux", label: "Bijoux" },
-      { href: "/men?categorie=homme-accessoires", label: "Accessoires" },
-    ],
-  },
-  {
-    href: "/women",
-    label: "Women",
-    children: [
-      { href: "/women?categorie=femme-vetements", label: "Vêtements" },
-      { href: "/women?categorie=femme-robes", label: "Robes" },
-      { href: "/women?categorie=femme-chaussures", label: "Chaussures" },
-      { href: "/women?categorie=femme-sacs", label: "Sacs" },
-      { href: "/montres?genre=femme", label: "Montres" },
-      { href: "/women?categorie=femme-bijoux", label: "Bijoux" },
-      { href: "/women?categorie=femme-accessoires", label: "Accessoires" },
-    ],
-  },
-  {
-    href: "/accessories",
-    label: "Accessories",
-    children: [
-      { href: "/montres", label: "Montres" },
-      { href: "/accessories?type=sacs", label: "Sacs" },
-      { href: "/accessories?type=parfums", label: "Parfums" },
-      { href: "/accessories?type=bijoux", label: "Bijoux" },
-      { href: "/accessories?type=lunettes", label: "Lunettes" },
-      { href: "/chaussures", label: "Chaussures" },
-    ],
-  },
-  {
-    href: "/collections",
-    label: "Collections",
-    children: [
-      { href: "/nouveautes", label: "Nouvelle collection" },
-      { href: "/meilleures-ventes", label: "Meilleures ventes" },
       { href: "/promotions", label: "Promotions" },
-      { href: "/collections", label: "Toutes les collections" },
+      { href: "/nouveautes", label: "Nouveautés" },
+      { href: "/meilleures-ventes", label: "Meilleures ventes" },
     ],
   },
-  { href: "/contact", label: "Contact" },
+  {
+    href: "/aide",
+    label: "Aide",
+    children: [
+      { href: "/faq", label: "Questions fréquentes" },
+      { href: "/livraison", label: "Livraison" },
+      { href: "/garanties", label: "Garanties & retours" },
+      { href: "/suivi", label: "Suivre une commande" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
 ];

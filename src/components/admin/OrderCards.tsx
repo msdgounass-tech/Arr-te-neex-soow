@@ -14,7 +14,7 @@ export function OrderCards({ orders }: { orders: Pick<Order, "id" | "order_numbe
           <Link href={`/admin/commandes/${o.id}`} className="block">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate font-semibold tracking-wide text-gold">{o.order_number}</p>
+                <p className="truncate font-semibold tracking-wide text-accent">{o.order_number}</p>
                 <p className="mt-0.5 text-xs text-mist">{formatDate(o.created_at, true)}</p>
               </div>
               <p className="display shrink-0 text-xl text-ivory">{formatPrice(o.total)}</p>

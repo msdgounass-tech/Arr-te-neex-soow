@@ -36,21 +36,16 @@ export function SettingsEditor({ store, home, payments }: { store: StoreSettings
             <label key={k}><span className="label">{label}</span><input value={s[k]} placeholder={ph} onChange={(e) => setS((x) => ({ ...x, [k]: e.target.value }))} className="field-box mt-1" /></label>
           ))}
         </div>
-        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("store")} className="btn btn-gold min-h-10">Enregistrer</button><span className="text-xs text-gold">{msg.store}</span></div>
+        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("store")} className="btn btn-primary min-h-10">Enregistrer</button><span className="text-xs text-accent">{msg.store}</span></div>
       </Card>
       <Card>
         <p className="label mb-5">Page d&apos;accueil</p>
         <label className="block"><span className="label">Bandeau d&apos;annonce (laisser vide pour masquer)</span><input value={h.announcement} onChange={(e) => setH((x) => ({ ...x, announcement: e.target.value }))} className="field-box mt-1" /></label>
         <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <ImageField label="Logo (remplace l'emblème GL, format carré)" value={h.logo_url} onChange={(u) => setH((x) => ({ ...x, logo_url: u }))} bucket="site" folder="brand" />
-          <ImageField label="Bannière principale (mannequins)" value={h.hero_image} onChange={(u) => setH((x) => ({ ...x, hero_image: u }))} bucket="site" folder="home" />
-          <ImageField label="Collection Homme" value={h.men_image} onChange={(u) => setH((x) => ({ ...x, men_image: u }))} bucket="site" folder="home" />
-          <ImageField label="Collection Femme" value={h.women_image} onChange={(u) => setH((x) => ({ ...x, women_image: u }))} bucket="site" folder="home" />
-          <ImageField label="Accessoires" value={h.accessories_image} onChange={(u) => setH((x) => ({ ...x, accessories_image: u }))} bucket="site" folder="home" />
-          <ImageField label="Bannière éditoriale" value={h.editorial_image} onChange={(u) => setH((x) => ({ ...x, editorial_image: u }))} bucket="site" folder="home" />
+          <ImageField label="Logo (remplace le monogramme, format carré)" value={h.logo_url} onChange={(u) => setH((x) => ({ ...x, logo_url: u }))} bucket="site" folder="brand" />
         </div>
-        <p className="mt-4 text-xs text-mist">Sans image personnalisée, les visuels éditoriaux par défaut sont utilisés.</p>
-        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("home")} className="btn btn-gold min-h-10">Enregistrer</button><span className="text-xs text-gold">{msg.home}</span></div>
+        <p className="mt-4 text-xs text-mist">Le visuel d&apos;accueil est un smartphone en 3D généré par le site : aucune image n&apos;est nécessaire. Sans logo personnalisé, le monogramme vectoriel est utilisé.</p>
+        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("home")} className="btn btn-primary min-h-10">Enregistrer</button><span className="text-xs text-accent">{msg.home}</span></div>
       </Card>
       <Card className="xl:col-span-2">
         <p className="label mb-2">Liens de paiement marchands</p>
@@ -62,7 +57,7 @@ export function SettingsEditor({ store, home, payments }: { store: StoreSettings
           <label><span className="label">Lien Wave (pay.wave.com/…)</span><input value={pay.wave_link} onChange={(e) => setPay((x) => ({ ...x, wave_link: e.target.value }))} placeholder="https://pay.wave.com/m/…" className="field-box mt-1" /></label>
           <label><span className="label">Lien Orange Money</span><input value={pay.orange_money_link} onChange={(e) => setPay((x) => ({ ...x, orange_money_link: e.target.value }))} placeholder="https://…" className="field-box mt-1" /></label>
         </div>
-        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("payments")} className="btn btn-gold min-h-10">Enregistrer</button><span className="text-xs text-gold">{msg.payments}</span></div>
+        <div className="mt-6 flex items-center gap-4"><button onClick={() => save("payments")} className="btn btn-primary min-h-10">Enregistrer</button><span className="text-xs text-accent">{msg.payments}</span></div>
       </Card>
     </div>
   );

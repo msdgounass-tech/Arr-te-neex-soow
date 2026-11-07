@@ -21,7 +21,7 @@ export function OrderQuickActions({ id, status, size = "md", withCancel = true }
         <form action={quickSetStatus}>
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="status" value={next.status} />
-          <button className={clsx("btn btn-gold", size === "sm" ? "min-h-11 px-4 text-[0.7rem]" : "min-h-12 px-6")}>{next.label}</button>
+          <button className={clsx("btn btn-primary", size === "sm" ? "min-h-11 px-4 text-[0.7rem]" : "min-h-12 px-6")}>{next.label}</button>
         </form>
       )}
       {withCancel && next && (

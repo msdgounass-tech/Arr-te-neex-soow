@@ -6,7 +6,7 @@ import { DEFAULT_IMAGES } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-export const metadata: Metadata = { title: "Collections", description: "Les collections et capsules exclusives GOUNASS LUXURY." };
+export const metadata: Metadata = { title: "Collections", description: "Nos sélections de produits high-tech : nouveautés, meilleures ventes, offres et collections thématiques.", alternates: { canonical: "/collections" } };
 export const revalidate = 60;
 
 export default async function CollectionsPage() {
@@ -23,15 +23,15 @@ export default async function CollectionsPage() {
       <nav aria-label="Sélections" className="mb-12 grid gap-3 sm:grid-cols-3">
         {[
           ["/nouveautes", "Nouvelle collection", "Les dernières arrivées"],
-          ["/meilleures-ventes", "Meilleures ventes", "Les pièces les plus convoitées"],
+          ["/meilleures-ventes", "Meilleures ventes", "Les produits les plus demandés"],
           ["/promotions", "Promotions", "Offres privilèges"],
         ].map(([href, title, sub]) => (
-          <Link key={href} href={href} className="group flex items-center justify-between border border-white/[0.12] bg-ink-2/60 px-6 py-6 transition-colors hover:border-gold/60">
+          <Link key={href} href={href} className="group flex items-center justify-between border border-white/[0.12] bg-ink-2/60 px-6 py-6 transition-colors hover:border-accent/60">
             <span>
-              <span className="display block text-2xl text-ivory group-hover:text-gold">{title}</span>
+              <span className="display block text-2xl text-ivory group-hover:text-accent">{title}</span>
               <span className="mt-1 block text-sm text-mist">{sub}</span>
             </span>
-            <span aria-hidden className="text-gold transition-transform group-hover:translate-x-1">→</span>
+            <span aria-hidden className="text-accent transition-transform group-hover:translate-x-1">→</span>
           </Link>
         ))}
       </nav>

@@ -12,7 +12,7 @@ export function ImageField({ label, value, onChange, bucket, folder }: { label: 
       <div className="mt-2 flex items-center gap-4">
         <span className="relative h-20 w-28 shrink-0 overflow-hidden border border-white/15 bg-ink-3">{value && <Image src={value} alt="" fill sizes="112px" className="object-cover" />}</span>
         <div className="space-y-2">
-          <label className="btn btn-ghost-gold min-h-9 cursor-pointer px-4">
+          <label className="btn btn-ghost min-h-9 cursor-pointer px-4">
             {busy ? "Téléversement…" : value ? "Remplacer" : "Téléverser"}
             <input
               type="file"

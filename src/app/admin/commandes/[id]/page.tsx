@@ -9,6 +9,7 @@ import { markCodPaid } from "../../actions";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import type { Order } from "@/lib/types";
 import { WhatsAppIcon } from "@/components/ui/Icons";
+import { BRAND } from "@/lib/site";
 
 export default async function AdminOrderDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,16 +23,16 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   const o = data as Order & { deliveries: { carrier: string | null; tracking_number: string | null; scheduled_for: string | null; notes: string | null; status: string }[] | { carrier: string | null; tracking_number: string | null; scheduled_for: string | null; notes: string | null; status: string } | null };
   const delivery = Array.isArray(o.deliveries) ? o.deliveries[0] ?? null : o.deliveries;
   const wa = toWhatsAppNumber(o.whatsapp || o.phone);
-  const waText = `Bonjour ${o.customer_name}, ici GOUNASS LUXURY au sujet de votre commande ${o.order_number} (${formatPrice(o.total)}).`;
+  const waText = `Bonjour ${o.customer_name}, ici ${BRAND.name} au sujet de votre commande ${o.order_number} (${formatPrice(o.total)}).`;
 
   return (
     <>
-      <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-gold">← Commandes</Link>
+      <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-accent">← Commandes</Link>
       <PageTitle title={o.order_number} subtitle={formatDate(o.created_at, true)}>
         <StatusBadge status={o.status} />
       </PageTitle>
       {o.status !== "livree" && o.status !== "annulee" && (
-        <Card className="mb-4 border-gold/40">
+        <Card className="mb-4 border-accent/40">
           <p className="label mb-3">Action suivante</p>
           <OrderQuickActions id={o.id} status={o.status} />
           {o.payment_method !== "livraison" && o.payment_status !== "reussi" && (
@@ -49,16 +50,16 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               {(o.order_items || []).map((it) => (
                 <li key={it.id} className="flex items-center gap-4 py-3">
                   <span className="relative h-16 w-12 shrink-0 overflow-hidden bg-ink-3">{it.image_url && <Image src={it.image_url} alt="" fill sizes="48px" className="object-cover" />}</span>
-                  <span className="min-w-0 flex-1 text-sm">{it.product_name}<span className="block text-xs text-mist">{it.color ? `${it.color} · ` : ""}{it.size ? `Taille ${it.size} · ` : ""}{it.quantity} × {formatPrice(it.unit_price)}</span><span className="block text-[0.7rem] text-mist/80">SKU {it.sku}</span></span>
+                  <span className="min-w-0 flex-1 text-sm">{it.product_name}<span className="block text-xs text-mist">{it.color ? `${it.color} · ` : ""}{it.size ? `${it.size} · ` : ""}{it.quantity} × {formatPrice(it.unit_price)}</span><span className="block text-[0.7rem] text-mist/80">SKU {it.sku}</span></span>
                   <span className="shrink-0 whitespace-nowrap text-right text-sm">{formatPrice(it.line_total)}</span>
                 </li>
               ))}
             </ul>
             <dl className="ml-auto mt-4 max-w-xs space-y-1 text-sm">
               <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(o.subtotal)}</dd></div>
-              {o.discount > 0 && <div className="flex justify-between text-gold"><dt>Code {o.coupon_code}</dt><dd>-{formatPrice(o.discount)}</dd></div>}
+              {o.discount > 0 && <div className="flex justify-between text-accent"><dt>Code {o.coupon_code}</dt><dd>-{formatPrice(o.discount)}</dd></div>}
               <div className="flex justify-between"><dt className="text-mist">Livraison ({o.zone_name})</dt><dd>{o.delivery_fee_pending ? "À confirmer" : formatPrice(o.delivery_fee)}</dd></div>
-              <div className="flex justify-between border-t border-white/[0.1] pt-2 text-base"><dt>Total</dt><dd className="text-gold">{formatPrice(o.total)}</dd></div>
+              <div className="flex justify-between border-t border-white/[0.1] pt-2 text-base"><dt>Total</dt><dd className="text-accent">{formatPrice(o.total)}</dd></div>
             </dl>
           </Card>
 
@@ -76,7 +77,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <p className="label mb-3">Adresse de livraison</p>
               <p className="text-sm">{o.address_line}</p>
               <p className="text-sm text-ivory/90">{[o.city, o.region].filter(Boolean).join(", ")}</p>
-              {o.notes && <p className="mt-3 border-l border-gold/40 pl-3 text-sm italic text-ivory/90">{o.notes}</p>}
+              {o.notes && <p className="mt-3 border-l border-accent/40 pl-3 text-sm italic text-ivory/90">{o.notes}</p>}
               {o.delivery_lat != null && o.delivery_lng != null && (
                 <a href={`https://www.google.com/maps/search/?api=1&query=${o.delivery_lat},${o.delivery_lng}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-4 min-h-10 w-full">
                   Ouvrir la position GPS{o.delivery_km != null ? ` · ${o.delivery_km} km` : ""}
@@ -95,7 +96,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             {o.payment_method === "livraison" && o.payment_status !== "reussi" && o.status !== "annulee" && (
               <form action={markCodPaid} className="mt-4">
                 <input type="hidden" name="id" value={o.id} />
-                <button className="btn btn-ghost-gold min-h-10">Marquer comme encaissé</button>
+                <button className="btn btn-ghost min-h-10">Marquer comme encaissé</button>
               </form>
             )}
             {(() => {
@@ -127,7 +128,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
 
         <div className="space-y-4">
           {o.delivery_fee_pending && o.status !== "annulee" && (
-            <Card className="border-gold/40"><p className="label mb-2 text-gold">Frais de livraison à confirmer</p><p className="mb-4 text-xs text-mist">Le client attend le montant. Le paiement en ligne lui sera proposé ensuite.</p><DeliveryFeeForm id={o.id} current={o.delivery_fee} /></Card>
+            <Card className="border-accent/40"><p className="label mb-2 text-accent">Frais de livraison à confirmer</p><p className="mb-4 text-xs text-mist">Le client attend le montant. Le paiement en ligne lui sera proposé ensuite.</p><DeliveryFeeForm id={o.id} current={o.delivery_fee} /></Card>
           )}
           <Card><p className="label mb-4">Statut de la commande</p><StatusForm id={o.id} status={o.status} /></Card>
           <Card><p className="label mb-4">Livraison {delivery ? `— ${delivery.status}` : ""}</p><DeliveryForm orderId={o.id} d={delivery} /></Card>

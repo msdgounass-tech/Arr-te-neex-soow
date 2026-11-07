@@ -1,13 +1,13 @@
 import "server-only";
 import { cache } from "react";
 import { getPublicSupabase } from "./supabase/server";
-import type { Category, Collection, DeliverySettings, DeliveryZone, Gender, HomeSettings, PaymentSettings, Product, StoreSettings } from "./types";
+import type { Category, CategoryNode, Collection, DeliverySettings, DeliveryZone, Gender, HomeSettings, PaymentSettings, Product, StoreSettings } from "./types";
 import { EMPTY_DELIVERY, EMPTY_HOME, EMPTY_PAYMENTS, EMPTY_STORE } from "./site";
 
 export const PRODUCT_SELECT = `
   id, name, slug, reference, description, details, gender, price, compare_at_price, is_featured, is_new, is_active,
-  created_at, category_id, collection_id, seo_title, seo_description, tags,
-  category:categories(id, name, slug, gender),
+  created_at, category_id, collection_id, seo_title, seo_description, tags, brand, specs,
+  category:categories(id, name, slug, gender, parent_id),
   collection:collections(id, name, slug),
   product_images(id, url, alt, position),
   product_variants(id, size, color, color_hex, sku, price_override, position, is_active, inventory(quantity))
@@ -34,6 +34,7 @@ export interface ProductFilters {
   ids?: string[];
   excludeId?: string;
   tag?: string;
+  brand?: string;
 }
 
 const clean = (q: string) => q.replace(/[%,()*\\'"]/g, " ").trim().slice(0, 60);
@@ -70,11 +71,12 @@ export async function getProducts(f: ProductFilters = {}): Promise<{ items: Prod
   if (f.ids) q = q.in("id", f.ids.length ? f.ids : ["00000000-0000-0000-0000-000000000000"]);
   if (f.excludeId) q = q.neq("id", f.excludeId);
   if (f.tag) q = q.contains("tags", [f.tag]);
+  if (f.brand) q = q.ilike("brand", clean(f.brand));
   if (f.min) q = q.gte("price", f.min);
   if (f.max) q = q.lte("price", f.max);
   if (f.q) {
     const term = clean(f.q);
-    if (term) q = q.or(`name.ilike.%${term}%,description.ilike.%${term}%,reference.ilike.%${term}%`);
+    if (term) q = q.or(`name.ilike.%${term}%,brand.ilike.%${term}%,description.ilike.%${term}%,reference.ilike.%${term}%`);
   }
   switch (f.sort) {
     case "price-asc":
@@ -123,6 +125,58 @@ export const getCategories = cache(async (): Promise<Category[]> => {
   if (!sb) return [];
   const { data } = await sb.from("categories").select("*").eq("is_active", true).order("position");
   return (data || []) as Category[];
+});
+
+/** Univers (catégories parentes) et leurs types, sans les univers vides de sous-catégories actives. */
+export const getCategoryTree = cache(async (): Promise<CategoryNode[]> => {
+  const all = await getCategories();
+  return all
+    .filter((c) => !c.parent_id)
+    .map((p) => ({ ...p, children: all.filter((c) => c.parent_id === p.id) }))
+    .filter((p) => p.children.length > 0);
+});
+
+/** Catégorie par slug, avec la liste des slugs à inclure (elle-même + ses sous-catégories). */
+export const getCategoryBySlug = cache(async (slug: string) => {
+  const all = await getCategories();
+  const cat = all.find((c) => c.slug === slug);
+  if (!cat) return null;
+  const children = all.filter((c) => c.parent_id === cat.id);
+  const parent = cat.parent_id ? all.find((c) => c.id === cat.parent_id) || null : null;
+  const siblings = parent ? all.filter((c) => c.parent_id === parent.id) : children;
+  return { category: cat, parent, children, siblings, slugs: [cat.slug, ...children.map((c) => c.slug)] };
+});
+
+/** Nombre de produits en ligne par catégorie (slug) — les univers cumulent leurs sous-catégories. */
+export const getCategoryCounts = cache(async (): Promise<Record<string, number>> => {
+  const sb = getPublicSupabase();
+  if (!sb) return {};
+  const [all, { data }] = await Promise.all([getCategories(), sb.from("products").select("category_id").eq("is_active", true).limit(5000)]);
+  const byId: Record<string, number> = {};
+  (data || []).forEach((r) => {
+    if (r.category_id) byId[r.category_id as string] = (byId[r.category_id as string] || 0) + 1;
+  });
+  const out: Record<string, number> = {};
+  all.forEach((c) => {
+    const own = byId[c.id] || 0;
+    out[c.slug] = (out[c.slug] || 0) + own;
+    const parent = c.parent_id ? all.find((p) => p.id === c.parent_id) : null;
+    if (parent) out[parent.slug] = (out[parent.slug] || 0) + own;
+  });
+  return out;
+});
+
+/** Marques présentes dans le catalogue en ligne (pour le filtre « Marque »). */
+export const getBrands = cache(async (): Promise<string[]> => {
+  const sb = getPublicSupabase();
+  if (!sb) return [];
+  const { data } = await sb.from("products").select("brand").eq("is_active", true).not("brand", "is", null).limit(2000);
+  const set = new Map<string, string>();
+  (data || []).forEach((r) => {
+    const b = String(r.brand || "").trim();
+    if (b && !set.has(b.toLowerCase())) set.set(b.toLowerCase(), b);
+  });
+  return [...set.values()].sort((a, b) => a.localeCompare(b, "fr"));
 });
 
 export const getCollections = cache(async (): Promise<Collection[]> => {

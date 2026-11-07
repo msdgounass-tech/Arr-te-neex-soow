@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { CatalogPage, type SearchParams } from "@/components/catalog/CatalogPage";
-import { GENDER_OPTIONS } from "@/lib/catalog-options";
+import { universeFilter } from "@/lib/catalog";
 
-export const metadata: Metadata = { title: "Promotions" };
+export const metadata: Metadata = {
+  title: "Promotions",
+  description: "Les offres du moment sur les smartphones, l'audio, l'informatique et les accessoires. Prix en FCFA.",
+  alternates: { canonical: "/promotions" },
+};
 
 export default async function PromoPage({ searchParams }: { searchParams: SearchParams }) {
-  return <CatalogPage eyebrow="Offres privilèges" title="Promotions" basePath="/promotions" base={{ onSale: true }} searchParams={await searchParams} categories={GENDER_OPTIONS} categoryParam="genre" filterKind="gender" />;
+  const { categories, mapCategory } = await universeFilter();
+  return <CatalogPage eyebrow="Offres du moment" title="Promotions" basePath="/promotions" base={{ onSale: true }} searchParams={await searchParams} categories={categories} mapCategory={mapCategory} />;
 }

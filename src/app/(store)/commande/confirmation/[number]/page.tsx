@@ -7,6 +7,7 @@ import { formatPrice, PAYMENT_METHOD_LABEL, toWhatsAppNumber } from "@/lib/forma
 import { OrderSummary } from "@/components/order/OrderSummary";
 import { PrintButton, RetryPayment, WhatsAppShare } from "@/components/order/OrderActions";
 import { BrandLogo } from "@/components/brand/Logo";
+import { BRAND } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Votre commande", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
   const cancelledReturn = retour?.includes("annule") || retour?.includes("erreur");
 
   const lines = (order.order_items || []).map((i) => `• ${i.product_name}${i.size ? ` (${i.size})` : ""}${i.color ? ` ${i.color}` : ""} x${i.quantity} — ${formatPrice(i.line_total)}`);
-  const waText = [`Bonjour GOUNASS LUXURY, voici ma commande ${order.order_number} :`, ...lines, `Total : ${formatPrice(order.total)}`, `Paiement : ${PAYMENT_METHOD_LABEL[order.payment_method]}`, `Livraison : ${order.address_line}, ${order.city}`, `Nom : ${order.customer_name} — ${order.phone}`].join("\n");
+  const waText = [`Bonjour ${BRAND.name}, voici ma commande ${order.order_number} :`, ...lines, `Total : ${formatPrice(order.total)}`, `Paiement : ${PAYMENT_METHOD_LABEL[order.payment_method]}`, `Livraison : ${order.address_line}, ${order.city}`, `Nom : ${order.customer_name} — ${order.phone}`].join("\n");
 
   let title = "Merci pour votre commande";
   let text = "Votre commande est enregistrée. Notre équipe vous contactera pour confirmer la livraison.";
@@ -62,21 +63,21 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
       </header>
 
       {feePending && (
-        <div className="mb-12 border border-gold/30 bg-gold/[0.04] p-6 text-center text-sm text-ivory/90">
-          Frais de livraison <strong className="text-gold">à confirmer</strong> — total actuel hors livraison : {formatPrice(order.total)}.
+        <div className="mb-12 border border-accent/30 bg-accent/[0.04] p-6 text-center text-sm text-ivory/90">
+          Frais de livraison <strong className="text-accent">à confirmer</strong> — total actuel hors livraison : {formatPrice(order.total)}.
         </div>
       )}
 
       {awaitingPayment && (
-        <div className="mb-12 flex flex-col items-center gap-6 border border-gold/30 bg-gold/[0.04] p-8 text-center">
-          <p className="text-sm text-ivory/90">Montant à régler : <strong className="text-gold">{formatPrice(order.total)}</strong> via {PAYMENT_METHOD_LABEL[order.payment_method]}</p>
+        <div className="mb-12 flex flex-col items-center gap-6 border border-accent/30 bg-accent/[0.04] p-8 text-center">
+          <p className="text-sm text-ivory/90">Montant à régler : <strong className="text-accent">{formatPrice(order.total)}</strong> via {PAYMENT_METHOD_LABEL[order.payment_method]}</p>
           {order.payment_method === "orange_money" && qrCode && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={qrCode.startsWith("data:") ? qrCode : `data:image/png;base64,${qrCode}`} alt="QR code Orange Money" className="h-48 w-48 bg-white p-2" />
           )}
           {payLink ? (
             <>
-              <a href={payLink} target="_blank" rel="noopener noreferrer" className="btn btn-gold">Payer {formatPrice(order.total)} avec {PAYMENT_METHOD_LABEL[order.payment_method]}</a>
+              <a href={payLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Payer {formatPrice(order.total)} avec {PAYMENT_METHOD_LABEL[order.payment_method]}</a>
               <p className="max-w-md text-xs leading-relaxed text-mist">
                 Vérifiez que le montant affiché est bien <strong className="text-ivory">{formatPrice(order.total)}</strong> et indiquez la référence <strong className="text-ivory">{order.order_number}</strong> si l&apos;application vous le propose. Le statut « Payé » s&apos;affichera ici après vérification.
               </p>
@@ -92,7 +93,7 @@ export default async function ConfirmationPage({ params, searchParams }: Props) 
       <div className="mt-12 flex flex-wrap justify-center gap-3 print:hidden">
         {store.whatsapp && <WhatsAppShare number={toWhatsAppNumber(store.whatsapp)} text={waText} />}
         <PrintButton />
-        <Link href="/shop" className="btn btn-ghost-gold">Continuer mes achats</Link>
+        <Link href="/shop" className="btn btn-ghost">Continuer mes achats</Link>
       </div>
       <p className="mt-8 text-center text-xs text-mist">Conservez ce lien : il vous permet de suivre votre commande à tout moment.</p>
     </div>

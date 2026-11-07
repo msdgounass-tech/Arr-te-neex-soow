@@ -27,6 +27,8 @@ export interface EditableProduct {
   seo_title: string | null;
   seo_description: string | null;
   tags?: string[];
+  brand?: string | null;
+  specs?: { label: string; value: string }[] | null;
   product_images: { id: string; url: string; storage_path: string | null; alt: string | null; position: number }[];
   product_variants: { id: string; size: string | null; color: string | null; color_hex: string | null; sku: string; price_override: number | null; position: number; is_active: boolean; inventory: { quantity: number } | null }[];
 }
@@ -36,7 +38,7 @@ type Var = { id?: string; size: string; color: string; color_hex: string; sku: s
 
 interface Props {
   product?: EditableProduct;
-  categories: { id: string; name: string; slug: string; parent_id: string | null; gender: string | null }[];
+  categories: { id: string; name: string; slug: string; parent_id: string | null; gender: string | null; is_active?: boolean }[];
   collections: { id: string; name: string }[];
 }
 
@@ -50,7 +52,8 @@ export function ProductEditor({ product, categories, collections }: Props) {
     details: product?.details || "",
     category_id: product?.category_id || "",
     collection_id: product?.collection_id || "",
-    gender: product?.gender || "homme",
+    gender: product?.gender || "unisexe",
+    brand: product?.brand || "",
     price: product ? String(product.price) : "",
     compare_at_price: product?.compare_at_price ? String(product.compare_at_price) : "",
     is_featured: product?.is_featured ?? false,
@@ -66,6 +69,8 @@ export function ProductEditor({ product, categories, collections }: Props) {
       ? [...product.product_variants].sort((a, b) => a.position - b.position).map((v) => ({ id: v.id, size: v.size || "", color: v.color || "", color_hex: v.color_hex || "", sku: v.sku, price_override: v.price_override != null ? String(v.price_override) : "", stock: String(v.inventory?.quantity ?? 0), is_active: v.is_active }))
       : [{ size: "", color: "", color_hex: "", sku: "", price_override: "", stock: "0", is_active: true }],
   );
+  const [specs, setSpecs] = useState<{ label: string; value: string }[]>(() => (product?.specs?.length ? product.specs : [{ label: "", value: "" }]));
+  const setSpec = (i: number, k: "label" | "value", v: string) => setSpecs((xs) => xs.map((x, j) => (j === i ? { ...x, [k]: v } : x)));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -94,7 +99,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
 
   const genSku = (i: number) => {
     const v = variants[i];
-    const base = (f.reference || "GL").toUpperCase();
+    const base = (f.reference || "REF").toUpperCase();
     return [base, v.color && slugify(v.color).slice(0, 4).toUpperCase(), v.size && v.size.toUpperCase().replace(/\s/g, "")].filter(Boolean).join("-");
   };
 
@@ -105,6 +110,7 @@ export function ProductEditor({ product, categories, collections }: Props) {
     const res = await saveProduct({
       ...f,
       tags: f.tags.split(",").map((t) => slugify(t)).filter(Boolean),
+      specs: specs.map((x) => ({ label: x.label.trim(), value: x.value.trim() })).filter((x) => x.label && x.value),
       id: product?.id,
       category_id: f.category_id || null,
       collection_id: f.collection_id || null,
@@ -129,17 +135,35 @@ export function ProductEditor({ product, categories, collections }: Props) {
           <p className="label mb-4">Informations</p>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="md:col-span-2"><span className="label">Nom *</span><input required value={f.name} onChange={set("name")} className="field-box mt-1" /></label>
-            <label><span className="label">Référence *</span><input required value={f.reference} onChange={set("reference")} placeholder="GL-H-0001" className="field-box mt-1 uppercase" /></label>
+            <label><span className="label">Marque</span><input value={f.brand} onChange={set("brand")} placeholder="Apple, Samsung, Xiaomi…" className="field-box mt-1" /></label>
+            <label><span className="label">Référence *</span><input required value={f.reference} onChange={set("reference")} placeholder="TEL-0001" className="field-box mt-1 uppercase" /></label>
             <label><span className="label">Slug (URL)</span><input value={f.slug} onChange={set("slug")} placeholder={slugify(f.name) || "genere-automatiquement"} className="field-box mt-1" /></label>
             <label className="md:col-span-2"><span className="label">Description</span><textarea rows={5} value={f.description} onChange={set("description")} className="field-box mt-1" /></label>
-            <label className="md:col-span-2"><span className="label">Détails &amp; entretien</span><textarea rows={3} value={f.details} onChange={set("details")} className="field-box mt-1" /></label>
+            <label className="md:col-span-2"><span className="label">Contenu de la boîte &amp; informations</span><textarea rows={3} value={f.details} onChange={set("details")} className="field-box mt-1" /></label>
           </div>
+        </Card>
+
+        <Card>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="label">Caractéristiques techniques ({specs.filter((x) => x.label && x.value).length})</p>
+            <button type="button" onClick={() => setSpecs((xs) => [...xs, { label: "", value: "" }])} className="btn btn-ghost min-h-9 px-4">Ajouter une ligne</button>
+          </div>
+          <div className="space-y-2">
+            {specs.map((x, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1.6fr_auto] gap-2">
+                <input value={x.label} onChange={(e) => setSpec(i, "label", e.target.value)} placeholder="Écran, Processeur, Batterie…" aria-label={`Caractéristique ${i + 1}`} className="field-box py-1.5" />
+                <input value={x.value} onChange={(e) => setSpec(i, "value", e.target.value)} placeholder="Valeur exacte (fiche constructeur)" aria-label={`Valeur ${i + 1}`} className="field-box py-1.5" />
+                <button type="button" aria-label="Supprimer la ligne" onClick={() => setSpecs((xs) => (xs.length === 1 ? [{ label: "", value: "" }] : xs.filter((_, j) => j !== i)))} className="p-1 text-mist hover:text-danger"><TrashIcon width={16} height={16} /></button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-mist">Saisissez uniquement les caractéristiques officielles du produit. Les lignes vides sont ignorées.</p>
         </Card>
 
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <p className="label">Photos ({images.length}) — la première est l&apos;image principale</p>
-            <label className={clsx("btn btn-ghost-gold min-h-9 cursor-pointer px-4", uploading && "opacity-50")}>
+            <label className={clsx("btn btn-ghost min-h-9 cursor-pointer px-4", uploading && "opacity-50")}>
               {uploading ? "Téléversement…" : "Ajouter des photos"}
               <input type="file" accept="image/*" multiple className="hidden" disabled={uploading} onChange={(e) => onFiles(e.target.files)} />
             </label>
@@ -147,39 +171,39 @@ export function ProductEditor({ product, categories, collections }: Props) {
           {images.length ? (
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {images.map((img, i) => (
-                <li key={img.url} className={clsx("relative border", i === 0 ? "border-gold" : "border-white/15")}>
+                <li key={img.url} className={clsx("relative border", i === 0 ? "border-accent" : "border-white/15")}>
                   <div className="relative aspect-[3/4]"><Image src={img.url} alt="" fill sizes="200px" className="object-cover" /></div>
                   <input value={img.alt || ""} onChange={(e) => setImages((x) => x.map((m, j) => (j === i ? { ...m, alt: e.target.value } : m)))} placeholder="Texte alternatif" className="w-full bg-ink px-2 py-1 text-xs focus:outline-none" />
                   <div className="flex justify-between bg-ink-3 px-1 py-1">
-                    <button type="button" aria-label="Déplacer à gauche" onClick={() => move(i, -1)} className="p-1 hover:text-gold"><ChevronLeft width={14} height={14} /></button>
+                    <button type="button" aria-label="Déplacer à gauche" onClick={() => move(i, -1)} className="p-1 hover:text-accent"><ChevronLeft width={14} height={14} /></button>
                     <button type="button" aria-label="Retirer" onClick={() => setImages((x) => x.filter((_, j) => j !== i))} className="p-1 hover:text-danger"><TrashIcon width={14} height={14} /></button>
-                    <button type="button" aria-label="Déplacer à droite" onClick={() => move(i, 1)} className="p-1 hover:text-gold"><ChevronRight width={14} height={14} /></button>
+                    <button type="button" aria-label="Déplacer à droite" onClick={() => move(i, 1)} className="p-1 hover:text-accent"><ChevronRight width={14} height={14} /></button>
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-mist">Aucune photo. Formats JPG, PNG, WebP — 8 Mo max par image. Privilégiez un ratio portrait 3:4.</p>
+            <p className="text-sm text-mist">Aucune photo. Formats JPG, PNG, WebP — 8 Mo max par image. Privilégiez des photos carrées sur fond uni.</p>
           )}
         </Card>
 
         <Card className="overflow-x-auto">
           <div className="mb-4 flex items-center justify-between">
-            <p className="label">Déclinaisons, tailles, couleurs &amp; stock</p>
-            <button type="button" onClick={() => setVariants((v) => [...v, { size: "", color: v.at(-1)?.color || "", color_hex: v.at(-1)?.color_hex || "", sku: "", price_override: "", stock: "0", is_active: true }])} className="btn btn-ghost-gold min-h-9 px-4">Ajouter</button>
+            <p className="label">Déclinaisons : version, couleur &amp; stock</p>
+            <button type="button" onClick={() => setVariants((v) => [...v, { size: "", color: v.at(-1)?.color || "", color_hex: v.at(-1)?.color_hex || "", sku: "", price_override: "", stock: "0", is_active: true }])} className="btn btn-ghost min-h-9 px-4">Ajouter</button>
           </div>
           <table className="w-full min-w-[760px] text-sm">
-            <thead><tr className="text-left text-[0.68rem] uppercase tracking-[0.16em] text-mist"><th className="pb-2 pr-2 font-normal">Taille</th><th className="pb-2 pr-2 font-normal">Couleur</th><th className="pb-2 pr-2 font-normal">Teinte</th><th className="pb-2 pr-2 font-normal">SKU</th><th className="pb-2 pr-2 font-normal">Prix spécifique</th><th className="pb-2 pr-2 font-normal">Stock</th><th className="pb-2 pr-2 font-normal">Actif</th><th /></tr></thead>
+            <thead><tr className="text-left text-[0.68rem] uppercase tracking-[0.16em] text-mist"><th className="pb-2 pr-2 font-normal">Version</th><th className="pb-2 pr-2 font-normal">Couleur</th><th className="pb-2 pr-2 font-normal">Teinte</th><th className="pb-2 pr-2 font-normal">SKU</th><th className="pb-2 pr-2 font-normal">Prix spécifique</th><th className="pb-2 pr-2 font-normal">Stock</th><th className="pb-2 pr-2 font-normal">Actif</th><th /></tr></thead>
             <tbody>
               {variants.map((v, i) => (
                 <tr key={v.id || i}>
-                  <td className="pb-2 pr-2"><input value={v.size} onChange={(e) => setVar(i, "size", e.target.value)} placeholder="M, 42, Unique…" className="field-box py-1.5" /></td>
+                  <td className="pb-2 pr-2"><input value={v.size} onChange={(e) => setVar(i, "size", e.target.value)} placeholder="128 Go, 8/256 Go…" className="field-box py-1.5" /></td>
                   <td className="pb-2 pr-2"><input value={v.color} onChange={(e) => setVar(i, "color", e.target.value)} placeholder="Noir" className="field-box py-1.5" /></td>
                   <td className="pb-2 pr-2"><input type="color" value={v.color_hex || "#000000"} onChange={(e) => setVar(i, "color_hex", e.target.value)} className="h-9 w-12 cursor-pointer border border-line bg-transparent" /></td>
                   <td className="pb-2 pr-2"><input value={v.sku} onChange={(e) => setVar(i, "sku", e.target.value)} placeholder={genSku(i)} className="field-box py-1.5 uppercase" /></td>
                   <td className="pb-2 pr-2"><input inputMode="numeric" value={v.price_override} onChange={(e) => setVar(i, "price_override", e.target.value.replace(/\D/g, ""))} placeholder="—" className="field-box py-1.5" /></td>
                   <td className="pb-2 pr-2"><input inputMode="numeric" value={v.stock} onChange={(e) => setVar(i, "stock", e.target.value.replace(/\D/g, ""))} className="field-box w-20 py-1.5" /></td>
-                  <td className="pb-2 pr-2 text-center"><input type="checkbox" checked={v.is_active} onChange={(e) => setVar(i, "is_active", e.target.checked)} className="accent-[#C6A15B]" /></td>
+                  <td className="pb-2 pr-2 text-center"><input type="checkbox" checked={v.is_active} onChange={(e) => setVar(i, "is_active", e.target.checked)} className="accent-[#7ea4ff]" /></td>
                   <td className="pb-2"><button type="button" aria-label="Supprimer la déclinaison" disabled={variants.length === 1} onClick={() => setVariants((vs) => vs.filter((_, j) => j !== i))} className="p-1 text-mist hover:text-danger disabled:opacity-20"><TrashIcon width={16} height={16} /></button></td>
                 </tr>
               ))}
@@ -204,15 +228,12 @@ export function ProductEditor({ product, categories, collections }: Props) {
           <label className="mt-4 block"><span className="label">Prix barré (promotion)</span><input inputMode="numeric" value={f.compare_at_price} onChange={(e) => setF((s) => ({ ...s, compare_at_price: e.target.value.replace(/\D/g, "") }))} placeholder="Laisser vide si aucune promotion" className="field-box mt-1" /></label>
 
           <p className="label mb-3 mt-8">Classement</p>
-          <label className="block"><span className="label">Univers</span>
-            <select value={f.gender} onChange={set("gender")} className="field-box mt-1"><option value="homme">Homme</option><option value="femme">Femme</option><option value="unisexe">Unisexe</option></select>
-          </label>
-          <label className="mt-4 block"><span className="label">Catégorie</span>
+          <label className="block"><span className="label">Catégorie</span>
             <select value={f.category_id} onChange={set("category_id")} className="field-box mt-1">
               <option value="">—</option>
               {parents.map((p) => (
-                <optgroup key={p.id} label={p.name}>
-                  {categories.filter((c) => c.parent_id === p.id).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <optgroup key={p.id} label={`${p.name}${p.is_active === false ? " (masqué)" : ""}`}>
+                  {categories.filter((c) => c.parent_id === p.id).map((c) => <option key={c.id} value={c.id}>{c.name}{c.is_active === false ? " (masquée)" : ""}</option>)}
                 </optgroup>
               ))}
             </select>
@@ -222,19 +243,19 @@ export function ProductEditor({ product, categories, collections }: Props) {
           </label>
 
           <label className="mt-4 block">
-            <span className="label">Styles (séparés par des virgules)</span>
-            <input value={f.tags} onChange={set("tags")} placeholder="luxe, classique, sportive, connectee" className="field-box mt-1" />
-            <span className="mt-1 block text-xs text-mist">Utilisés par la page Montres et les filtres de style.</span>
+            <span className="label">Étiquettes (séparées par des virgules)</span>
+            <input value={f.tags} onChange={set("tags")} placeholder="5g, gaming, sans-fil" className="field-box mt-1" />
+            <span className="mt-1 block text-xs text-mist">Mots-clés internes, facultatifs.</span>
           </label>
 
           <div className="mt-8 space-y-3 text-sm">
-            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_active} onChange={set("is_active")} className="accent-[#C6A15B]" /> En ligne</label>
-            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_new} onChange={set("is_new")} className="accent-[#C6A15B]" /> Nouveauté</label>
-            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_featured} onChange={set("is_featured")} className="accent-[#C6A15B]" /> Mettre en vedette</label>
+            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_active} onChange={set("is_active")} className="accent-[#7ea4ff]" /> En ligne</label>
+            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_new} onChange={set("is_new")} className="accent-[#7ea4ff]" /> Nouveauté</label>
+            <label className="flex items-center gap-3"><input type="checkbox" checked={f.is_featured} onChange={set("is_featured")} className="accent-[#7ea4ff]" /> Mettre en vedette</label>
           </div>
 
-          {msg && <p className={clsx("mt-6 text-sm", msg.ok ? "text-gold" : "text-danger")}>{msg.text}</p>}
-          <button disabled={saving || uploading} className="btn btn-gold mt-6 w-full">{saving ? "Enregistrement…" : "Enregistrer le produit"}</button>
+          {msg && <p className={clsx("mt-6 text-sm", msg.ok ? "text-accent" : "text-danger")}>{msg.text}</p>}
+          <button disabled={saving || uploading} className="btn btn-primary mt-6 w-full">{saving ? "Enregistrement…" : "Enregistrer le produit"}</button>
         </Card>
       </div>
     </form>

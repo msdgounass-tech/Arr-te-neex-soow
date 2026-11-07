@@ -27,8 +27,8 @@ export function AddressForm({ zones }: { zones: DeliveryZone[] }) {
       <label className="md:col-span-2"><span className="label">Indications</span><input name="notes" className="field" /></label>
       <div className="md:col-span-2">
         {state.error && <p className="mb-4 text-sm text-danger">{state.error}</p>}
-        {state.message && <p className="mb-4 text-sm text-gold">{state.message}</p>}
-        <button disabled={pending} className="btn btn-ghost-gold">{pending ? "…" : "Ajouter l'adresse"}</button>
+        {state.message && <p className="mb-4 text-sm text-accent">{state.message}</p>}
+        <button disabled={pending} className="btn btn-ghost">{pending ? "…" : "Ajouter l'adresse"}</button>
       </div>
     </form>
   );

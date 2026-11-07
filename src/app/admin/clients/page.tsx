@@ -18,7 +18,7 @@ export default async function AdminClients({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageTitle title="Clients & équipe" subtitle={`${data?.length ?? 0} compte(s)`} />
-      <form className="mb-6 flex gap-2"><input name="q" defaultValue={q} placeholder="Nom, e-mail, téléphone" className="field-box w-72" /><button className="btn btn-ghost-gold min-h-10 px-4">Rechercher</button></form>
+      <form className="mb-6 flex gap-2"><input name="q" defaultValue={q} placeholder="Nom, e-mail, téléphone" className="field-box w-72" /><button className="btn btn-ghost min-h-10 px-4">Rechercher</button></form>
       <Card className="overflow-x-auto p-0 md:p-0">
         <table className="w-full min-w-[760px] text-sm">
           <thead className="border-b border-white/[0.1]"><tr className="[&>th]:px-4"><th className={th}>Nom</th><th className={th}>E-mail</th><th className={th}>Téléphone</th><th className={th}>Inscription</th><th className={th}>Rôle</th></tr></thead>
@@ -34,10 +34,10 @@ export default async function AdminClients({ searchParams }: { searchParams: Pro
                     <form action={setRole} className="flex gap-2">
                       <input type="hidden" name="id" value={p.id} />
                       <select name="role" defaultValue={p.role} className="field-box py-1 text-xs">{ROLES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
-                      <button className="text-[0.78rem] uppercase tracking-[0.16em] text-gold">OK</button>
+                      <button className="text-[0.78rem] uppercase tracking-[0.16em] text-accent">OK</button>
                     </form>
                   ) : (
-                    <span className="text-xs uppercase tracking-[0.14em] text-gold">{ROLES.find(([v]) => v === p.role)?.[1]}</span>
+                    <span className="text-xs uppercase tracking-[0.14em] text-accent">{ROLES.find(([v]) => v === p.role)?.[1]}</span>
                   )}
                 </td>
               </tr>

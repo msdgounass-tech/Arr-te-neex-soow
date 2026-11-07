@@ -3,6 +3,7 @@ import { getServiceSupabase, hasServiceKey } from "@/lib/supabase/admin";
 import { SITE_URL } from "@/lib/env";
 import { formatPrice, ORDER_STATUS_LABEL, toWhatsAppNumber } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
+import { BRAND } from "@/lib/site";
 
 export type NotificationEvent = "order_created" | "payment_received" | "status_changed" | "shipped" | "delivered" | "delivery_fee_set";
 
@@ -20,7 +21,7 @@ const message = (event: NotificationEvent, o: Order) => {
     case "shipped":
       return `Votre commande ${o.order_number} a été expédiée. Suivi : ${link}`;
     case "delivered":
-      return `Votre commande ${o.order_number} a été livrée. Merci pour votre confiance — Wouro Maama.`;
+      return `Votre commande ${o.order_number} a été livrée. Merci pour votre confiance.`;
     default:
       return `Le statut de votre commande ${o.order_number} est désormais : ${ORDER_STATUS_LABEL[o.status as OrderStatus]}. Suivi : ${link}`;
   }
@@ -54,7 +55,7 @@ async function sendWhatsApp(to: string, name: string, orderNumber: string, text:
           components: [{ type: "body", parameters: [name, orderNumber, text].map((t) => ({ type: "text", text: t.slice(0, 900) })) }],
         },
       }
-    : { messaging_product: "whatsapp", to, type: "text", text: { body: `GOUNASS LUXURY — ${text}` } };
+    : { messaging_product: "whatsapp", to, type: "text", text: { body: `${BRAND.name} — ${text}` } };
   const res = await fetch(`https://graph.facebook.com/v21.0/${phoneId}/messages`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -68,11 +69,11 @@ async function sendEmail(to: string, subject: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!key || !from) return { skipped: true as const };
-  const html = `<div style="background:#231811;color:#F5F1E8;padding:40px;font-family:Georgia,serif">
-    <p style="letter-spacing:6px;color:#C6A15B;font-size:12px">GOUNASS LUXURY</p>
+  const html = `<div style="background:#07080b;color:#eef1f6;padding:40px;font-family:Arial,Helvetica,sans-serif">
+    <p style="letter-spacing:4px;color:#7ea4ff;font-size:12px">${BRAND.name} ${BRAND.tagline}</p>
     <h1 style="font-weight:400;font-size:26px">${subject}</h1>
-    <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#d8d2c5">${text.replace(/(https?:\/\/\S+)/g, '<a style="color:#C6A15B" href="$1">$1</a>')}</p>
-    <p style="font-style:italic;color:#C6A15B;margin-top:32px">Wouro Maama</p></div>`;
+    <p style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#c3c9d4">${text.replace(/(https?:\/\/\S+)/g, '<a style="color:#7ea4ff" href="$1">$1</a>')}</p>
+    <p style="color:#7ea4ff;margin-top:32px">${BRAND.slogan}</p></div>`;
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },

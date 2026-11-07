@@ -27,8 +27,8 @@ export function ContactForm() {
       <label className="md:col-span-2"><span className="label">Objet</span><input name="subject" className="field" /></label>
       <label className="md:col-span-2"><span className="label">Message *</span><textarea name="message" required rows={5} className="field resize-none" /></label>
       <div className="md:col-span-2">
-        {msg && <p className={`mb-4 text-sm ${state === "ok" ? "text-gold" : "text-danger"}`}>{msg}</p>}
-        <button disabled={state === "loading"} className="btn btn-gold">{state === "loading" ? "Envoi…" : "Envoyer le message"}</button>
+        {msg && <p className={`mb-4 text-sm ${state === "ok" ? "text-accent" : "text-danger"}`}>{msg}</p>}
+        <button disabled={state === "loading"} className="btn btn-primary">{state === "loading" ? "Envoi…" : "Envoyer le message"}</button>
       </div>
     </form>
   );

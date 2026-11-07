@@ -22,7 +22,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
   const { items } = await getProducts({ collectionSlug: slug, limit: 48 });
   return (
     <>
-      <section className="relative -mt-[72px] h-[80vh] min-h-[520px] overflow-hidden lg:-mt-[84px]">
+      <section className="relative -mt-16 h-[80vh] min-h-[520px] overflow-hidden lg:-mt-[72px]">
         <Image src={c.image_url || DEFAULT_IMAGES.collection} alt={c.name} fill priority sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/50" />
         <div className="container-luxe relative flex h-full flex-col items-center justify-end pb-20 text-center">
@@ -35,7 +35,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
       </section>
       <div className="container-luxe pt-16">
         {c.description && <p className="mx-auto mb-16 max-w-2xl text-center leading-relaxed text-ivory/90">{c.description}</p>}
-        {items.length ? <ProductGrid products={items} /> : <EmptyState title="Bientôt disponible" text="Les pièces de cette collection seront bientôt dévoilées." />}
+        {items.length ? <ProductGrid products={items} /> : <EmptyState title="Bientôt disponible" text="Les produits de cette sélection arrivent très bientôt." />}
       </div>
     </>
   );

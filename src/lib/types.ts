@@ -30,6 +30,15 @@ export interface Collection {
   position: number;
 }
 
+export interface ProductSpec {
+  label: string;
+  value: string;
+}
+
+export interface CategoryNode extends Category {
+  children: Category[];
+}
+
 export interface ProductImage {
   id: string;
   url: string;
@@ -69,7 +78,11 @@ export interface Product {
   seo_title?: string | null;
   seo_description?: string | null;
   tags?: string[];
-  category: Pick<Category, "id" | "name" | "slug" | "gender"> | null;
+  /** Marque (Apple, Samsung…) — saisie dans l'admin. */
+  brand?: string | null;
+  /** Caractéristiques techniques réelles saisies dans l'admin. */
+  specs?: ProductSpec[];
+  category: (Pick<Category, "id" | "name" | "slug" | "gender"> & { parent_id?: string | null }) | null;
   collection?: Pick<Collection, "id" | "name" | "slug"> | null;
   product_images: ProductImage[];
   product_variants: ProductVariant[];

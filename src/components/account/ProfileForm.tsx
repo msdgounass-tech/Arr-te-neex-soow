@@ -12,8 +12,8 @@ export function ProfileForm({ profile, email }: { profile: { full_name: string |
       <label><span className="label">WhatsApp</span><input name="whatsapp" type="tel" defaultValue={profile.whatsapp || ""} className="field" /></label>
       <div className="md:col-span-2">
         {state.error && <p className="mb-4 text-sm text-danger">{state.error}</p>}
-        {state.message && <p className="mb-4 text-sm text-gold">{state.message}</p>}
-        <button disabled={pending} className="btn btn-gold">{pending ? "Enregistrement…" : "Enregistrer"}</button>
+        {state.message && <p className="mb-4 text-sm text-accent">{state.message}</p>}
+        <button disabled={pending} className="btn btn-primary">{pending ? "Enregistrement…" : "Enregistrer"}</button>
       </div>
     </form>
   );

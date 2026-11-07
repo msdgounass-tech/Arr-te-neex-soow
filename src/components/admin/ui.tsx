@@ -20,7 +20,7 @@ export function Card({ className, children }: { className?: string; children: Re
 }
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
-  en_attente: "border-gold/40 text-gold",
+  en_attente: "border-accent/40 text-accent",
   confirmee: "border-sky-400/40 text-sky-300",
   en_preparation: "border-violet-400/40 text-violet-300",
   expediee: "border-amber-300/40 text-amber-200",

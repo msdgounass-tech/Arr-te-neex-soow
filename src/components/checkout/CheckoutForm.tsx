@@ -82,7 +82,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
   if (!lines.length) {
     return (
       <div className="container-luxe pt-24">
-        <EmptyState title="Votre panier est vide" text="Ajoutez des pièces à votre panier pour passer commande." cta={{ href: "/shop", label: "Explorer la boutique" }} />
+        <EmptyState title="Votre panier est vide" text="Ajoutez des produits à votre panier pour passer commande." cta={{ href: "/shop", label: "Explorer la boutique" }} />
       </div>
     );
   }
@@ -138,8 +138,8 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
         <h1 className="display mt-5 text-5xl md:text-7xl">{step === 1 ? "Vos informations" : "Récapitulatif"}</h1>
         <ol className="mx-auto mt-8 flex max-w-sm items-center justify-center gap-2 sm:gap-4 text-[0.78rem] uppercase tracking-[0.24em]">
           {["Informations", "Validation"].map((s, i) => (
-            <li key={s} className={clsx("flex items-center gap-2", step >= i + 1 ? "text-gold" : "text-mist")}>
-              <span className={clsx("flex h-6 w-6 items-center justify-center rounded-full border", step > i + 1 ? "border-gold bg-gold text-ink" : step === i + 1 ? "border-gold" : "border-white/20")}>
+            <li key={s} className={clsx("flex items-center gap-2", step >= i + 1 ? "text-accent" : "text-mist")}>
+              <span className={clsx("flex h-6 w-6 items-center justify-center rounded-full border", step > i + 1 ? "border-accent bg-accent text-ink" : step === i + 1 ? "border-accent" : "border-white/20")}>
                 {step > i + 1 ? <CheckIcon width={12} height={12} /> : i + 1}
               </span>
               {s}
@@ -149,7 +149,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
         </ol>
       </header>
 
-      {cartNotice && <p role="status" className="mb-8 border border-gold/40 bg-gold/[0.06] px-4 py-3 text-sm text-ivory">{cartNotice}</p>}
+      {cartNotice && <p role="status" className="mb-8 border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-ivory">{cartNotice}</p>}
       <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -162,7 +162,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                   <label><span className="label">E-mail (pour le reçu)</span><input type="email" value={f.email} onChange={set("email")} autoComplete="email" className="field" /></label>
                   <div className="md:col-span-2">
                     <label className="flex items-center gap-3 text-sm text-ivory/90">
-                      <input type="checkbox" checked={sameWa} onChange={(e) => setSameWa(e.target.checked)} className="h-4 w-4 accent-[#C6A15B]" />
+                      <input type="checkbox" checked={sameWa} onChange={(e) => setSameWa(e.target.checked)} className="h-4 w-4 accent-[#5B8CFF]" />
                       Mon numéro WhatsApp est identique
                     </label>
                     {!sameWa && (
@@ -175,8 +175,8 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
               <fieldset>
                 <legend className="display mb-6 text-3xl">Livraison</legend>
                 {zones.length === 0 ? (
-                  <p className="mb-8 border border-gold/30 p-4 text-sm text-ivory/90">
-                    Les zones de livraison sont en cours de configuration. Contactez-nous pour finaliser votre commande. <Link className="text-gold" href="/contact">Nous contacter</Link>
+                  <p className="mb-8 border border-accent/30 p-4 text-sm text-ivory/90">
+                    Les zones de livraison sont en cours de configuration. Contactez-nous pour finaliser votre commande. <Link className="text-accent" href="/contact">Nous contacter</Link>
                   </p>
                 ) : (
                   <div className="mb-8 grid gap-3 sm:grid-cols-2">
@@ -186,13 +186,13 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                         key={z.id}
                         onClick={() => setF((s) => ({ ...s, zone_id: z.id }))}
                         aria-pressed={f.zone_id === z.id}
-                        className={clsx("flex items-start justify-between gap-3 border p-4 text-left transition-colors", f.zone_id === z.id ? "border-gold bg-gold/[0.06]" : "border-white/15 hover:border-white/30")}
+                        className={clsx("flex items-start justify-between gap-3 border p-4 text-left transition-colors", f.zone_id === z.id ? "border-accent bg-accent/[0.06]" : "border-white/15 hover:border-white/30")}
                       >
                         <span>
                           <span className="block text-sm font-medium">{z.name}</span>
                           {z.delay && <span className="mt-1 block text-xs text-mist">{z.delay}</span>}
                         </span>
-                        <span className="shrink-0 text-right text-sm text-gold">
+                        <span className="shrink-0 text-right text-sm text-accent">
                           {z.fee_mode === "quote" ? "Tarif à confirmer" : z.fee_mode === "distance" ? "Selon distance" : z.fee === 0 ? "Offerte" : formatPrice(z.fee)}
                           {z.free_above ? <span className="block text-[0.74rem] text-mist">Offerte dès {formatPrice(z.free_above)}</span> : null}
                         </span>
@@ -210,7 +210,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                     </p>
                     {locError && <p className="mt-1 text-xs text-danger">{locError}</p>}
                   </div>
-                  <button type="button" onClick={locate} disabled={locating} className="btn btn-ghost-gold min-h-10 shrink-0 px-4">
+                  <button type="button" onClick={locate} disabled={locating} className="btn btn-ghost min-h-10 shrink-0 px-4">
                     {locating ? "Localisation…" : pos ? "Mettre à jour" : "Utiliser ma position"}
                   </button>
                 </div>
@@ -227,7 +227,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                   <label className="md:col-span-2"><span className="label">Informations complémentaires</span><textarea rows={3} value={f.notes} onChange={set("notes")} placeholder="Horaires de livraison, instructions…" className="field resize-none" /></label>
                   {loggedIn && (
                     <label className="flex items-center gap-3 text-sm text-ivory/90 md:col-span-2">
-                      <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="h-4 w-4 accent-[#C6A15B]" />
+                      <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="h-4 w-4 accent-[#5B8CFF]" />
                       Enregistrer cette adresse dans mon compte
                     </label>
                   )}
@@ -247,10 +247,10 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                         disabled={!ok}
                         onClick={() => setMethod(m.id)}
                         aria-pressed={method === m.id}
-                        className={clsx("flex items-center gap-4 border p-5 text-left transition-colors", method === m.id ? "border-gold bg-gold/[0.06]" : "border-white/15 hover:border-white/30", !ok && "cursor-not-allowed opacity-40")}
+                        className={clsx("flex items-center gap-4 border p-5 text-left transition-colors", method === m.id ? "border-accent bg-accent/[0.06]" : "border-white/15 hover:border-white/30", !ok && "cursor-not-allowed opacity-40")}
                       >
-                        <span className={clsx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border", method === m.id ? "border-gold" : "border-white/30")}>
-                          {method === m.id && <span className="h-2.5 w-2.5 rounded-full bg-gold" />}
+                        <span className={clsx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border", method === m.id ? "border-accent" : "border-white/30")}>
+                          {method === m.id && <span className="h-2.5 w-2.5 rounded-full bg-accent" />}
                         </span>
                         <span>
                           <span className="block text-sm font-medium">{PAYMENT_METHOD_LABEL[m.id]}</span>
@@ -263,7 +263,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
               </fieldset>
 
               {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-              <button type="submit" className="btn btn-gold w-full md:w-auto">Vérifier ma commande</button>
+              <button type="submit" className="btn btn-primary w-full md:w-auto">Vérifier ma commande</button>
             </motion.form>
           ) : (
             <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.5 }} className="space-y-8">
@@ -281,7 +281,7 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
                   <p className="mt-1 text-sm text-ivory/90">{[f.city, f.region].filter(Boolean).join(", ")}</p>
                   {zone?.delay && <p className="text-sm text-mist">Délai : {zone.delay}</p>}
                   {pos && <p className="text-sm text-mist">Position GPS partagée{delivery?.km != null ? ` · ${delivery.km} km` : ""}</p>}
-                  {delivery?.pending && <p className="mt-2 text-xs text-gold">Frais de livraison à confirmer : notre équipe vous communique le montant sur WhatsApp avant l&apos;expédition.</p>}
+                  {delivery?.pending && <p className="mt-2 text-xs text-accent">Frais de livraison à confirmer : notre équipe vous communique le montant sur WhatsApp avant l&apos;expédition.</p>}
                   {f.notes && <p className="mt-2 text-sm italic text-mist">« {f.notes} »</p>}
                 </div>
                 <div className="bg-ink p-6 md:col-span-2">
@@ -294,26 +294,26 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
               </div>
               {error && <p role="alert" className="text-sm text-danger">{error}</p>}
               <div className="flex flex-col gap-3 sm:flex-row">
-                <button onClick={confirm} disabled={submitting} className="btn btn-gold flex-1">
+                <button onClick={confirm} disabled={submitting} className="btn btn-primary flex-1">
                   {submitting ? "Enregistrement…" : `Confirmer la commande · ${formatPrice(total)}`}
                 </button>
                 <button onClick={() => setStep(1)} disabled={submitting} className="btn btn-outline">Modifier</button>
               </div>
               <p className="text-xs text-mist">
-                En confirmant, vous acceptez nos <Link href="/conditions" className="text-gold">conditions de vente</Link>. Les prix et le stock sont vérifiés au moment de la validation.
+                En confirmant, vous acceptez nos <Link href="/conditions" className="text-accent">conditions de vente</Link>. Les prix et le stock sont vérifiés au moment de la validation.
               </p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <aside className="h-fit border border-white/[0.1] bg-ink-2 p-6 md:p-8 lg:sticky lg:top-28">
+        <aside className="surface h-fit p-6 md:p-8 lg:sticky lg:top-28">
           <h2 className="display text-2xl">Votre commande</h2>
           <ul className="mt-6 max-h-72 space-y-4 overflow-y-auto pr-1">
             {lines.map((l) => (
               <li key={l.variantId} className="flex gap-4">
                 <span className="relative h-20 w-16 shrink-0 overflow-hidden bg-ink-3">
                   {l.image && <Image src={l.image} alt="" fill sizes="64px" className="object-cover" />}
-                  <span className="absolute right-0 top-0 bg-gold px-1.5 text-[0.78rem] font-bold text-ink">{l.quantity}</span>
+                  <span className="absolute right-0 top-0 bg-accent px-1.5 text-[0.78rem] font-bold text-ink">{l.quantity}</span>
                 </span>
                 <span className="flex-1 text-sm">
                   <span className="display block text-lg leading-tight">{l.name}</span>
@@ -326,8 +326,8 @@ export function CheckoutForm({ zones, modes, origin, prefill, loggedIn }: { zone
           {step === 1 && <div className="mt-6"><CouponBox /></div>}
           <dl className="mt-6 space-y-3 border-t border-white/[0.1] pt-6 text-sm">
             <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(subtotal)}</dd></div>
-            {discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction ({coupon?.code})</dt><dd>-{formatPrice(discount)}</dd></div>}
-            <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd className={delivery?.pending ? "text-gold" : ""}>{feeLabel}</dd></div>
+            {discount > 0 && <div className="flex justify-between text-accent"><dt>Réduction ({coupon?.code})</dt><dd>-{formatPrice(discount)}</dd></div>}
+            <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd className={delivery?.pending ? "text-accent" : ""}>{feeLabel}</dd></div>
           </dl>
           <div className="hairline my-5" />
           <div className="flex items-baseline justify-between">

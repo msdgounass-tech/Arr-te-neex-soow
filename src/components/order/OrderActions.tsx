@@ -20,7 +20,7 @@ export function RetryPayment({ orderNumber, token }: { orderNumber: string; toke
             setLoading(false);
           }
         }}
-        className="btn btn-gold"
+        className="btn btn-primary"
       >
         {loading ? "Redirection…" : "Procéder au paiement"}
       </button>

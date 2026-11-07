@@ -29,7 +29,7 @@ export function FavoritesView() {
       {items === null ? (
         <p className="text-center text-sm text-mist">Chargement…</p>
       ) : items.length === 0 ? (
-        <EmptyState title="Aucun favori" text="Touchez le cœur sur une pièce pour la retrouver ici." cta={{ href: "/shop", label: "Explorer la boutique" }} />
+        <EmptyState title="Aucun favori" text="Touchez le cœur sur un produit pour le retrouver ici." cta={{ href: "/shop", label: "Explorer la boutique" }} />
       ) : (
         <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 md:gap-x-6 xl:grid-cols-4">
           {items.filter((p) => ids.includes(p.id)).map((p) => <ProductCardClient key={p.id} product={p} />)}

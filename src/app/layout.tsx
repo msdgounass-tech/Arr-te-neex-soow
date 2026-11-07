@@ -1,39 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Manrope, Sora } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/site";
 import { SITE_URL } from "@/lib/env";
 import { Toast } from "@/components/ui/Toast";
 
-const cormorant = Cormorant_Garamond({
+const sora = Sora({
   subsets: ["latin"],
-  // Seule la graisse 500 est utilisée (titres et italiques) : 2 fichiers au lieu de 8.
-  weight: ["500"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  // Titres uniquement : deux graisses suffisent.
+  weight: ["500", "600"],
+  variable: "--font-sora",
   display: "swap",
 });
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-manrope", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${BRAND.name} — ${BRAND.slogan}`, template: `%s — ${BRAND.name}` },
+  title: { default: `${BRAND.name} ${BRAND.tagline} — ${BRAND.slogan}`, template: `%s — ${BRAND.name} ${BRAND.tagline}` },
   description: BRAND.description,
   applicationName: BRAND.name,
   openGraph: {
     type: "website",
     locale: "fr_SN",
     siteName: BRAND.name,
-    title: `${BRAND.name} — ${BRAND.slogan}`,
+    title: `${BRAND.name} ${BRAND.tagline} — ${BRAND.slogan}`,
     description: BRAND.description,
   },
   twitter: { card: "summary_large_image" },
-  keywords: ["boutique de luxe Sénégal", "mode de luxe Dakar", "montres de luxe", "sacs de luxe", "parfums", "bijoux", "GOUNASS LUXURY"],
+  keywords: ["boutique high-tech Sénégal", "smartphone Dakar", "ordinateur portable Dakar", "écouteurs", "montre connectée", "accessoires téléphone", "prix FCFA", BRAND.name],
+  formatDetection: { telephone: false },
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#21150F",
+  themeColor: "#07080B",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -41,7 +41,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
+    <html lang="fr" className={`${sora.variable} ${manrope.variable}`}>
       <body className="min-h-dvh bg-ink text-ivory">
         {children}
         <Toast />

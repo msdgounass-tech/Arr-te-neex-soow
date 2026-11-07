@@ -42,7 +42,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
     <>
       <PageTitle title="Tableau de bord" subtitle="Données réelles issues de la base de la boutique.">
         {canStats && [7, 30, 90].map((d) => (
-          <Link key={d} href={`/admin?jours=${d}`} className={`px-3 py-1.5 text-[0.8rem] uppercase tracking-[0.2em] ${d === days ? "bg-gold text-ink" : "border border-white/15 text-ivory/90"}`}>{d} jours</Link>
+          <Link key={d} href={`/admin?jours=${d}`} className={`px-3 py-1.5 text-[0.8rem] uppercase tracking-[0.2em] ${d === days ? "bg-accent text-ink" : "border border-white/15 text-ivory/90"}`}>{d} jours</Link>
         ))}
       </PageTitle>
 
@@ -68,7 +68,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                 <ol className="space-y-4">
                   {s.top_products.map((p, i) => (
                     <li key={p.name} className="flex items-baseline justify-between gap-3 text-sm">
-                      <span className="truncate"><span className="mr-3 text-gold">{i + 1}.</span>{p.name}</span>
+                      <span className="truncate"><span className="mr-3 text-accent">{i + 1}.</span>{p.name}</span>
                       <span className="shrink-0 text-mist">{p.quantity} · {formatPrice(p.revenue)}</span>
                     </li>
                   ))}
@@ -77,7 +77,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                 <p className="text-sm text-mist">Aucune vente enregistrée pour le moment.</p>
               )}
               {s.low_stock > 0 && (
-                <Link href="/admin/produits?stock=faible" className="mt-8 block border border-gold/30 p-3 text-xs text-gold">
+                <Link href="/admin/produits?stock=faible" className="mt-8 block border border-accent/30 p-3 text-xs text-accent">
                   {s.low_stock} déclinaison(s) en stock faible →
                 </Link>
               )}
@@ -89,7 +89,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
       <Card className="mt-4 overflow-x-auto p-4 md:p-6">
         <div className="mb-4 flex items-baseline justify-between">
           <p className="label">Dernières commandes</p>
-          <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-gold">Toutes les commandes</Link>
+          <Link href="/admin/commandes" className="text-[0.8rem] uppercase tracking-[0.2em] text-accent">Toutes les commandes</Link>
         </div>
         {recent && recent.length ? (
           <>
@@ -99,7 +99,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
             <tbody className="divide-y divide-white/[0.05]">
               {(recent as Order[]).map((o) => (
                 <tr key={o.id}>
-                  <td className={td}><Link href={`/admin/commandes/${o.id}`} className="text-gold">{o.order_number}</Link></td>
+                  <td className={td}><Link href={`/admin/commandes/${o.id}`} className="text-accent">{o.order_number}</Link></td>
                   <td className={td}>{o.customer_name}</td>
                   <td className={`${td} text-mist`}>{formatDate(o.created_at, true)}</td>
                   <td className={td}><StatusBadge status={o.status} /></td>

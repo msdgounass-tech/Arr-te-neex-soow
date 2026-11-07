@@ -1,6 +1,7 @@
 import "server-only";
 import { SITE_URL } from "@/lib/env";
 import type { CheckoutResult, PaymentContext } from "./types";
+import { BRAND } from "@/lib/site";
 
 /**
  * Orange Money Sénégal — API marchand Sonatel (https://developer.orange-sonatel.com).
@@ -38,7 +39,7 @@ export async function createOrangeMoneyCheckout(ctx: PaymentContext): Promise<Ch
     body: JSON.stringify({
       amount: { unit: "XOF", value: ctx.amount },
       code: process.env.ORANGE_MONEY_MERCHANT_CODE,
-      name: process.env.ORANGE_MONEY_MERCHANT_NAME || "GOUNASS LUXURY",
+      name: process.env.ORANGE_MONEY_MERCHANT_NAME || BRAND.legalName,
       callbackSuccessUrl: `${back}&retour=orange`,
       callbackCancelUrl: `${back}&retour=orange-annule`,
       validity: 900,

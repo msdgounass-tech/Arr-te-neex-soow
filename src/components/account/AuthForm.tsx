@@ -74,7 +74,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   const titles: Record<Mode, [string, string]> = {
     login: ["Bon retour", "Connexion"],
-    register: ["Rejoindre la maison", "Créer un compte"],
+    register: ["Créer votre compte", "Créer un compte"],
     forgot: ["Accès", "Mot de passe oublié"],
     reset: ["Sécurité", "Nouveau mot de passe"],
   };
@@ -100,20 +100,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </label>
         )}
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-        {info && <p role="status" className="text-sm text-gold">{info}</p>}
-        <button disabled={loading} className="btn btn-gold w-full">
+        {info && <p role="status" className="text-sm text-accent">{info}</p>}
+        <button disabled={loading} className="btn btn-primary w-full">
           {loading ? "Patientez…" : mode === "login" ? "Se connecter" : mode === "register" ? "Créer mon compte" : mode === "forgot" ? "Envoyer le lien" : "Enregistrer"}
         </button>
       </form>
       <div className="mt-10 space-y-3 text-center text-sm text-mist">
         {mode === "login" && (
           <>
-            <p><Link href="/compte/mot-de-passe" className="hover:text-gold">Mot de passe oublié ?</Link></p>
-            <p>Nouveau client ? <Link href={`/compte/inscription?redirect=${encodeURIComponent(redirectTo)}`} className="text-gold">Créer un compte</Link></p>
+            <p><Link href="/compte/mot-de-passe" className="hover:text-accent">Mot de passe oublié ?</Link></p>
+            <p>Nouveau client ? <Link href={`/compte/inscription?redirect=${encodeURIComponent(redirectTo)}`} className="text-accent">Créer un compte</Link></p>
           </>
         )}
-        {mode === "register" && <p>Déjà client ? <Link href="/compte/connexion" className="text-gold">Se connecter</Link></p>}
-        {mode === "forgot" && <p><Link href="/compte/connexion" className="text-gold">Retour à la connexion</Link></p>}
+        {mode === "register" && <p>Déjà client ? <Link href="/compte/connexion" className="text-accent">Se connecter</Link></p>}
+        {mode === "forgot" && <p><Link href="/compte/connexion" className="text-accent">Retour à la connexion</Link></p>}
       </div>
     </div>
   );

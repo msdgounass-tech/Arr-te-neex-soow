@@ -13,7 +13,7 @@ export function SalesChart({ data }: { data: { day: string; revenue: number; ord
           {data.map((d, i) => {
             const h = (d.revenue / max) * 96;
             return (
-              <rect key={d.day} x={i * w + w * 0.18} width={w * 0.64} y={100 - h} height={h} fill="#C6A15B" opacity={d.revenue ? 0.9 : 0.15}>
+              <rect key={d.day} x={i * w + w * 0.18} width={w * 0.64} y={100 - h} height={h} fill="#7ea4ff" opacity={d.revenue ? 0.9 : 0.15}>
                 <title>{`${new Date(d.day).toLocaleDateString("fr-FR")} — ${formatPrice(d.revenue)} · ${d.orders} commande(s)`}</title>
               </rect>
             );

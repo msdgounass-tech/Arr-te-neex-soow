@@ -32,6 +32,17 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: { serverActions: { bodySizeLimit: "2mb" } },
+  // Anciennes adresses de la boutique de mode : redirigées vers le catalogue high-tech.
+  async redirects() {
+    return [
+      { source: "/men", destination: "/shop", permanent: true },
+      { source: "/women", destination: "/shop", permanent: true },
+      { source: "/chaussures", destination: "/shop", permanent: true },
+      { source: "/accessories", destination: "/categorie/accessoires-tech", permanent: true },
+      { source: "/montres", destination: "/categorie/montres-connectees", permanent: true },
+      { source: "/aide", destination: "/faq", permanent: false },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

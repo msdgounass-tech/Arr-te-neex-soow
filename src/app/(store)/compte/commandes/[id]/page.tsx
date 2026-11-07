@@ -21,9 +21,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const awaiting = order.payment_method !== "livraison" && order.payment_status !== "reussi" && order.status !== "annulee";
   return (
     <AccountShell title="Détail de commande" active="/compte/commandes" isStaff={hasRole(profile?.role ?? "customer", "staff")}>
-      <Link href="/compte/commandes" className="mb-8 inline-block text-[0.8rem] uppercase tracking-[0.24em] text-mist hover:text-gold">← Mes commandes</Link>
+      <Link href="/compte/commandes" className="mb-8 inline-block text-[0.8rem] uppercase tracking-[0.24em] text-mist hover:text-accent">← Mes commandes</Link>
       {awaiting && order.access_token && (
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border border-gold/30 p-5">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border border-accent/30 p-5">
           <p className="text-sm">Le paiement de cette commande est en attente.</p>
           <RetryPayment orderNumber={order.order_number} token={order.access_token} />
         </div>

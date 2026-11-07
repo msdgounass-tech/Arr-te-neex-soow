@@ -16,7 +16,7 @@ export default async function AdminCategories() {
       {parents.map((p) => (
         <Card key={p.id} className="mb-4 space-y-5">
           <CategoryForm parents={parents.filter((x) => x.id !== p.id)} initial={p} />
-          <div className="space-y-4 border-l border-gold/20 pl-4 md:pl-8">
+          <div className="space-y-4 border-l border-accent/20 pl-4 md:pl-8">
             {all.filter((c) => c.parent_id === p.id).map((c) => (
               <div key={c.id} className="flex flex-col gap-2 md:flex-row md:items-end">
                 <div className="flex-1"><CategoryForm parents={parents} initial={c} /></div>

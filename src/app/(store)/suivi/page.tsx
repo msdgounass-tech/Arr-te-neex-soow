@@ -26,7 +26,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
         <label className="block"><span className="label">Numéro de commande</span><input name="number" required placeholder="GL-000000-00000" className="field uppercase tracking-wider" /></label>
         <label className="block"><span className="label">Téléphone</span><input name="phone" type="tel" required className="field" /></label>
         {erreur && <p role="alert" className="text-sm text-danger">Aucune commande ne correspond à ces informations.</p>}
-        <button className="btn btn-gold w-full">Afficher ma commande</button>
+        <button className="btn btn-primary w-full">Afficher ma commande</button>
       </form>
     </div>
   );

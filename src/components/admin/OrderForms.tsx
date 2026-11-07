@@ -14,11 +14,11 @@ export function StatusForm({ id, status }: { id: string; status: OrderStatus }) 
         {(Object.keys(ORDER_STATUS_LABEL) as OrderStatus[]).map((s) => <option key={s} value={s}>{ORDER_STATUS_LABEL[s]}</option>)}
       </select>
       <label className="flex items-center gap-2 text-xs text-ivory/90">
-        <input type="checkbox" name="notify" defaultChecked className="accent-[#C6A15B]" /> Notifier le client (WhatsApp / e-mail)
+        <input type="checkbox" name="notify" defaultChecked className="accent-[#5B8CFF]" /> Notifier le client (WhatsApp / e-mail)
       </label>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
-      {state.message && <p className="text-xs text-gold">{state.message}</p>}
-      <button disabled={pending || locked} className="btn btn-gold min-h-10 w-full">{pending ? "…" : "Mettre à jour le statut"}</button>
+      {state.message && <p className="text-xs text-accent">{state.message}</p>}
+      <button disabled={pending || locked} className="btn btn-primary min-h-10 w-full">{pending ? "…" : "Mettre à jour le statut"}</button>
       <p className="text-[0.74rem] leading-relaxed text-mist">L&apos;annulation remet automatiquement les articles en stock. Une commande annulée est définitive.</p>
     </form>
   );
@@ -34,8 +34,8 @@ export function DeliveryForm({ orderId, d }: { orderId: string; d: { carrier: st
       <label className="block"><span className="label">Date prévue</span><input type="date" name="scheduled_for" defaultValue={d?.scheduled_for || ""} className="field-box mt-1" /></label>
       <label className="block"><span className="label">Notes internes</span><textarea name="notes" rows={2} defaultValue={d?.notes || ""} className="field-box mt-1" /></label>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
-      {state.message && <p className="text-xs text-gold">{state.message}</p>}
-      <button disabled={pending} className="btn btn-ghost-gold min-h-10 w-full">{pending ? "…" : "Enregistrer la livraison"}</button>
+      {state.message && <p className="text-xs text-accent">{state.message}</p>}
+      <button disabled={pending} className="btn btn-ghost min-h-10 w-full">{pending ? "…" : "Enregistrer la livraison"}</button>
     </form>
   );
 }
@@ -46,10 +46,10 @@ export function DeliveryFeeForm({ id, current }: { id: string; current: number }
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={id} />
       <label className="block"><span className="label">Frais de livraison (FCFA)</span><input name="fee" inputMode="numeric" defaultValue={current || ""} required className="field-box mt-1" /></label>
-      <label className="flex items-center gap-2 text-xs text-ivory/90"><input type="checkbox" name="notify" defaultChecked className="accent-[#C6A15B]" /> Envoyer le montant au client</label>
+      <label className="flex items-center gap-2 text-xs text-ivory/90"><input type="checkbox" name="notify" defaultChecked className="accent-[#5B8CFF]" /> Envoyer le montant au client</label>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
-      {state.message && <p className="text-xs text-gold">{state.message}</p>}
-      <button disabled={pending} className="btn btn-gold min-h-10 w-full">{pending ? "…" : "Valider les frais"}</button>
+      {state.message && <p className="text-xs text-accent">{state.message}</p>}
+      <button disabled={pending} className="btn btn-primary min-h-10 w-full">{pending ? "…" : "Valider les frais"}</button>
     </form>
   );
 }
@@ -64,8 +64,8 @@ export function ManualPaymentForm({ id, label }: { id: string; label: string }) 
       </p>
       <label className="block"><span className="label">Référence de la transaction</span><input name="reference" required minLength={4} className="field-box mt-1" /></label>
       {state.error && <p className="text-xs text-danger">{state.error}</p>}
-      {state.message && <p className="text-xs text-gold">{state.message}</p>}
-      <button disabled={pending} className="btn btn-ghost-gold min-h-10">{pending ? "…" : "Confirmer le paiement reçu"}</button>
+      {state.message && <p className="text-xs text-accent">{state.message}</p>}
+      <button disabled={pending} className="btn btn-ghost min-h-10">{pending ? "…" : "Confirmer le paiement reçu"}</button>
     </form>
   );
 }

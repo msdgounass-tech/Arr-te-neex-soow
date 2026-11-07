@@ -1,63 +1,61 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/brand/Logo";
+import { Wordmark } from "@/components/brand/Logo";
 import { InstagramIcon, WhatsAppIcon } from "@/components/ui/Icons";
 import { NewsletterForm } from "./NewsletterForm";
 import { formatPhone, toWhatsAppNumber } from "@/lib/format";
+import { BRAND } from "@/lib/site";
 import type { StoreSettings } from "@/lib/types";
+import type { NavCategory } from "./Header";
 
-const COLS = [
-  {
-    title: "Boutique",
-    links: [
-      ["Homme", "/men"],
-      ["Femme", "/women"],
-      ["Accessoires", "/accessories"],
-      ["Nouveautés", "/nouveautes"],
-      ["Meilleures ventes", "/meilleures-ventes"],
-      ["Promotions", "/promotions"],
-    ],
-  },
-  {
-    title: "La Maison",
-    links: [
-      ["Collections", "/collections"],
-      ["Contact", "/contact"],
-      ["Livraison", "/livraison"],
-      ["Suivre une commande", "/suivi"],
-    ],
-  },
-  {
-    title: "Mon espace",
-    links: [
-      ["Mon compte", "/compte"],
-      ["Mes commandes", "/compte/commandes"],
-      ["Mes favoris", "/favoris"],
-      ["Panier", "/panier"],
-    ],
-  },
+const HELP: [string, string][] = [
+  ["Questions fréquentes", "/faq"],
+  ["Livraison", "/livraison"],
+  ["Garanties & retours", "/garanties"],
+  ["Suivre une commande", "/suivi"],
+  ["Contact", "/contact"],
+];
+const ACCOUNT: [string, string][] = [
+  ["Mon compte", "/compte"],
+  ["Mes commandes", "/compte/commandes"],
+  ["Mes favoris", "/favoris"],
+  ["Panier", "/panier"],
 ];
 
-export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: string }) {
+const social = (v: string, base: string) => (v.startsWith("http") ? v : `${base}${v.replace("@", "")}`);
+
+export function Footer({ store, logoUrl, categories }: { store: StoreSettings; logoUrl?: string; categories: NavCategory[] }) {
   const year = new Date().getFullYear();
+  const shop: [string, string][] = [
+    ...categories.map((c) => [c.name, `/categorie/${c.slug}`] as [string, string]),
+    ["Nouveautés", "/nouveautes"],
+    ["Promotions", "/promotions"],
+  ];
+  const cols = [
+    { title: "Catalogue", links: shop },
+    { title: "Aide", links: HELP },
+    { title: "Mon espace", links: ACCOUNT },
+  ];
   return (
-    <footer className="relative mt-24 border-t border-white/[0.1] bg-ink">
-      <div className="container-luxe grid gap-14 py-20 lg:grid-cols-[1.3fr_2fr]">
+    <footer className="relative mt-24 overflow-hidden border-t border-white/[0.08] bg-ink-2/60">
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[60rem] -translate-x-1/2 bg-[radial-gradient(closest-side,rgba(126,164,255,.14),transparent)]" />
+      <div className="container-luxe relative grid gap-14 py-16 md:py-20 lg:grid-cols-[1.2fr_2fr]">
         <div>
-          <BrandLogo size={176} src={logoUrl} className="h-36 w-36 ring-1 ring-gold/40 md:h-44 md:w-44" />
-          <div className="mt-10 max-w-sm">
-            <p className="label mb-1">Newsletter privée</p>
+          <Wordmark logoUrl={logoUrl} />
+          <p className="mt-6 max-w-sm text-sm leading-relaxed text-mist">{BRAND.description}</p>
+          <div className="mt-8 max-w-sm">
+            <p className="label mb-3">Offres et nouveautés par e-mail</p>
             <NewsletterForm />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
-          {COLS.map((c) => (
+          {cols.map((c) => (
             <div key={c.title}>
-              <p className="eyebrow mb-6">{c.title}</p>
-              <ul className="space-y-3.5">
+              <p className="mb-5 text-sm font-bold text-ivory">{c.title}</p>
+              <ul className="space-y-3">
                 {c.links.map(([label, href]) => (
                   <li key={href}>
-                    <Link href={href} className="link-luxe text-sm text-ivory/90 hover:text-ivory">
+                    <Link href={href} className="text-sm text-mist transition-colors hover:text-white">
                       {label}
                     </Link>
                   </li>
@@ -66,33 +64,29 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
             </div>
           ))}
           <div>
-            <p className="eyebrow mb-6">Nous joindre</p>
-            <ul className="space-y-3.5 text-sm text-ivory/90">
-              {store.address && <li>{[store.address, store.city].filter(Boolean).join(", ")}</li>}
-              {store.city && !store.address && <li>{store.city}</li>}
+            <p className="mb-5 text-sm font-bold text-ivory">Nous joindre</p>
+            <ul className="space-y-3 text-sm text-mist">
+              {(store.address || store.city) && <li>{[store.address, store.city].filter(Boolean).join(", ")}</li>}
               {store.phone && (
                 <li>
-                  <a href={`tel:+${toWhatsAppNumber(store.phone)}`} className="hover:text-ivory">{formatPhone(store.phone)}</a>
+                  <a href={`tel:+${toWhatsAppNumber(store.phone)}`} className="hover:text-white">{formatPhone(store.phone)}</a>
                 </li>
               )}
               {store.email && (
                 <li>
-                  <a href={`mailto:${store.email}`} className="break-all hover:text-ivory">{store.email}</a>
+                  <a href={`mailto:${store.email}`} className="break-all hover:text-white">{store.email}</a>
                 </li>
               )}
-              {store.opening_hours && <li className="text-mist">{store.opening_hours}</li>}
-              <li>
-                <Link href="/contact" className="link-luxe">Formulaire de contact</Link>
-              </li>
+              {store.opening_hours && <li>{store.opening_hours}</li>}
             </ul>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex gap-2">
               {store.whatsapp && (
-                <a aria-label="WhatsApp" href={`https://wa.me/${toWhatsAppNumber(store.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/15 text-ivory/90 hover:border-gold hover:text-gold">
+                <a aria-label="WhatsApp" href={`https://wa.me/${toWhatsAppNumber(store.whatsapp)}`} target="_blank" rel="noopener noreferrer" className="flex h-11 w-11 items-center justify-center rounded-full border border-white/12 text-ivory/90 transition-colors hover:border-[#23bd60] hover:text-[#23bd60]">
                   <WhatsAppIcon />
                 </a>
               )}
               {store.instagram && (
-                <a aria-label="Instagram" href={store.instagram.startsWith("http") ? store.instagram : `https://instagram.com/${store.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center border border-white/15 text-ivory/90 hover:border-gold hover:text-gold">
+                <a aria-label="Instagram" href={social(store.instagram, "https://instagram.com/")} target="_blank" rel="noopener noreferrer" className="flex h-11 w-11 items-center justify-center rounded-full border border-white/12 text-ivory/90 transition-colors hover:border-white/40">
                   <InstagramIcon />
                 </a>
               )}
@@ -102,12 +96,12 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
       </div>
 
       <div className="hairline" />
-      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.8rem] uppercase tracking-[0.24em] text-mist text-center md:flex-row md:text-left">
-        <p>© {year} GOUNASS LUXURY — Tous droits réservés</p>
-        <div className="flex flex-wrap justify-center gap-6">
-          <Link href="/conditions" className="hover:text-ivory">Conditions de vente</Link>
-          <Link href="/confidentialite" className="hover:text-ivory">Confidentialité</Link>
-          <span>Paiement : Wave · Orange Money · Carte · Livraison</span>
+      <div className="container-luxe flex flex-col items-center justify-between gap-4 py-7 text-center text-[0.8rem] text-mist md:flex-row md:text-left">
+        <p>© {year} {BRAND.legalName} — Tous droits réservés</p>
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+          <Link href="/conditions" className="hover:text-white">Conditions de vente</Link>
+          <Link href="/confidentialite" className="hover:text-white">Confidentialité</Link>
+          <span>Wave · Orange Money · Paiement à la livraison</span>
         </div>
       </div>
     </footer>

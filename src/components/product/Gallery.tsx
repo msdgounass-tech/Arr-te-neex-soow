@@ -1,17 +1,21 @@
 "use client";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion, type PanInfo } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import type { ProductImage } from "@/lib/types";
+import { Emblem } from "@/components/brand/Logo";
 import { ChevronLeft, ChevronRight, CloseIcon, ZoomIcon } from "@/components/ui/Icons";
 
 export function Gallery({ images, name }: { images: ProductImage[]; name: string }) {
-  const [index, setIndex] = useState(0);
+  const [[index, dir], setState] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState<{ x: number; y: number } | null>(null);
   const [lightbox, setLightbox] = useState(false);
+  const reduce = useReducedMotion();
+  const dragged = useRef(false);
   const count = images.length;
-  const go = useCallback((d: number) => setIndex((i) => (i + d + count) % count), [count]);
+  const go = useCallback((d: number) => setState(([i]) => [(i + d + count) % count, d]), [count]);
+  const select = (i: number) => setState(([cur]) => [i, i > cur ? 1 : -1]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -30,49 +34,79 @@ export function Gallery({ images, name }: { images: ProductImage[]; name: string
 
   if (!count) {
     return (
-      <div className="flex aspect-[3/4] items-center justify-center bg-ink-3">
-        <span className="display text-7xl text-gold/30">GL</span>
+      <div className="surface flex aspect-square items-center justify-center">
+        <Emblem className="h-20 w-20 opacity-40" />
       </div>
     );
   }
   const current = images[index];
+  const onDragEnd = (_: unknown, info: PanInfo) => {
+    if (count < 2) return;
+    if (info.offset.x < -60) go(1);
+    else if (info.offset.x > 60) go(-1);
+  };
 
   return (
-    <div className="flex flex-col-reverse gap-4 md:flex-row">
+    <div className="flex min-w-0 flex-col-reverse gap-3 md:flex-row md:gap-4">
       {count > 1 && (
-        <div className="no-scrollbar flex gap-3 overflow-x-auto md:w-20 md:flex-col md:overflow-visible">
+        <div className="no-scrollbar flex gap-2 overflow-x-auto md:w-20 md:flex-col md:overflow-visible">
           {images.map((img, i) => (
             <button
               key={img.id}
-              onClick={() => setIndex(i)}
+              onClick={() => select(i)}
               aria-label={`Voir la photo ${i + 1}`}
-              className={clsx("relative aspect-[3/4] w-16 shrink-0 overflow-hidden border transition-colors md:w-full", i === index ? "border-gold" : "border-transparent opacity-60 hover:opacity-100")}
+              aria-current={i === index}
+              className={clsx(
+                "relative aspect-square w-16 shrink-0 overflow-hidden rounded-xl border bg-white/[0.03] transition-all md:w-full",
+                i === index ? "border-accent shadow-[0_0_0_3px_rgba(126,164,255,.18)]" : "border-white/10 opacity-60 hover:opacity-100",
+              )}
             >
-              <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
+              <Image src={img.url} alt="" fill sizes="80px" className="object-contain p-1.5" />
             </button>
           ))}
         </div>
       )}
 
       <div
-        className="group relative aspect-[3/4] flex-1 cursor-zoom-in overflow-hidden bg-ink-3"
+        className="surface group relative aspect-square w-full min-w-0 flex-1 cursor-zoom-in overflow-hidden"
         onMouseMove={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
           setZoom({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
         }}
         onMouseLeave={() => setZoom(null)}
-        onClick={() => setLightbox(true)}
+        onClick={() => {
+          if (dragged.current) {
+            dragged.current = false;
+            return;
+          }
+          setLightbox(true);
+        }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div key={current.id} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_45%,rgba(126,164,255,.12),transparent_70%)]" />
+        <AnimatePresence initial={false} custom={dir} mode="popLayout">
+          <motion.div
+            key={current.id}
+            custom={dir}
+            className="absolute inset-0"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, x: dir * 60, scale: 0.97 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, x: dir * -60, scale: 0.97 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            drag={count > 1 ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.25}
+            onDragStart={() => (dragged.current = true)}
+            onDragEnd={onDragEnd}
+          >
             <Image
               src={current.url}
               alt={current.alt || name}
               fill
               priority={index === 0}
               sizes="(min-width:1024px) 50vw, 100vw"
-              className="object-cover transition-transform duration-300 ease-out"
-              style={zoom ? { transform: "scale(2)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
+              draggable={false}
+              className="object-contain p-6 transition-transform duration-300 ease-out md:p-10"
+              style={zoom ? { transform: "scale(1.9)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
             />
           </motion.div>
         </AnimatePresence>
@@ -81,34 +115,36 @@ export function Gallery({ images, name }: { images: ProductImage[]; name: string
         </span>
         {count > 1 && (
           <>
-            <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); go(-1); }} className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-ivory/90 hover:text-gold md:hidden">
-              <ChevronLeft width={26} height={26} />
+            <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); go(-1); }} className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/50 text-ivory backdrop-blur hover:bg-ink/80 md:opacity-0 md:group-hover:opacity-100">
+              <ChevronLeft width={20} height={20} />
             </button>
-            <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); go(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-ivory/90 hover:text-gold md:hidden">
-              <ChevronRight width={26} height={26} />
+            <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); go(1); }} className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-ink/50 text-ivory backdrop-blur hover:bg-ink/80 md:opacity-0 md:group-hover:opacity-100">
+              <ChevronRight width={20} height={20} />
             </button>
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[0.78rem] tracking-[0.3em] text-ivory/90">
-              {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
-            </span>
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden>
+              {images.map((img, i) => (
+                <span key={img.id} className={clsx("h-1.5 rounded-full transition-all duration-500", i === index ? "w-6 bg-ivory" : "w-1.5 bg-white/30")} />
+              ))}
+            </div>
           </>
         )}
       </div>
 
       <AnimatePresence>
         {lightbox && (
-          <motion.div role="dialog" aria-label="Photos en plein écran" className="fixed inset-0 z-[95] bg-ink" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <button aria-label="Fermer" onClick={() => setLightbox(false)} className="absolute right-5 top-5 z-10 p-2 text-ivory hover:text-gold">
-              <CloseIcon width={26} height={26} />
+          <motion.div role="dialog" aria-modal="true" aria-label="Photos en plein écran" className="fixed inset-0 z-[95] bg-ink/95 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <button aria-label="Fermer" onClick={() => setLightbox(false)} className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-ivory hover:bg-white/20">
+              <CloseIcon width={22} height={22} />
             </button>
-            <div className="relative h-full w-full overflow-auto">
-              <div className="relative mx-auto h-[200vh] w-full max-w-[1400px] md:h-[180vh]">
+            <div className="relative h-full w-full p-4 md:p-12">
+              <div className="relative h-full w-full">
                 <Image src={current.url} alt={current.alt || name} fill sizes="100vw" className="object-contain" />
               </div>
             </div>
             {count > 1 && (
               <>
-                <button aria-label="Photo précédente" onClick={() => go(-1)} className="fixed left-4 top-1/2 -translate-y-1/2 p-3 text-ivory hover:text-gold"><ChevronLeft width={32} height={32} /></button>
-                <button aria-label="Photo suivante" onClick={() => go(1)} className="fixed right-4 top-1/2 -translate-y-1/2 p-3 text-ivory hover:text-gold"><ChevronRight width={32} height={32} /></button>
+                <button aria-label="Photo précédente" onClick={() => go(-1)} className="fixed left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-ivory hover:bg-white/20"><ChevronLeft width={24} height={24} /></button>
+                <button aria-label="Photo suivante" onClick={() => go(1)} className="fixed right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-ivory hover:bg-white/20"><ChevronRight width={24} height={24} /></button>
               </>
             )}
           </motion.div>

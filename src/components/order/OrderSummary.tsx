@@ -19,7 +19,7 @@ export function OrderSummary({ order }: { order: Order }) {
         {order.deliveries?.tracking_number && (
           <p className="mt-6 text-sm text-ivory/90">
             Suivi : {order.deliveries.carrier ? `${order.deliveries.carrier} — ` : ""}
-            <span className="text-gold">{order.deliveries.tracking_number}</span>
+            <span className="text-accent">{order.deliveries.tracking_number}</span>
           </p>
         )}
       </div>
@@ -39,7 +39,7 @@ export function OrderSummary({ order }: { order: Order }) {
         <div className="bg-ink p-6">
           <p className="label mb-3">Paiement</p>
           <p className="text-sm">{PAYMENT_METHOD_LABEL[order.payment_method]}</p>
-          <p className={order.payment_status === "reussi" ? "text-sm text-success" : "text-sm text-gold"}>{PAYMENT_STATUS_LABEL[order.payment_status]}</p>
+          <p className={order.payment_status === "reussi" ? "text-sm text-success" : "text-sm text-accent"}>{PAYMENT_STATUS_LABEL[order.payment_status]}</p>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export function OrderSummary({ order }: { order: Order }) {
         </ul>
         <dl className="ml-auto mt-6 max-w-sm space-y-2 text-sm">
           <div className="flex justify-between"><dt className="text-mist">Sous-total</dt><dd>{formatPrice(order.subtotal)}</dd></div>
-          {order.discount > 0 && <div className="flex justify-between text-gold"><dt>Réduction {order.coupon_code}</dt><dd>-{formatPrice(order.discount)}</dd></div>}
+          {order.discount > 0 && <div className="flex justify-between text-accent"><dt>Réduction {order.coupon_code}</dt><dd>-{formatPrice(order.discount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-mist">Livraison</dt><dd>{order.delivery_fee_pending ? "À confirmer" : order.delivery_fee ? formatPrice(order.delivery_fee) : "Offerte"}</dd></div>
           <div className="flex justify-between border-t border-white/[0.1] pt-3"><dt className="label">Total</dt><dd className="display text-2xl">{formatPrice(order.total)}</dd></div>
         </dl>
