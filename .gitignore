@@ -9,3 +9,5 @@ next-env.d.ts
 .vercel
 .DS_Store
 apercu/
+test-results/
+playwright-report/

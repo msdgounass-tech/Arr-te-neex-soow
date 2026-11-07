@@ -74,6 +74,7 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
       <CatalogToolbar categories={categories} paramName={categoryParam} count={count} />
 
       <div className="pt-12">
+        <h2 className="sr-only">Produits</h2>
         {items.length ? (
           <ProductGrid products={items} />
         ) : (

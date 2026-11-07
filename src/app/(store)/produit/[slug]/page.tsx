@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       <div className="grid gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-20">
         <Gallery images={images} name={product.name} />
 
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
           {product.collection && (
             <Link href={`/collections/${product.collection.slug}`} className="eyebrow hover:text-ivory">
               {product.collection.name}

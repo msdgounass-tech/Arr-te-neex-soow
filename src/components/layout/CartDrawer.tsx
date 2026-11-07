@@ -85,12 +85,12 @@ export function CartDrawer() {
                           </p>
                           <div className="mt-auto flex items-center justify-between pt-3">
                             <div className="flex items-center border border-white/15">
-                              <button aria-label="Diminuer" className="p-3 hover:text-gold" onClick={() => setQuantity(l.variantId, l.quantity - 1)}>
+                              <button aria-label="Diminuer la quantité" className="p-3 hover:text-gold" onClick={() => setQuantity(l.variantId, l.quantity - 1)}>
                                 <MinusIcon width={14} height={14} />
                               </button>
                               <span className="w-8 text-center text-sm">{l.quantity}</span>
                               <button
-                                aria-label="Augmenter"
+                                aria-label="Augmenter la quantité"
                                 className="p-3 hover:text-gold disabled:opacity-30"
                                 disabled={l.quantity >= l.maxStock}
                                 onClick={() => setQuantity(l.variantId, l.quantity + 1)}
@@ -98,7 +98,7 @@ export function CartDrawer() {
                                 <PlusIcon width={14} height={14} />
                               </button>
                             </div>
-                            <button onClick={() => remove(l.variantId)} className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
+                            <button onClick={() => remove(l.variantId)} aria-label={`Retirer ${l.name} du panier`} className="text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
                               Retirer
                             </button>
                           </div>
@@ -114,7 +114,7 @@ export function CartDrawer() {
               <div className="border-t border-white/[0.1] px-6 py-6">
                 <div className="flex items-baseline justify-between">
                   <span className="label">Sous-total</span>
-                  <span className="display text-2xl">{formatPrice(cartSubtotal(items))}</span>
+                  <span data-testid="cart-subtotal" className="display text-2xl">{formatPrice(cartSubtotal(items))}</span>
                 </div>
                 <p className="mt-2 text-xs text-mist">Livraison et codes promotionnels calculés à l&apos;étape suivante.</p>
                 <div className="mt-5 grid gap-3">

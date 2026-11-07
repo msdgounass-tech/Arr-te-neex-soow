@@ -53,11 +53,11 @@ export function CartView({ freeAbove = null, freeEverywhere = false }: { freeAbo
                     </div>
                     <div className="mt-auto flex items-center justify-between pt-4">
                       <div className="flex items-center border border-white/15">
-                        <button aria-label="Diminuer" onClick={() => setQuantity(l.variantId, l.quantity - 1)} className="p-3 hover:text-gold"><MinusIcon width={14} height={14} /></button>
+                        <button aria-label="Diminuer la quantité" onClick={() => setQuantity(l.variantId, l.quantity - 1)} className="p-3 hover:text-gold"><MinusIcon width={14} height={14} /></button>
                         <span className="w-10 text-center text-sm">{l.quantity}</span>
-                        <button aria-label="Augmenter" disabled={l.quantity >= l.maxStock} onClick={() => setQuantity(l.variantId, l.quantity + 1)} className="p-3 hover:text-gold disabled:opacity-30"><PlusIcon width={14} height={14} /></button>
+                        <button aria-label="Augmenter la quantité" disabled={l.quantity >= l.maxStock} onClick={() => setQuantity(l.variantId, l.quantity + 1)} className="p-3 hover:text-gold disabled:opacity-30"><PlusIcon width={14} height={14} /></button>
                       </div>
-                      <button onClick={() => remove(l.variantId)} className="flex items-center gap-2 text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
+                      <button onClick={() => remove(l.variantId)} aria-label={`Supprimer ${l.name} du panier`} className="flex items-center gap-2 text-[0.8rem] uppercase tracking-[0.2em] text-mist hover:text-danger">
                         <TrashIcon width={16} height={16} /> <span className="hidden sm:inline">Supprimer</span>
                       </button>
                     </div>
