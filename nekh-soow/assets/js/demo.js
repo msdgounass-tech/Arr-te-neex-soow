@@ -72,12 +72,32 @@ function seed() {
       });
     }
   }
-  return { settings, products, zones, closedDates: [], closedSlots: [], orders, seq };
+  settings.promos_enabled = true;
+  const promos = [
+    { id: uid(), code: 'BIENVENUE10', kind: 'percent', value: 10, min_order: 2000, max_uses: null, used_count: 3, starts_on: null, ends_on: null, active: true, description: 'Bienvenue : -10 % dès 2 000 FCFA', created_at: new Date().toISOString() },
+    { id: uid(), code: 'TABASKI', kind: 'amount', value: 500, min_order: 0, max_uses: 50, used_count: 12, starts_on: null, ends_on: null, active: false, description: 'Fête : -500 FCFA', created_at: new Date().toISOString() },
+  ];
+  products[0].formats[1].compare_price = 2500;
+  return { settings, products, zones, promos, closedDates: [], closedSlots: [], orders, seq };
+}
+
+function promoCalc(db, code, sub) {
+  const c = String(code || '').trim().toUpperCase(); const t = dakarNow().day;
+  if (!c) return { ok: false, message: 'Saisissez un code' };
+  if (db.settings.promos_enabled === false) return { ok: false, message: 'Les codes promo ne sont pas disponibles en ce moment' };
+  const p = db.promos.find((x) => x.code === c);
+  if (!p || !p.active) return { ok: false, message: 'Ce code promo n’existe pas ou n’est plus actif' };
+  if (p.starts_on && t < p.starts_on) return { ok: false, message: 'Ce code promo n’est pas encore valable' };
+  if (p.ends_on && t > p.ends_on) return { ok: false, message: 'Ce code promo a expiré' };
+  if (p.max_uses != null && p.used_count >= p.max_uses) return { ok: false, message: 'Ce code promo a atteint sa limite d’utilisation' };
+  if (sub < p.min_order) return { ok: false, message: `Ce code est valable dès ${p.min_order.toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ')} FCFA d’achat` };
+  const discount = p.kind === 'percent' ? Math.floor((sub * p.value) / 100) : Math.min(p.value, sub);
+  return { ok: true, code: p.code, discount, kind: p.kind, value: p.value, label: p.kind === 'percent' ? `-${p.value} %` : `-${p.value} FCFA` };
 }
 
 export function createDemoApi() {
   let db = store.get(KEY);
-  if (!db || !db.settings || !db.zones) { db = seed(); store.set(KEY, db); }
+  if (!db || !db.settings || !db.zones || !db.promos) { db = seed(); store.set(KEY, db); }
   const CUST = 'ns-demo-customer';
   const listeners = new Set();
   const bc = 'BroadcastChannel' in window ? new BroadcastChannel('ns-demo') : null;
@@ -134,6 +154,9 @@ export function createDemoApi() {
         if (f.stock != null && f.stock < it.qty) fail('STOCK', `Stock insuffisant pour ${p.name} (${f.name}) : il en reste ${f.stock}`);
         return { p, f, qty: it.qty };
       });
+      const sub = items.reduce((a, i) => a + i.f.price * i.qty, 0);
+      let promo = null;
+      if (o.promo) { promo = promoCalc(db, o.promo, sub); if (!promo.ok) fail('PROMO', promo.message); db.promos.find((x) => x.code === promo.code).used_count++; }
       items.forEach(({ f, qty }) => { if (f.stock != null) f.stock -= qty; });
       const created = new Date().toISOString();
       const order = {
@@ -141,7 +164,8 @@ export function createDemoApi() {
         customer_name: name, phone, note: String(o.note || '').trim().slice(0, 500), pickup_day: o.day, pickup_slot: o.slot,
         fulfillment: zone ? 'livraison' : 'retrait', delivery_zone: zone?.name || '', delivery_fee: zone?.fee || 0,
         delivery_address: zone ? String(o.address).trim().slice(0, 300) : '', payment_ref: '', user_id: store.get(CUST)?.id || null,
-        status: 'nouvelle', total: items.reduce((a, i) => a + i.f.price * i.qty, 0) + (zone?.fee || 0), items_count: items.reduce((a, i) => a + i.qty, 0),
+        promo_code: promo?.code || '', discount: promo?.discount || 0,
+        status: 'nouvelle', total: sub - (promo?.discount || 0) + (zone?.fee || 0), items_count: items.reduce((a, i) => a + i.qty, 0),
         paid: false, payment_method: o.payment || 'retrait', admin_note: '', created_at: created, updated_at: created,
         items: items.map(({ p, f, qty }) => ({ id: uid(), product_id: p.id, format_id: f.id, product_name: p.name, format_name: f.name, unit_price: f.price, qty })),
         history: [{ status: 'nouvelle', changed_at: created }],
@@ -149,6 +173,10 @@ export function createDemoApi() {
       db.orders.push(order); save({ type: 'INSERT', order });
       return delay({ number: order.number, token: order.tracking_token, total: order.total });
     },
+    async checkPromo(code, subtotal) { reload(); return delay(promoCalc(db, code, subtotal)); },
+    async listPromos() { needAdmin(); reload(); return delay(db.promos); },
+    async savePromo(p) { needAdmin(); reload(); if (db.promos.some((x) => x.code === p.code && x.id !== p.id)) fail('CODE', 'Ce code existe déjà'); if (p.id) Object.assign(db.promos.find((x) => x.id === p.id), p); else db.promos.unshift({ ...p, id: uid(), used_count: 0, created_at: new Date().toISOString() }); save(); },
+    async deletePromo(id) { needAdmin(); reload(); db.promos = db.promos.filter((x) => x.id !== id); save(); },
     async trackOrder(token) {
       reload(); const o = db.orders.find((x) => x.tracking_token === token); if (!o) return delay(null);
       return delay({ ...o, history: o.history.map((h) => ({ status: h.status, at: h.changed_at })) });
@@ -161,6 +189,7 @@ export function createDemoApi() {
     _setStatus(o, status) {
       if (['annulee', 'recuperee'].includes(o.status) && status !== o.status) fail('CLOS', 'Cette commande est clôturée');
       if (status === o.status) return;
+      if (status === 'annulee' && o.promo_code) { const pr = db.promos.find((x) => x.code === o.promo_code); if (pr) pr.used_count = Math.max(0, pr.used_count - 1); }
       if (status === 'annulee') o.items.forEach((i) => { const f = db.products.flatMap((p) => p.formats).find((x) => x.id === i.format_id); if (f && f.stock != null) f.stock += i.qty; });
       o.status = status; o.updated_at = new Date().toISOString(); o.history.push({ status, changed_at: o.updated_at });
     },
@@ -212,7 +241,7 @@ export function createDemoApi() {
     },
     async saveProduct(p) {
       needAdmin(); reload();
-      const row = { ...clone(p), formats: p.formats.map((f, i) => ({ id: f.id || uid(), name: f.name, price: f.price, stock: f.stock ?? null, active: f.active, position: i })) };
+      const row = { ...clone(p), formats: p.formats.map((f, i) => ({ id: f.id || uid(), name: f.name, price: f.price, compare_price: f.compare_price || null, stock: f.stock ?? null, active: f.active, position: i })) };
       if (p.id) { const i = db.products.findIndex((x) => x.id === p.id); db.products[i] = { ...db.products[i], ...row }; }
       else { row.id = uid(); row.position = Math.max(0, ...db.products.map((x) => x.position)) + 1; db.products.push(row); }
       save(); return row.id;
@@ -262,6 +291,7 @@ export function createOfflineApi() {
       return { offline: true, number, total, name, phone, lines, zone, address: String(o.address || '').trim(), note: String(o.note || '').trim(), day: o.day, slot: o.slot, payment: o.payment, fulfillment: o.fulfillment };
     },
     async trackOrder() { return null; },
+    async checkPromo() { return { ok: false, message: 'Les codes promo seront bientôt disponibles' }; },
     async cancelOrder() { off(); },
     async customer() { return null; },
     async signUp() { off(); }, async customerSignIn() { off(); }, async customerSignOut() {}, async updateProfile() {}, async myOrders() { return []; },

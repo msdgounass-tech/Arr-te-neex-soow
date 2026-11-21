@@ -515,3 +515,44 @@ body.shop .nav .nav-acc.on { background: var(--or); color: var(--vert); box-shad
   body.shop .nav .nav-acc .tab-lbl { display: none; }
   body.shop .top .brand b { overflow: visible; text-overflow: clip; }
 }
+
+/* ==========================================================================
+   V3 : icônes (au lieu des emojis), promotions
+   ========================================================================== */
+.empty .big { display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto 12px; border-radius: 22px; background: rgba(27, 63, 139, .08); color: var(--vert, #1b3f8b); font-size: 0; }
+.empty .big svg { width: 36px; height: 36px; }
+body.shop .product .media .emoji { color: rgba(27, 63, 139, .55); }
+body.shop .product .media .emoji svg { width: 34%; height: 34%; stroke-width: 1.6; }
+.thumb svg { width: 30px; height: 30px; color: var(--vert, #1b3f8b); opacity: .6; }
+.cart-line .thumb { display: grid; place-items: center; }
+body.shop .nav .nav-admin svg { width: 22px; height: 22px; transition: transform .5s var(--ease); }
+body.shop .nav .nav-admin:hover svg { transform: rotate(90deg); }
+body.shop .nav .nav-admin { display: inline-grid; place-items: center; }
+.mode-opt .mi { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: rgba(27, 63, 139, .08); color: var(--vert, #1b3f8b); font-size: 0; }
+.mode-opt .mi svg { width: 24px; height: 24px; }
+.mode-opt:has(input:checked) .mi { background: var(--vert, #1b3f8b); color: #fff; }
+.login-hint svg { width: 22px; height: 22px; flex: none; color: var(--vert, #1b3f8b); }
+.hint-ic { display: flex; gap: 8px; align-items: center; }
+.hint-ic svg { width: 18px; height: 18px; flex: none; }
+.product .tag { display: inline-flex; align-items: center; gap: 4px; }
+.product .tag svg { width: 13px; height: 13px; }
+.product .tag.promo { background: var(--red, #c23a2e); color: #fff; }
+.formats button s, .line-total s { color: var(--ink-3); font-weight: 600; text-decoration-thickness: 1.5px; margin-right: 4px; }
+.line-total s { font-size: 15px; display: block; text-align: right; line-height: 1; }
+.line-total { text-align: right; }
+
+/* Code promo */
+.promo-box { margin: 10px 0 12px; }
+.promo-lbl { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; cursor: pointer; }
+.promo-lbl svg { width: 18px; height: 18px; color: var(--gold); }
+.promo-row { display: flex; gap: 8px; }
+.promo-row .input { min-height: 42px; padding: 8px 12px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; flex: 1; min-width: 0; }
+.promo-row .btn { min-height: 42px; flex: none; }
+.promo-err { color: var(--red); font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+.promo-ok { display: flex; gap: 10px; align-items: center; background: #e8f7ef; border: 1.5px dashed var(--green); border-radius: 12px; padding: 10px 12px; animation: popIn .35s var(--ease); }
+.promo-ok svg { width: 22px; height: 22px; color: var(--green); flex: none; }
+.promo-ok div { flex: 1; min-width: 0; }
+.promo-ok b { display: block; letter-spacing: .05em; }
+.promo-ok small { color: var(--ink-2); font-size: 13px; }
+.totals .row.discount, .sum-line.discount { color: var(--green); font-weight: 700; }
+.sum-line.discount b { color: var(--green); }

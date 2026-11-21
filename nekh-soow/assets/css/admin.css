@@ -322,3 +322,56 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .day-kpis .mini > span { display: block; font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
 .day-kpis .mini b { display: block; font-size: 22px; margin-top: 2px; }
 .day-kpis .mini b span { font-size: inherit; color: inherit; display: inline; font-weight: inherit; }
+
+/* ==========================================================================
+   V3 : bouton boutique, promotions, icônes
+   ========================================================================== */
+.shop-link { gap: 6px; }
+.shop-link svg { width: 18px; height: 18px; }
+.side-shop { background: rgba(217, 149, 31, .14); color: var(--gold-l) !important; }
+.side-shop:hover { background: rgba(217, 149, 31, .24) !important; }
+@media (max-width: 900px) {
+  .shop-link span { display: none; }
+  .shop-link { width: 40px; padding: 0; min-height: 40px; border-radius: 50%; }
+  .mtab { display: flex; overflow-x: auto; scrollbar-width: none; grid-template-columns: none; }
+  .mtab::-webkit-scrollbar { display: none; }
+  .mtab a { flex: 1 0 64px; }
+}
+.empty .big { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 10px; border-radius: 20px; background: var(--surface-2); color: var(--ink-3); font-size: 0; }
+.empty .big svg { width: 32px; height: 32px; }
+.badge svg, .st-flow button svg { width: 14px; height: 14px; vertical-align: -2px; }
+.st-flow button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.bell-ring { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: #2f6fd6; color: #fff; font-size: 0; }
+.bell-ring svg { width: 24px; height: 24px; }
+.order .note { display: flex; gap: 8px; align-items: flex-start; }
+.order .note svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.paid { display: inline-flex; align-items: center; gap: 3px; }
+.paid svg { width: 14px; height: 14px; }
+.up-row b svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; color: var(--navy); }
+.mini-ic svg { width: 16px; height: 16px; color: var(--navy); }
+.deliv svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.prow .thumb svg, .img-drop .prev svg { width: 28px; height: 28px; color: var(--ink-3); }
+.ic-inline { width: 15px; height: 15px; vertical-align: -2px; }
+.prow h3 .badge svg { width: 12px; height: 12px; }
+
+/* Promotions */
+.promo-list { display: grid; gap: 10px; }
+.promo-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; background: var(--surface); border-radius: var(--r); box-shadow: var(--sh-1), 0 0 0 1px var(--line); padding: 14px 16px; animation: fadeUp .4s var(--ease) both; }
+.promo-card.off { opacity: .6; }
+.promo-val { display: grid; place-items: center; min-width: 74px; height: 58px; padding: 0 10px; border-radius: 14px; background: linear-gradient(135deg, var(--gold), #e8b34f); color: var(--ink); font-family: var(--f-display); font-weight: 800; font-size: 20px; text-align: center; line-height: 1; }
+.promo-code { font-family: ui-monospace, Menlo, monospace; font-size: 16px; font-weight: 800; letter-spacing: .06em; }
+.promo-meta { font-size: 13.5px; color: var(--ink-3); margin-top: 3px; display: flex; gap: 6px 14px; flex-wrap: wrap; }
+.promo-card .ctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.use-meter { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin-top: 6px; max-width: 240px; }
+.use-meter i { display: block; height: 100%; background: var(--green); transform-origin: left; animation: meterGrow .8s var(--ease) both; }
+@media (max-width: 700px) { .promo-card { grid-template-columns: auto minmax(0, 1fr); } .promo-card .ctl { grid-column: 1 / -1; justify-content: space-between; border-top: 1px dashed var(--line); padding-top: 10px; } }
+.kind-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kind-seg label { display: flex; gap: 8px; align-items: center; justify-content: center; padding: 12px; border-radius: 12px; border: 1.5px solid var(--line-2); cursor: pointer; font-weight: 700; }
+.kind-seg label:has(input:checked) { border-color: var(--navy); background: #eef3ff; color: var(--navy); }
+.kind-seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+.kind-seg svg { width: 18px; height: 18px; }
+.install-box { text-align: center; padding: 30px 20px; }
+.install-box .big { margin-bottom: 12px; }
+.order .promo-line { color: var(--green); font-weight: 700; }
+.fmt-row { grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr) minmax(0, .9fr) minmax(0, .8fr) auto auto; }
+@media (max-width: 560px) { .fmt-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }

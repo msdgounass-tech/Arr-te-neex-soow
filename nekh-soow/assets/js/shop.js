@@ -69,7 +69,7 @@ function sanitizeCart() {
 const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const media = (p, cls = '') => (p.image_url
   ? `<img class="${cls}" src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy" decoding="async" width="600" height="450">`
-  : `<div class="emoji ${cls}" role="img" aria-label="${esc(p.name)}">${esc(p.emoji || '🍽️')}</div>`);
+  : `<div class="emoji ${cls}" role="img" aria-label="${esc(p.name)}">${icon('bowl')}</div>`);
 
 function productCard(p) {
   const fs = p.formats.filter((f) => f.active);
@@ -79,15 +79,16 @@ function productCard(p) {
   const out = f.stock === 0; const allOut = fs.every((x) => x.stock === 0);
   const max = f.stock == null ? 99 : f.stock;
   const low = f.stock != null && f.stock > 0 && f.stock <= 5;
+  const pct = Math.max(0, ...fs.map((x) => (x.compare_price > x.price ? Math.round((1 - x.price / x.compare_price) * 100) : 0)));
   return `<article class="product reveal ${allOut ? 'unavailable' : ''}" data-pid="${p.id}" style="transition-delay:${(S.cardIdx = ((S.cardIdx || 0) + 1) % 3) * 90}ms">
     <div class="media">${media(p)}
-      ${allOut ? '<span class="tag">Épuisé</span>' : p.popular ? '<span class="tag gold">★ Populaire</span>' : ''}
+      ${allOut ? '<span class="tag">Épuisé</span>' : pct ? `<span class="tag promo">${icon('percent')} -${pct} %</span>` : p.popular ? `<span class="tag gold">${icon('star')} Populaire</span>` : ''}
     </div>
     <div class="body">
       <div><h3>${esc(p.name)}</h3><p class="desc">${esc(p.description)}</p></div>
       <div class="formats" role="group" aria-label="Format">
         ${fs.map((x) => `<button type="button" data-action="fmt" data-pid="${p.id}" data-fid="${x.id}" aria-pressed="${x.id === sel.fid}" ${x.stock === 0 ? 'disabled' : ''}>
-          <b>${esc(x.name)}</b><span>${money(x.price)}</span></button>`).join('')}
+          <b>${esc(x.name)}</b><span>${x.compare_price > x.price ? `<s>${money(x.compare_price)}</s> ` : ''}${money(x.price)}</span></button>`).join('')}
       </div>
       ${low ? `<small class="hint">Plus que ${f.stock} disponible${f.stock > 1 ? 's' : ''}</small>` : ''}
       <div class="buy">
@@ -97,7 +98,7 @@ function productCard(p) {
             <output aria-live="polite">${sel.qty}</output>
             <button type="button" data-action="qty" data-pid="${p.id}" data-d="1" aria-label="Ajouter un" ${sel.qty >= max ? 'disabled' : ''}>${icon('plus')}</button>
           </div>
-          <span class="line-total">${money(f.price * sel.qty)}</span>
+          <span class="line-total">${f.compare_price > f.price ? `<s>${money(f.compare_price * sel.qty)}</s>` : ''}${money(f.price * sel.qty)}</span>
         </div>
         <button class="btn" type="button" data-action="add" data-pid="${p.id}" ${out ? 'disabled' : ''}>${out ? 'Épuisé' : 'Ajouter à ma commande'}</button>
       </div>
@@ -184,7 +185,7 @@ function viewMenu() {
     <div class="filters"><div class="chips" role="group" aria-label="Catégories">
       ${cats.map((c) => `<button class="chip" type="button" data-action="filter" data-cat="${esc(c)}" aria-pressed="${S.filter === c}">${esc(label(c))}<span class="count">${c === 'TOUT' ? list.length : list.filter((p) => p.category === c).length}</span></button>`).join('')}
     </div></div>
-    <div class="products">${shown.map(productCard).join('') || '<div class="empty"><div class="big">🍽️</div><h3>Aucun produit</h3></div>'}</div>
+    <div class="products">${shown.map(productCard).join('') || `<div class="empty"><div class="big">${icon('bowl')}</div><h3>Aucun produit</h3></div>`}</div>
   </div></div>`;
 }
 
@@ -196,10 +197,10 @@ const waveUrl = (amount) => { const l = settings().wave_link; if (!l) return '';
 function viewCheckout() {
   const lines = cartLines(); const s = settings();
   if (!lines.length) {
-    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">🛍️</div><h3>Votre panier est vide</h3><p>Ajoutez quelques douceurs avant de commander.</p><p style="margin-top:18px"><a class="btn" href="#/menu">Voir les produits</a></p></div></div></div>`;
+    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('bag')}</div><h3>Votre panier est vide</h3><p>Ajoutez quelques douceurs avant de commander.</p><p style="margin-top:18px"><a class="btn" href="#/menu">Voir les produits</a></p></div></div></div>`;
   }
   if (!s.accepting_orders) {
-    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">⏸️</div><h3>Commandes en ligne suspendues</h3><p>${esc(s.announcement || 'Revenez un peu plus tard ou contactez-nous sur WhatsApp.')}</p><p style="margin-top:18px"><a class="btn btn-wa" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></p></div></div></div>`;
+    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('pause')}</div><h3>Commandes en ligne suspendues</h3><p>${esc(s.announcement || 'Revenez un peu plus tard ou contactez-nous sur WhatsApp.')}</p><p style="margin-top:18px"><a class="btn btn-wa" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></p></div></div></div>`;
   }
   if (!deliveryOn()) S.co.mode = 'retrait';
   const me = S.user || store.get(ME_KEY, {});
@@ -208,18 +209,18 @@ function viewCheckout() {
   const minFee = z.length ? Math.min(...z.map((x) => x.fee)) : 0;
   return `<div class="view"><div class="wrap">
     <div class="page-head"><a class="back" href="#/menu">${icon('back')} Continuer mes achats</a><h1 class="page-title">Finaliser la commande</h1></div>
-    ${S.user ? '' : `<a class="login-hint" href="#/compte">👤 <span><b>Vous avez un compte ?</b> Connectez-vous pour remplir vos informations automatiquement (facultatif).</span></a>`}
+    ${S.user ? '' : `<a class="login-hint" href="#/compte">${icon('user')}<span><b>Vous avez un compte ?</b> Connectez-vous pour remplir vos informations automatiquement (facultatif).</span></a>`}
     <form class="checkout" id="co-form" novalidate>
       <div>
         <section class="co-step" aria-labelledby="h-mode"><h2 id="h-mode"><span class="n">1</span>Retrait ou livraison ?</h2>
           <div class="mode-opts">
-            <label class="mode-opt"><input type="radio" name="mode" value="retrait" ${S.co.mode !== 'livraison' ? 'checked' : ''}><span class="mi">🏪</span><b>Retrait sur place</b><small>Gratuit · ${esc(s.address)}</small></label>
-            <label class="mode-opt ${deliveryOn() ? '' : 'off'}"><input type="radio" name="mode" value="livraison" ${S.co.mode === 'livraison' ? 'checked' : ''} ${deliveryOn() ? '' : 'disabled'}><span class="mi">🛵</span><b>Livraison à domicile</b><small>${deliveryOn() ? `À partir de ${money(minFee)}` : 'Indisponible pour le moment'}</small></label>
+            <label class="mode-opt"><input type="radio" name="mode" value="retrait" ${S.co.mode !== 'livraison' ? 'checked' : ''}><span class="mi">${icon('store')}</span><b>Retrait sur place</b><small>Gratuit · ${esc(s.address)}</small></label>
+            <label class="mode-opt ${deliveryOn() ? '' : 'off'}"><input type="radio" name="mode" value="livraison" ${S.co.mode === 'livraison' ? 'checked' : ''} ${deliveryOn() ? '' : 'disabled'}><span class="mi">${icon('scooter')}</span><b>Livraison à domicile</b><small>${deliveryOn() ? `À partir de ${money(minFee)}` : 'Indisponible pour le moment'}</small></label>
           </div>
           <div id="delivery-box" class="delivery-box" ${S.co.mode === 'livraison' ? '' : 'hidden'}>
             <label class="field"><span>Zone de livraison</span><select name="zone">${z.map((x) => `<option value="${x.id}" ${x.id === S.co.zone ? 'selected' : ''}>${esc(x.name)} — ${x.fee ? money(x.fee) : 'gratuit'}</option>`).join('')}</select></label>
             <label class="field" id="f-addr"><span>Adresse de livraison</span><textarea name="address" rows="2" maxlength="300" placeholder="Quartier, rue, repère (ex : Cité Lamy, villa 12, près de la pharmacie)">${esc(S.co.address || '')}</textarea><em class="err" hidden></em></label>
-            <p class="hint">🛵 ${esc(s.delivery_info)}</p>
+            <p class="hint hint-ic">${icon('scooter')}${esc(s.delivery_info)}</p>
           </div>
         </section>
         <section class="co-step" aria-labelledby="h-slot"><h2 id="h-slot"><span class="n" id="n1">2</span><span id="slot-title">${S.co.mode === 'livraison' ? 'Quand souhaitez-vous être livré(e) ?' : 'Quand passez-vous la récupérer ?'}</span></h2><div id="slot-picker"></div></section>
@@ -239,12 +240,37 @@ function viewCheckout() {
         <h2>Récapitulatif</h2>
         ${lines.map((l) => `<div class="sum-line"><span>${l.qty} × ${esc(l.p.name)} <small>(${esc(l.f.name)})</small></span><b>${money(l.f.price * l.qty)}</b></div>`).join('')}
         <div id="sum-pick"></div>
+        ${promoOn() ? `<div class="promo-box" id="promo-box">${promoBox()}</div>` : ''}
         <div class="totals" id="sum-totals"></div>
         <button class="btn btn-block btn-lg btn-gold" type="submit" id="co-submit">Confirmer ma commande</button>
         <p class="legal">En confirmant, vous acceptez d’être contacté(e) au sujet de cette commande. <a href="#/confidentialite">Confidentialité</a></p>
       </div></aside>
     </form>
   </div></div>`;
+}
+
+// ---------- Code promo ----------
+const promoOn = () => settings().promos_enabled === true && !S.api.offline && typeof S.api.checkPromo === 'function';
+function promoBox(err = '') {
+  if (S.co.promo) return `<div class="promo-ok">${icon('ticket')}<div><b>${esc(S.co.promo.code)}</b><small>${esc(S.co.promo.label)} · vous économisez ${money(S.co.promo.discount)}</small></div><button type="button" class="line-del" data-action="remove-promo">Retirer</button></div>`;
+  return `<label class="promo-lbl" for="promo-in">${icon('ticket')} Vous avez un code promo ?</label>
+    <div class="promo-row"><input id="promo-in" class="input" name="promo" autocomplete="off" autocapitalize="characters" maxlength="20" placeholder="Ex : BIENVENUE10"><button type="button" class="btn btn-sm" data-action="apply-promo">Appliquer</button></div>
+    ${err ? `<p class="promo-err" role="alert">${esc(err)}</p>` : ''}`;
+}
+async function applyPromo() {
+  const inp = $('#promo-in'); const code = String(inp?.value || '').trim().toUpperCase(); const box = $('#promo-box');
+  if (!code) { box.innerHTML = promoBox('Saisissez un code'); return; }
+  const b = $('[data-action="apply-promo"]'); b?.classList.add('is-loading');
+  try {
+    const r = await S.api.checkPromo(code, cartTotal());
+    if (!r?.ok) { box.innerHTML = promoBox(r?.message || 'Code invalide'); $('#promo-in').value = code; return; }
+    S.co.promo = { code: r.code, discount: r.discount, label: r.label };
+    box.innerHTML = promoBox(); renderTotals(); toast(`Code ${r.code} appliqué : -${money(r.discount)}`, 'success');
+  } catch (e) { box.innerHTML = promoBox(errMsg(e)); } finally { b?.classList.remove('is-loading'); }
+}
+async function refreshPromo() {
+  if (!S.co.promo || !promoOn()) return;
+  try { const r = await S.api.checkPromo(S.co.promo.code, cartTotal()); if (r?.ok) S.co.promo = { code: r.code, discount: r.discount, label: r.label }; else { S.co.promo = null; const b = $('#promo-box'); if (b) b.innerHTML = promoBox(r?.message || ''); } renderTotals(); } catch { /* ignore */ }
 }
 
 function renderPayOpts() {
@@ -256,10 +282,11 @@ function renderPayOpts() {
   box.innerHTML = opts.map(([k, t, d]) => `<label class="pay-opt ${k === 'wave' ? 'wave' : ''}"><input type="radio" name="payment" value="${k}" ${S.co.payment === k ? 'checked' : ''}><div><b>${k === 'wave' ? '<span class="wave-logo">Wave</span> ' : ''}${t.replace(/^Wave · /, '')}</b><small>${esc(d)}</small></div></label>`).join('');
 }
 function renderTotals() {
-  const el = $('#sum-totals'); if (!el) return; const sub = cartTotal(); const fee = coFee();
+  const el = $('#sum-totals'); if (!el) return; const sub = cartTotal(); const fee = coFee(); const disc = Math.min(S.co.promo?.discount || 0, sub);
   el.innerHTML = `<div class="row"><span>Sous-total</span><span>${money(sub)}</span></div>
+    ${disc ? `<div class="row discount"><span>Code ${esc(S.co.promo.code)}</span><span>-${money(disc)}</span></div>` : ''}
     ${S.co.mode === 'livraison' ? `<div class="row"><span>Livraison</span><span>${fee ? money(fee) : 'Gratuite'}</span></div>` : ''}
-    <div class="row grand"><span>Total</span><span class="count-up">${money(sub + fee)}</span></div>`;
+    <div class="row grand"><span>Total</span><span class="count-up">${money(sub - disc + fee)}</span></div>`;
 }
 
 function renderSlotPicker() {
@@ -267,7 +294,7 @@ function renderSlotPicker() {
   const s = settings(); const days = openDays(s, S.cat.closedDates);
   const daysInfo = days.map((d) => { const st = slotStates(d, s, S.cat.closedSlots, S.load); return { d, free: st.filter((x) => x.state === 'ok' || x.state === 'few').length }; });
   if (!daysInfo.some((x) => x.free)) {
-    box.innerHTML = `<div class="empty"><div class="big">📅</div><h3>Aucun créneau disponible</h3><p>Tous nos créneaux sont complets. Écrivez-nous sur WhatsApp, on trouvera une solution.</p></div>`;
+    box.innerHTML = `<div class="empty"><div class="big">${icon('calendar')}</div><h3>Aucun créneau disponible</h3><p>Tous nos créneaux sont complets. Écrivez-nous sur WhatsApp, on trouvera une solution.</p></div>`;
     updatePick(); return;
   }
   if (!S.co.day || !daysInfo.find((x) => x.d === S.co.day && x.free)) { S.co.day = daysInfo.find((x) => x.free).d; S.co.slot = null; }
@@ -330,18 +357,20 @@ async function submitOrder(form) {
       name, phone, note: String(fd.get('note') || ''), day: S.co.day, slot: S.co.slot,
       items: cartLines().map((l) => ({ format_id: l.fid, qty: l.qty })), payment: String(fd.get('payment') || 'retrait'),
       fulfillment: S.co.mode, zone: liv ? S.co.zone : null, address: liv ? address : '',
+      ...(S.co.promo?.code ? { promo: S.co.promo.code } : {}),
     });
     if (res.offline) { showWhatsAppOrder(res); return; }
     const my = store.get(MY_KEY, []);
     my.unshift({ token: res.token, number: res.number, day: S.co.day, slot: S.co.slot, total: res.total, at: new Date().toISOString() });
     store.set(MY_KEY, my.slice(0, 20));
     if (S.user && (!S.user.phone || !S.user.name)) S.api.updateProfile({ name: S.user.name || name, phone: S.user.phone || phone }).catch(() => {});
-    cart = []; saveCart(); S.co.slot = null; S.co.address = '';
+    cart = []; saveCart(); S.co.slot = null; S.co.address = ''; S.co.promo = null;
     location.hash = `#/suivi/${res.token}?new=1`;
   } catch (e) {
     const m = errMsg(e); toast(m, 'error', 5000);
     if (/créneau|complet/i.test(m)) { await refreshLoad(); renderSlotPicker(); }
-    if (/disponible|stock/i.test(m)) { S.cat = await S.api.getCatalog(); sanitizeCart(); render(); }
+    if (/disponible|stock/i.test(m) && !/code promo/i.test(m)) { S.cat = await S.api.getCatalog(); sanitizeCart(); render(); }
+    if (/code|promo/i.test(m)) { S.co.promo = null; const b = $('#promo-box'); if (b) b.innerHTML = promoBox(m); renderTotals(); }
   } finally { btn?.classList.remove('is-loading'); S.co.busy = false; }
 }
 
@@ -352,7 +381,7 @@ async function viewTrack(token, isNew) {
   let o;
   try { o = await S.api.trackOrder(token); } catch (e) { o = null; toast(errMsg(e), 'error'); }
   if (!o) {
-    view.innerHTML = `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">🔎</div><h3>Commande introuvable</h3><p>Le lien est peut-être incomplet. Contactez-nous sur WhatsApp avec votre numéro de commande.</p><p style="margin-top:18px"><a class="btn" href="#/mes-commandes">Mes commandes</a></p></div></div></div>`;
+    view.innerHTML = `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('search')}</div><h3>Commande introuvable</h3><p>Le lien est peut-être incomplet. Contactez-nous sur WhatsApp avec votre numéro de commande.</p><p style="margin-top:18px"><a class="btn" href="#/mes-commandes">Mes commandes</a></p></div></div></div>`;
     return;
   }
   const s = settings(); const st = ST[o.status];
@@ -362,7 +391,7 @@ async function viewTrack(token, isNew) {
   const cancelled = o.status === 'annulee';
   const title = cancelled ? 'Commande annulée' : isNew ? 'Merci, commande envoyée !' : o.status === 'prete' ? 'Votre commande est prête !' : o.status === 'recuperee' ? 'Bonne dégustation !' : 'Suivi de commande';
   const liv = o.fulfillment === 'livraison'; const modeLbl = liv ? 'Livraison' : 'Retrait';
-  const waText = `Bonjour ${s.shop_name} 👋\nVoici ma commande ${o.number} :\n${o.items.map((i) => `• ${i.qty} × ${i.product_name} (${i.format_name}) – ${money(i.unit_price * i.qty)}`).join('\n')}${liv ? `\nLivraison (${o.delivery_zone}) : ${money(o.delivery_fee)}\nAdresse : ${o.delivery_address}` : ''}\nTotal : ${money(o.total)}\n${modeLbl} : ${relDay(o.pickup_day).toLowerCase()} (${fmtDay(o.pickup_day)}) à ${fmtSlot(o.pickup_slot)}\nNom : ${o.customer_name}${o.payment_method === 'wave' ? '\nPaiement : Wave' : ''}\nSuivi : ${trackUrl(o.tracking_token)}`;
+  const waText = `Bonjour ${s.shop_name},\nVoici ma commande ${o.number} :\n${o.items.map((i) => `• ${i.qty} × ${i.product_name} (${i.format_name}) – ${money(i.unit_price * i.qty)}`).join('\n')}${liv ? `\nLivraison (${o.delivery_zone}) : ${money(o.delivery_fee)}\nAdresse : ${o.delivery_address}` : ''}\nTotal : ${money(o.total)}\n${modeLbl} : ${relDay(o.pickup_day).toLowerCase()} (${fmtDay(o.pickup_day)}) à ${fmtSlot(o.pickup_slot)}\nNom : ${o.customer_name}${o.payment_method === 'wave' ? '\nPaiement : Wave' : ''}\nSuivi : ${trackUrl(o.tracking_token)}`;
   const payWave = o.payment_method === 'wave' && !o.paid && !cancelled && waveUrl(o.total);
   view.innerHTML = `<div class="view"><div class="wrap" style="padding-top:24px">
     <div class="track">
@@ -371,7 +400,7 @@ async function viewTrack(token, isNew) {
           <div class="tick">${cancelled ? icon('x') : icon('check')}</div>
           <h1>${title}</h1>
           <p>${cancelled ? 'Cette commande ne sera pas préparée.' : `${modeLbl} <b>${relDay(o.pickup_day).toLowerCase()}</b>, ${fmtDay(o.pickup_day)} à <b>${fmtSlot(o.pickup_slot)}</b>`}</p>
-          ${liv && !cancelled ? `<p class="hint" style="margin-top:6px">🛵 ${esc(o.delivery_zone)} · ${esc(o.delivery_address)}</p>` : ''}
+          ${liv && !cancelled ? `<p class="hint hint-ic" style="margin-top:6px;justify-content:center">${icon('scooter')}${esc(o.delivery_zone)} · ${esc(o.delivery_address)}</p>` : ''}
           <span class="order-num">${esc(o.number)}</span>
           ${!['recuperee', 'annulee'].includes(o.status) ? '<p style="margin-top:12px"><span class="live">Mise à jour en direct</span></p>' : ''}
         </div>
@@ -387,8 +416,9 @@ async function viewTrack(token, isNew) {
         <div class="card" style="margin-bottom:14px">
           <h2 style="font-size:18px;margin-bottom:8px">Détail</h2>
           ${o.items.map((i) => `<div class="sum-line"><span>${i.qty} × ${esc(i.product_name)} <small>(${esc(i.format_name)})</small></span><b>${money(i.unit_price * i.qty)}</b></div>`).join('')}
+          ${o.discount ? `<div class="sum-line discount"><span>Code ${esc(o.promo_code)}</span><b>-${money(o.discount)}</b></div>` : ''}
           ${liv ? `<div class="sum-line"><span>Livraison <small>(${esc(o.delivery_zone)})</small></span><b>${o.delivery_fee ? money(o.delivery_fee) : 'Gratuite'}</b></div>` : ''}
-          <div class="totals" style="margin-top:8px"><div class="row grand"><span>Total</span><span>${money(o.total)}</span></div><div class="row"><span>Paiement</span><span>${o.paid ? '✅ Payé' : { wave: 'Wave', orange_money: 'Orange Money' }[o.payment_method] || (liv ? 'À la livraison' : 'Au retrait')}</span></div></div>
+          <div class="totals" style="margin-top:8px"><div class="row grand"><span>Total</span><span>${money(o.total)}</span></div><div class="row"><span>Paiement</span><span>${o.paid ? 'Payé' : { wave: 'Wave', orange_money: 'Orange Money' }[o.payment_method] || (liv ? 'À la livraison' : 'Au retrait')}</span></div></div>
           ${o.note ? `<p class="hint">Note : ${esc(o.note)}</p>` : ''}
         </div>
         <div class="actions no-print">
@@ -426,7 +456,7 @@ function viewMyOrders() {
   return `<div class="view"><div class="wrap">
     <div class="page-head"><h1 class="page-title">Suivre ma commande</h1><p>Les commandes passées depuis cet appareil.${S.user ? '' : ' <a href="#/compte">Connectez-vous</a> pour les retrouver sur tous vos appareils.'}</p></div>
     ${my.length ? `<div class="my-orders">${my.map((o) => orderRow(o)).join('')}</div>`
-      : '<div class="empty"><div class="big">🧾</div><h3>Aucune commande sur cet appareil</h3><p>Vos commandes apparaîtront ici automatiquement.</p></div>'}
+      : `<div class="empty"><div class="big">${icon('receipt')}</div><h3>Aucune commande sur cet appareil</h3><p>Vos commandes apparaîtront ici automatiquement.</p></div>`}
     <div class="card" style="margin-top:20px"><b>Vous avez commandé depuis un autre téléphone ?</b><p class="hint" style="margin:4px 0 12px">Ouvrez le lien de suivi reçu après la commande${S.user ? ', ou consultez <a href="#/compte">Mon compte</a>' : ''}, ou écrivez-nous avec votre numéro de commande.</p>
       <a class="btn btn-wa btn-sm" href="${waLink(s.whatsapp, 'Bonjour, je voudrais suivre ma commande n° ')}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></div>
   </div></div>`;
@@ -435,7 +465,7 @@ function viewMyOrders() {
 // ---------- Commande envoyée sur WhatsApp (base pas encore installée) ----------
 function showWhatsAppOrder(r) {
   const s = settings(); const liv = r.fulfillment === 'livraison';
-  const txt = `Bonjour ${s.shop_name} 👋 Je souhaite commander :\n${r.lines.map((l) => `• ${l.qty} × ${l.p.name} (${l.f.name}) – ${money(l.f.price * l.qty)}`).join('\n')}`
+  const txt = `Bonjour ${s.shop_name}, je souhaite commander :\n${r.lines.map((l) => `• ${l.qty} × ${l.p.name} (${l.f.name}) – ${money(l.f.price * l.qty)}`).join('\n')}`
     + `${liv ? `\nLivraison (${r.zone.name}) : ${money(r.zone.fee)}\nAdresse : ${r.address}` : ''}\nTotal : ${money(r.total)}`
     + `\n${liv ? 'Livraison' : 'Retrait'} : ${relDay(r.day).toLowerCase()} (${fmtDay(r.day)}) à ${fmtSlot(r.slot)}\nNom : ${r.name}\nTéléphone : ${fmtPhone(r.phone)}`
     + `${r.payment === 'wave' ? '\nPaiement : Wave' : r.payment === 'orange_money' ? '\nPaiement : Orange Money' : ''}${r.note ? `\nNote : ${r.note}` : ''}`;
@@ -456,7 +486,7 @@ async function viewAccount() {
   const view = $('#view');
   if (S.api.offline) {
     view.innerHTML = `<div class="view"><div class="wrap account"><div class="page-head"><h1 class="page-title">Mon compte</h1></div>
-      <div class="card" style="text-align:center"><div class="big" style="font-size:42px">👤</div><h2 style="font-size:20px;margin:8px 0">Bientôt disponible</h2>
+      <div class="card" style="text-align:center"><div class="big">${icon('user')}</div><h2 style="font-size:20px;margin:8px 0">Bientôt disponible</h2>
       <p class="hint">Les comptes clients arrivent très bientôt. Vous pouvez déjà commander sans compte : votre commande part sur WhatsApp.</p>
       <p style="margin-top:16px"><a class="btn" href="#/menu">Commander</a></p></div></div></div>`;
     return;
@@ -481,7 +511,7 @@ async function viewAccount() {
           <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
           <label class="field"><span>Mot de passe <small>(6 caractères minimum)</small></span><input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
           <button class="btn btn-block btn-lg btn-gold" type="submit">Créer mon compte</button>
-          <p class="hint" style="text-align:center;margin-top:10px">✓ Aucun e-mail de vérification : votre compte est actif immédiatement.</p>
+          <p class="hint" style="text-align:center;margin-top:10px">Aucun e-mail de vérification : votre compte est actif immédiatement.</p>
         </form>`}
       </div>
       <p style="text-align:center;margin-top:16px"><a class="btn btn-light" href="#/menu">Commander sans compte</a></p>
@@ -489,7 +519,7 @@ async function viewAccount() {
     return;
   }
   view.innerHTML = `<div class="view"><div class="wrap account">
-    <div class="page-head"><h1 class="page-title">Bonjour ${esc(firstName(S.user.name) || '👋')}</h1><p>${esc(S.user.email)}</p></div>
+    <div class="page-head"><h1 class="page-title">Bonjour ${esc(firstName(S.user.name))}</h1><p>${esc(S.user.email)}</p></div>
     <div class="grid-2">
       <div class="card"><h2 style="font-size:19px;margin-bottom:12px">Mes informations</h2>
         <form id="profile-form" novalidate>
@@ -504,12 +534,12 @@ async function viewAccount() {
   try {
     const list = await S.api.myOrders();
     $('#acc-orders').innerHTML = list.length ? `<div class="my-orders">${list.map((o) => orderRow(o)).join('')}</div>`
-      : '<div class="empty" style="padding:20px"><div class="big">🧾</div><p>Pas encore de commande avec ce compte.</p><p style="margin-top:12px"><a class="btn btn-sm" href="#/menu">Commander</a></p></div>';
+      : `<div class="empty" style="padding:20px"><div class="big">${icon('receipt')}</div><p>Pas encore de commande avec ce compte.</p><p style="margin-top:12px"><a class="btn btn-sm" href="#/menu">Commander</a></p></div>`;
   } catch (e) { $('#acc-orders').innerHTML = `<p class="hint">${esc(errMsg(e))}</p>`; }
 }
 const firstName = (n) => String(n || '').trim().split(/\s+/)[0];
 const orderRow = (o) => `<a class="my-order" href="#/suivi/${esc(o.tracking_token || o.token)}"><div><b>${esc(o.number)}</b>
-  <small>${o.fulfillment === 'livraison' ? '🛵 Livraison' : '🏪 Retrait'} ${relDay(o.pickup_day || o.day).toLowerCase()} à ${fmtSlot(o.pickup_slot || o.slot)} · ${money(o.total)}</small></div>
+  <small>${o.fulfillment === 'livraison' ? 'Livraison' : 'Retrait'} ${relDay(o.pickup_day || o.day).toLowerCase()} à ${fmtSlot(o.pickup_slot || o.slot)} · ${money(o.total)}</small></div>
   ${o.status ? `<span class="badge st-${o.status}">${ST[o.status].label}</span>` : icon('arrow')}</a>`;
 
 async function authSubmit(form) {
@@ -523,7 +553,7 @@ async function authSubmit(form) {
       if (raw && !phone) throw new Error('NS_TEL: Numéro de téléphone sénégalais invalide');
       if (password.length < 6) throw new Error('NS_MDP: Mot de passe : 6 caractères minimum');
       await S.api.signUp({ email, password, name, phone: phone || '' });
-      toast('Compte créé, bienvenue ! 🎉', 'success');
+      toast('Compte créé, bienvenue !', 'success');
     } else {
       await S.api.customerSignIn(email, password); toast('Vous êtes connecté(e)', 'success');
     }
@@ -601,12 +631,12 @@ function renderCart() {
   $('#cart-body').innerHTML = lines.length ? lines.map((l) => {
     const max = l.f.stock == null ? 99 : l.f.stock;
     return `<div class="cart-line">
-      ${l.p.image_url ? `<img class="thumb" src="${esc(l.p.image_url)}" alt="" loading="lazy">` : `<div class="thumb">${esc(l.p.emoji)}</div>`}
+      ${l.p.image_url ? `<img class="thumb" src="${esc(l.p.image_url)}" alt="" loading="lazy">` : `<div class="thumb">${icon('bowl')}</div>`}
       <div><b>${esc(l.p.name)}</b><small>${esc(l.f.name)} · ${money(l.f.price)}</small><br><button type="button" class="line-del" data-action="cart-del" data-fid="${l.fid}">Retirer</button></div>
       <div class="r"><b>${money(l.f.price * l.qty)}</b>
         <div class="stepper"><button type="button" data-action="cart-qty" data-fid="${l.fid}" data-d="-1" aria-label="Retirer un ${esc(l.p.name)}">${icon(l.qty <= 1 ? 'trash' : 'minus')}</button><output>${l.qty}</output><button type="button" data-action="cart-qty" data-fid="${l.fid}" data-d="1" aria-label="Ajouter un ${esc(l.p.name)}" ${l.qty >= max ? 'disabled' : ''}>${icon('plus')}</button></div></div>
     </div>`;
-  }).join('') : '<div class="empty"><div class="big">🛍️</div><h3>Votre panier est vide</h3><p>Découvrez nos spécialités maison.</p></div>';
+  }).join('') : `<div class="empty"><div class="big">${icon('bag')}</div><h3>Votre panier est vide</h3><p>Découvrez nos spécialités maison.</p></div>`;
   $('#cart-foot').innerHTML = lines.length
     ? `<div class="totals"><div class="row grand"><span>Total</span><span>${money(cartTotal())}</span></div><div class="row"><small>Paiement au retrait · aucun frais</small></div></div>
        <a class="btn btn-block btn-lg btn-gold" href="#/commande" data-action="close-cart">Choisir mon heure de retrait ${icon('arrow')}</a>`
@@ -648,6 +678,7 @@ function setNav(name) {
 const TITLES = { home: '', menu: 'La carte', commande: 'Commande', suivi: 'Suivi de commande', 'mes-commandes': 'Suivre ma commande', contact: 'Contact', confidentialite: 'Confidentialité', compte: 'Mon compte' };
 
 function render(scroll = false) {
+  if (!S.cat) return; // catalogue pas encore chargé : boot() affichera la page
   S.timers.forEach(clearInterval); S.timers = [];
   const r = route(); setNav(r.name);
   document.title = TITLES[r.name] ? `${TITLES[r.name]} · Arrêt nekh soow` : 'Arrêt nekh soow · Soow, Thiakry, Ngallakh à Thiès – commande en ligne';
@@ -658,7 +689,7 @@ function render(scroll = false) {
     const fn = { home: viewHome, menu: viewMenu, commande: viewCheckout, 'mes-commandes': viewMyOrders, contact: viewContact, confidentialite: viewPrivacy }[r.name] || viewHome;
     view.innerHTML = fn();
     if (r.name === 'commande') {
-      renderPayOpts(); renderSlotPicker();
+      renderPayOpts(); renderSlotPicker(); refreshPromo();
       S.timers.push(setInterval(async () => { await refreshLoad(); renderSlotPicker(); }, 30000));
     }
   }
@@ -713,6 +744,8 @@ document.addEventListener('click', async (e) => {
     }
     case 'forget': [CART_KEY, ME_KEY, MY_KEY].forEach(store.del); cart = []; renderCartBadge(); toast('Données effacées de cet appareil', 'success'); break;
     case 'reload': location.reload(); break;
+    case 'apply-promo': applyPromo(); break;
+    case 'remove-promo': S.co.promo = null; $('#promo-box').innerHTML = promoBox(); renderTotals(); break;
     case 'auth-tab': S.authTab = d.t; viewAccount(); break;
     case 'logout': await S.api.customerSignOut(); S.user = null; renderAccountTab(); toast('Vous êtes déconnecté(e)', 'info'); render(); break;
     default:
@@ -738,10 +771,13 @@ document.addEventListener('change', (e) => {
   if (e.target.name === 'mode') setMode(e.target.value);
   if (e.target.name === 'zone') { S.co.zone = e.target.value; updatePick(); }
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeCart();
+  if (e.key === 'Enter' && e.target.id === 'promo-in') { e.preventDefault(); applyPromo(); }
+});
 window.addEventListener('hashchange', () => { closeCart(); render(true); });
 window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 8), { passive: true });
-window.addEventListener('storage', (e) => { if (e.key === CART_KEY) { cart = store.get(CART_KEY, []); renderCartBadge(); } });
+window.addEventListener('storage', (e) => { if (e.key === CART_KEY && S.cat) { cart = store.get(CART_KEY, []); renderCartBadge(); } });
 
 // ---------------------------------------------------------------------------
 // Démarrage
@@ -756,7 +792,7 @@ async function boot() {
     [S.cat, , S.user] = await Promise.all([S.api.getCatalog(), refreshLoad(), S.api.customer().catch(() => null)]);
     S.api.onAuth?.(async () => { S.user = await S.api.customer().catch(() => null); renderAccountTab(); });
   } catch (e) {
-    $('#view').innerHTML = `<div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">📡</div><h3>Impossible de charger la boutique</h3><p>${esc(errMsg(e))}</p><p style="margin-top:16px"><button class="btn" type="button" data-action="reload">Réessayer</button></p></div></div>`;
+    $('#view').innerHTML = `<div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('wifi-off')}</div><h3>Impossible de charger la boutique</h3><p>${esc(errMsg(e))}</p><p style="margin-top:16px"><button class="btn" type="button" data-action="reload">Réessayer</button></p></div></div>`;
     return;
   }
   const s = settings();
@@ -764,7 +800,7 @@ async function boot() {
   if (!s.accepting_orders) { ann.hidden = false; ann.classList.add('closed'); ann.textContent = s.announcement || 'Les commandes en ligne sont momentanément suspendues.'; }
   else if (s.announcement) { ann.hidden = false; ann.textContent = s.announcement; }
   $('#foot-addr').textContent = `${s.address} · ${fmtPhone(s.phone)}`;
-  $('#wa-float').href = waLink(s.whatsapp, `Bonjour ${s.shop_name} 👋 `);
+  $('#wa-float').href = waLink(s.whatsapp, `Bonjour ${s.shop_name}, `);
   sanitizeCart(); renderCartBadge(); renderAccountTab(); render();
   // Rafraîchit le catalogue quand l'onglet redevient visible (prix / stock à jour)
   document.addEventListener('visibilitychange', async () => {

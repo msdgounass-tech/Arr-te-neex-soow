@@ -46,7 +46,9 @@ async function createSupabaseApi() {
       p_name: o.name, p_phone: o.phone, p_note: o.note, p_day: o.day, p_slot: o.slot,
       p_items: o.items, p_payment: o.payment || 'retrait',
       p_fulfillment: o.fulfillment || 'retrait', p_zone: o.zone || null, p_address: o.address || '',
+      ...(o.promo ? { p_promo: o.promo } : {}),
     }).then(ok),
+    checkPromo: (code, subtotal) => sb.rpc('ns_check_promo', { p_code: code, p_subtotal: subtotal }).then(ok),
     trackOrder: (token) => sb.rpc('ns_track_order', { p_token: token }).then(ok),
     cancelOrder: (token) => sb.rpc('ns_cancel_order', { p_token: token }).then(ok),
 
@@ -87,6 +89,12 @@ async function createSupabaseApi() {
       if (z.id) ok(await sb.from('ns_delivery_zones').update(row).eq('id', z.id)); else ok(await sb.from('ns_delivery_zones').insert(row));
     },
     async deleteZone(id) { ok(await sb.from('ns_delivery_zones').delete().eq('id', id)); },
+    async listPromos() { return ok(await sb.from('ns_promos').select('*').order('created_at', { ascending: false })); },
+    async savePromo(p) {
+      const row = { code: p.code, kind: p.kind, value: p.value, min_order: p.min_order, max_uses: p.max_uses ?? null, starts_on: p.starts_on || null, ends_on: p.ends_on || null, active: p.active, description: p.description || '' };
+      if (p.id) ok(await sb.from('ns_promos').update(row).eq('id', p.id)); else ok(await sb.from('ns_promos').insert(row));
+    },
+    async deletePromo(id) { ok(await sb.from('ns_promos').delete().eq('id', id)); },
     async listOrders({ from, to } = {}) {
       let q = sb.from('ns_orders').select(SELECT_ORDER).order('pickup_day').order('pickup_slot').order('created_at');
       if (from) q = q.gte('pickup_day', from);
@@ -109,7 +117,7 @@ async function createSupabaseApi() {
       let del = sb.from('ns_formats').delete().eq('product_id', saved.id);
       if (keep.length) del = del.not('id', 'in', `(${keep.join(',')})`);
       ok(await del);
-      const rows = p.formats.map((f, i) => ({ ...(f.id ? { id: f.id } : {}), product_id: saved.id, name: f.name, price: f.price, stock: f.stock ?? null, active: f.active, position: i }));
+      const rows = p.formats.map((f, i) => ({ ...(f.id ? { id: f.id } : {}), product_id: saved.id, name: f.name, price: f.price, stock: f.stock ?? null, active: f.active, position: i, ...(f.compare_price !== undefined ? { compare_price: f.compare_price || null } : {}) }));
       if (rows.length) ok(await sb.from('ns_formats').upsert(rows));
       return saved.id;
     },

@@ -15,6 +15,7 @@ const ACTIVE = ['nouvelle', 'confirmee', 'preparation', 'prete'];
 const icon = (id) => `<svg aria-hidden="true"><use href="#a-${id}"/></svg>`;
 const today = () => dakarNow().day;
 const S = () => A.cat.settings;
+const PROMO_SQL_URL = 'https://claude.ai/artifact/GMTEYMGd4udG26pXVqVX5p';
 const waveLink = (amount) => { const l = S().wave_link; return l ? `${l}${l.includes('?') ? '&' : '?'}amount=${Math.round(amount)}` : ''; };
 
 // ---------------------------------------------------------------------------
@@ -61,7 +62,7 @@ function soundBtn() { $('#sound-btn').innerHTML = icon(A.sound ? 'bell' : 'bell-
 async function onNewOrder(o) {
   if (A.seen.has(o.id)) return; A.seen.add(o.id); A.newIds.add(o.id);
   chime();
-  toast(`🔔 Nouvelle commande ${o.number} · ${firstName(o.customer_name)} · ${money(o.total)}`, 'success', 6000);
+  toast(`Nouvelle commande ${o.number} · ${firstName(o.customer_name)} · ${money(o.total)}`, 'success', 6000);
   if ('Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
     try { new Notification('Nouvelle commande', { body: `${o.customer_name} · ${money(o.total)} · retrait ${relDay(o.pickup_day).toLowerCase()} ${fmtSlot(o.pickup_slot)}`, icon: 'assets/img/icon-192.png', tag: o.id }); } catch { /* ignore */ }
   }
@@ -183,7 +184,7 @@ function pageDashboard() {
   const best = days.reduce((b, k, i) => (vals[i] > (b.v || 0) ? { k, v: vals[i] } : b), {});
   return `
   ${news.length ? `<a class="panel mb alert-new" href="#/commandes" data-action="filter-new">
-     <span class="bell-ring">🔔</span><div style="flex:1"><b>${news.length} nouvelle${news.length > 1 ? 's' : ''} commande${news.length > 1 ? 's' : ''} à confirmer</b><div class="muted" style="font-size:14px">La plus ancienne : ${esc(news[0].customer_name)}, ${news[0].fulfillment === 'livraison' ? 'livraison' : 'retrait'} ${relDay(news[0].pickup_day).toLowerCase()} à ${fmtSlot(news[0].pickup_slot)}</div></div>${icon('arrow')}</a>` : ''}
+     <span class="bell-ring">${icon('bell')}</span><div style="flex:1"><b>${news.length} nouvelle${news.length > 1 ? 's' : ''} commande${news.length > 1 ? 's' : ''} à confirmer</b><div class="muted" style="font-size:14px">La plus ancienne : ${esc(news[0].customer_name)}, ${news[0].fulfillment === 'livraison' ? 'livraison' : 'retrait'} ${relDay(news[0].pickup_day).toLowerCase()} à ${fmtSlot(news[0].pickup_slot)}</div></div>${icon('arrow')}</a>` : ''}
   <div class="panel mb today-strip stagger">
     <div><span class="lbl">Aujourd’hui</span><b>${countUp(tod.ca, 'm')}</b>${delta(tod.ca, yes.ca, 'vs hier')}</div>
     <div><span class="lbl">Commandes</span><b>${countUp(tod.n)}</b>${delta(tod.n, yes.n, 'vs hier')}</div>
@@ -204,7 +205,7 @@ function pageDashboard() {
       <div class="money-split"><div><span class="dot g"></span>Encaissé <b>${money(sc.paid)}</b></div><div><span class="dot o"></span>À encaisser <b>${money(sc.due)}</b></div><div><span class="dot r"></span>Annulées <b>${sc.cancelled}</b></div></div>
       <div class="meter big"><i style="width:${sc.ca ? (sc.paid / sc.ca) * 100 : 0}%"></i></div></div>
     <div class="panel"><div class="panel-head"><h2>Prochains retraits & livraisons</h2><a class="link" href="#/commandes">Tout voir</a></div>
-      <div class="upcoming stagger">${upcoming.map((o) => `<a class="up-row" href="#/commandes" data-action="open-order" data-id="${o.id}"><span class="t">${fmtSlot(o.pickup_slot)}</span><div><b>${o.fulfillment === 'livraison' ? '🛵 ' : ''}${esc(o.customer_name)}</b><small>${o.pickup_day === t ? '' : relDay(o.pickup_day) + ' · '}${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></div><span class="badge st-${o.status}">${ST[o.status].label}</span></a>`).join('') || '<div class="empty"><div class="big">☕</div><p>Aucun retrait prévu.</p></div>'}</div>
+      <div class="upcoming stagger">${upcoming.map((o) => `<a class="up-row" href="#/commandes" data-action="open-order" data-id="${o.id}"><span class="t">${fmtSlot(o.pickup_slot)}</span><div><b>${o.fulfillment === 'livraison' ? icon('scooter') : ''}${esc(o.customer_name)}</b><small>${o.pickup_day === t ? '' : relDay(o.pickup_day) + ' · '}${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></div><span class="badge st-${o.status}">${ST[o.status].label}</span></a>`).join('') || `<div class="empty"><div class="big">${icon('cup')}</div><p>Aucun retrait prévu.</p></div>`}</div>
     </div>
   </div>
   <div class="grid g3">
@@ -293,9 +294,9 @@ function openDay(d) {
       </div>
       <h3 class="h3">Toutes les ventes de la journée</h3>
       <div class="table-wrap"><table class="t"><thead><tr><th>Heure</th><th>N°</th><th>Client</th><th>Articles</th><th class="n">Total</th><th>Paiement</th><th>Statut</th></tr></thead><tbody>
-        ${list.map((o) => `<tr class="clk ${o.status === 'annulee' ? 'cancel' : ''}" data-action="open-order" data-id="${o.id}"><td><b>${fmtSlot(o.pickup_slot)}</b>${o.fulfillment === 'livraison' ? '<br>🛵' : ''}</td><td><small>${esc(o.number)}</small></td><td>${esc(o.customer_name)}<br><small class="muted">${esc(fmtPhone(o.phone))}</small></td>
+        ${list.map((o) => `<tr class="clk ${o.status === 'annulee' ? 'cancel' : ''}" data-action="open-order" data-id="${o.id}"><td><b>${fmtSlot(o.pickup_slot)}</b>${o.fulfillment === 'livraison' ? `<br><span class="mini-ic">${icon('scooter')}</span>` : ''}</td><td><small>${esc(o.number)}</small></td><td>${esc(o.customer_name)}<br><small class="muted">${esc(fmtPhone(o.phone))}</small></td>
           <td><small>${o.items.map((i) => `${i.qty}× ${esc(i.product_name)}`).join(', ')}</small></td><td class="n"><b>${money(o.total)}</b></td>
-          <td>${o.paid ? `<span class="paid">✓ ${PAY_LBL[o.payment_method] || ''}</span>` : '<span class="muted">À encaisser</span>'}${o.payment_ref ? `<br><small>Réf. ${esc(o.payment_ref)}</small>` : ''}</td><td><span class="badge st-${o.status}">${ST[o.status].label}</span></td></tr>`).join('') || '<tr><td colspan="7" class="muted">Aucune commande ce jour-là.</td></tr>'}
+          <td>${o.paid ? `<span class="paid">${icon('check')} ${PAY_LBL[o.payment_method] || ''}</span>` : '<span class="muted">À encaisser</span>'}${o.payment_ref ? `<br><small>Réf. ${esc(o.payment_ref)}</small>` : ''}</td><td><span class="badge st-${o.status}">${ST[o.status].label}</span></td></tr>`).join('') || '<tr><td colspan="7" class="muted">Aucune commande ce jour-là.</td></tr>'}
       </tbody><tfoot><tr><td colspan="4">Total (hors annulées)</td><td class="n">${money(s.ca)}</td><td colspan="2"></td></tr></tfoot></table></div>`,
     foot: `<button class="btn btn-light btn-sm" type="button" data-action="day-csv" data-d="${d}">${icon('dl')} CSV du jour</button><button class="btn btn-sm" type="button" data-action="close-modal">Fermer</button>`,
   });
@@ -334,10 +335,10 @@ function waMessage(o) {
   const s = S(); const fn = firstName(o.customer_name); const when = `${relDay(o.pickup_day).toLowerCase()} à ${fmtSlot(o.pickup_slot)}`;
   const m = {
     nouvelle: `Bonjour ${fn}, nous avons bien reçu votre commande ${o.number} (${money(o.total)}). Retrait ${when}. Merci !`,
-    confirmee: o.fulfillment === 'livraison' ? `Bonjour ${fn} 👋 Votre commande ${o.number} est confirmée ✅ Livraison ${when} à ${o.delivery_address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''}` : `Bonjour ${fn} 👋 Votre commande ${o.number} est confirmée ✅ Retrait ${when} à ${s.address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''} À tout à l’heure !`,
-    preparation: `Bonjour ${fn}, votre commande ${o.number} est en cours de préparation 👩🏾‍🍳 Elle sera prête pour ${fmtSlot(o.pickup_slot)}.`,
-    prete: o.fulfillment === 'livraison' ? `Bonne nouvelle ${fn} ! 🛵 Votre commande ${o.number} est en route vers ${o.delivery_address}. Le livreur vous appelle à l’arrivée. Total : ${money(o.total)}${o.paid ? ' (déjà payé)' : ''}.` : `Bonne nouvelle ${fn} ! 🛍️ Votre commande ${o.number} est prête. Vous pouvez passer la récupérer (${s.address}). Total à régler : ${money(o.total)}. Merci !`,
-    recuperee: `Merci ${fn} pour votre commande ! 🙏 Bonne dégustation et à très bientôt chez ${s.shop_name}.`,
+    confirmee: o.fulfillment === 'livraison' ? `Bonjour ${fn}, votre commande ${o.number} est confirmée. Livraison ${when} à ${o.delivery_address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''}` : `Bonjour ${fn}, votre commande ${o.number} est confirmée. Retrait ${when} à ${s.address}.${o.payment_method === 'wave' && !o.paid ? ` Paiement Wave : ${waveLink(o.total)}` : ''} À tout à l’heure !`,
+    preparation: `Bonjour ${fn}, votre commande ${o.number} est en cours de préparation. Elle sera prête pour ${fmtSlot(o.pickup_slot)}.`,
+    prete: o.fulfillment === 'livraison' ? `Bonne nouvelle ${fn} ! Votre commande ${o.number} est en route vers ${o.delivery_address}. Le livreur vous appelle à l’arrivée. Total : ${money(o.total)}${o.paid ? ' (déjà payé)' : ''}.` : `Bonne nouvelle ${fn} ! Votre commande ${o.number} est prête. Vous pouvez passer la récupérer (${s.address}). Total à régler : ${money(o.total)}. Merci !`,
+    recuperee: `Merci ${fn} pour votre commande ! Bonne dégustation et à très bientôt chez ${s.shop_name}.`,
     annulee: `Bonjour ${fn}, votre commande ${o.number} a été annulée. N’hésitez pas à nous écrire pour toute question.`,
   };
   return m[o.status];
@@ -347,12 +348,12 @@ function orderCard(o) {
   return `<article class="order s-${o.status} ${A.newIds.has(o.id) ? 'flash' : ''}" data-id="${o.id}">
     <div class="hd"><div><div class="num">${esc(o.number)} · ${timeAgo(o.created_at)}</div><div class="who">${esc(o.customer_name)}</div>
       <a class="tel" href="tel:+221${esc(o.phone)}">${icon('phone')}${esc(fmtPhone(o.phone))}</a></div>
-      <span class="badge st-${o.status}">${st.icon} ${st.label}</span></div>
-    <ul>${o.items.map((i) => `<li><span><b>${i.qty}×</b> ${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></span><span>${money(i.unit_price * i.qty)}</span></li>`).join('')}${o.delivery_fee ? `<li class="muted"><span>Livraison</span><span>${money(o.delivery_fee)}</span></li>` : ''}</ul>
-    ${o.fulfillment === 'livraison' ? `<a class="deliv" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.delivery_address + ', Thiès, Sénégal')}" target="_blank" rel="noopener">🛵 <span><b>Livraison · ${esc(o.delivery_zone)}</b><br>${esc(o.delivery_address)}</span></a>` : ''}
-    ${o.note ? `<div class="note">📝 ${esc(o.note)}</div>` : ''}
-    ${o.admin_note ? `<div class="note" style="background:#eef3ff;color:var(--navy)">🔒 ${esc(o.admin_note)}</div>` : ''}
-    <div class="ft"><div><div class="total">${money(o.total)}</div><div class="meta">${o.paid ? '<span class="paid">✓ Payé</span>' : 'À encaisser'} · ${{ retrait: 'au retrait', wave: 'Wave', orange_money: 'Orange Money', especes: 'espèces' }[o.payment_method] || ''}</div></div>
+      <span class="badge st-${o.status}">${icon(st.icon)} ${st.label}</span></div>
+    <ul>${o.items.map((i) => `<li><span><b>${i.qty}×</b> ${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></span><span>${money(i.unit_price * i.qty)}</span></li>`).join('')}${o.discount ? `<li class="promo-line"><span>Code ${esc(o.promo_code)}</span><span>-${money(o.discount)}</span></li>` : ''}${o.delivery_fee ? `<li class="muted"><span>Livraison</span><span>${money(o.delivery_fee)}</span></li>` : ''}</ul>
+    ${o.fulfillment === 'livraison' ? `<a class="deliv" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.delivery_address + ', Thiès, Sénégal')}" target="_blank" rel="noopener">${icon('scooter')}<span><b>Livraison · ${esc(o.delivery_zone)}</b><br>${esc(o.delivery_address)}</span></a>` : ''}
+    ${o.note ? `<div class="note">${icon('note')}<span>${esc(o.note)}</span></div>` : ''}
+    ${o.admin_note ? `<div class="note" style="background:#eef3ff;color:var(--navy)">${icon('lock')}<span>${esc(o.admin_note)}</span></div>` : ''}
+    <div class="ft"><div><div class="total">${money(o.total)}</div><div class="meta">${o.paid ? `<span class="paid">${icon('check')} Payé</span>` : 'À encaisser'} · ${{ retrait: 'au retrait', wave: 'Wave', orange_money: 'Orange Money', especes: 'espèces' }[o.payment_method] || ''}</div></div>
       <div class="acts">
         <a class="btn btn-xs btn-wa" href="${waLink(o.phone, waMessage(o))}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(o.customer_name)}">${icon('wa')}${o.status === 'prete' ? 'Prévenir' : ''}</a>
         <button class="btn btn-xs btn-light" type="button" data-action="open-order" data-id="${o.id}">Détail</button>
@@ -383,7 +384,7 @@ function pageOrders() {
     ${Object.keys(groups).length ? Object.entries(groups).map(([k, arr]) => {
       const [d, s] = k.split(' '); const booked = A.orders.filter((o) => o.pickup_day === d && o.pickup_slot === s && valid(o)).length;
       return `<section class="slot-group"><h3><span class="time">${fmtSlot(s)}</span>${showDay ? `<span>${relDay(d)}</span>` : ''}<span class="cap">${booked}/${cap} places</span></h3><div class="orders">${arr.map(orderCard).join('')}</div></section>`;
-    }).join('') : '<div class="panel empty"><div class="big">📭</div><h3>Aucune commande</h3><p>Rien ne correspond à ces filtres.</p></div>'}`;
+    }).join('') : `<div class="panel empty"><div class="big">${icon('inbox')}</div><h3>Aucune commande</h3><p>Rien ne correspond à ces filtres.</p></div>`}`;
 }
 
 function orderDetail(o) {
@@ -391,19 +392,20 @@ function orderDetail(o) {
   const flow = STATUSES.filter((s) => s.k !== 'annulee');
   return {
     title: `Commande ${esc(o.number)}`,
-    body: `<div class="st-flow" role="group" aria-label="Statut">${flow.map((s) => `<button type="button" data-action="set-status" data-id="${o.id}" data-s="${s.k}" aria-pressed="${o.status === s.k}" ${closed && o.status !== s.k ? 'disabled' : ''}>${s.icon} ${s.label}</button>`).join('')}</div>
+    body: `<div class="st-flow" role="group" aria-label="Statut">${flow.map((s) => `<button type="button" data-action="set-status" data-id="${o.id}" data-s="${s.k}" aria-pressed="${o.status === s.k}" ${closed && o.status !== s.k ? 'disabled' : ''}>${icon(s.icon)} ${s.label}</button>`).join('')}</div>
       <dl class="kv">
         <dt>Client</dt><dd>${esc(o.customer_name)}</dd>
         <dt>Téléphone</dt><dd><a href="tel:+221${esc(o.phone)}">${esc(fmtPhone(o.phone))}</a> · <a href="${waLink(o.phone, waMessage(o))}" target="_blank" rel="noopener">WhatsApp</a></dd>
         <dt>${o.fulfillment === 'livraison' ? 'Livraison' : 'Retrait'}</dt><dd>${relDay(o.pickup_day)} · ${fmtDay(o.pickup_day)} à ${fmtSlot(o.pickup_slot)}</dd>
         ${o.fulfillment === 'livraison' ? `<dt>Adresse</dt><dd>${esc(o.delivery_address)} <span class="muted">(${esc(o.delivery_zone)}, ${money(o.delivery_fee)})</span> · <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.delivery_address + ', Thiès, Sénégal')}" target="_blank" rel="noopener">Carte</a></dd>` : ''}
         <dt>Passée</dt><dd>${fmtDateTime(o.created_at)}</dd>
-        <dt>Statut</dt><dd><span class="badge st-${o.status}">${st.icon} ${st.label}</span></dd>
+        <dt>Statut</dt><dd><span class="badge st-${o.status}">${icon(st.icon)} ${st.label}</span></dd>
       </dl>
       <div class="table-wrap mb"><table class="t"><thead><tr><th>Article</th><th class="n">Qté</th><th class="n">P.U.</th><th class="n">Total</th></tr></thead><tbody>
         ${o.items.map((i) => `<tr><td>${esc(i.product_name)} <span class="muted">(${esc(i.format_name)})</span></td><td class="n">${i.qty}</td><td class="n">${money(i.unit_price)}</td><td class="n">${money(i.unit_price * i.qty)}</td></tr>`).join('')}
+      ${o.discount ? `<tr class="promo-line"><td>Code promo ${esc(o.promo_code)}</td><td class="n"></td><td class="n"></td><td class="n">-${money(o.discount)}</td></tr>` : ''}
       ${o.delivery_fee ? `<tr><td>Livraison (${esc(o.delivery_zone)})</td><td class="n"></td><td class="n"></td><td class="n">${money(o.delivery_fee)}</td></tr>` : ''}</tbody><tfoot><tr><td colspan="3">Total</td><td class="n">${money(o.total)}</td></tr></tfoot></table></div>
-      ${o.note ? `<div class="note mb" style="background:var(--amber-s);padding:10px 12px;border-radius:10px">📝 Note du client : ${esc(o.note)}</div>` : ''}
+      ${o.note ? `<div class="note mb" style="background:var(--amber-s);padding:10px 12px;border-radius:10px">Note du client : ${esc(o.note)}</div>` : ''}
       <div class="grid g2 mb">
         <label class="field" style="margin:0"><span>Moyen de paiement</span><select data-action="pay-method" data-id="${o.id}">${[['retrait', 'Au retrait'], ['especes', 'Espèces'], ['wave', 'Wave'], ['orange_money', 'Orange Money']].map(([k, l]) => `<option value="${k}" ${o.payment_method === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
         <div class="field" style="margin:0;align-content:end"><label class="switch"><input type="checkbox" data-action="paid" data-id="${o.id}" ${o.paid ? 'checked' : ''}> Paiement encaissé</label></div>
@@ -477,9 +479,9 @@ function pageProduction() {
       <tbody>${arr.map((r) => `<tr><td><b>${esc(r.p)}</b></td><td>${esc(r.f)}</td>${slots.map((s) => `<td class="n">${r.by[s] || '<span class="muted">·</span>'}</td>`).join('')}<td class="n"><span class="prod-big" style="font-size:18px">${r.total}</span></td><td class="n">${r.left}</td></tr>`).join('')}</tbody>
       <tfoot><tr><td colspan="2">Total</td>${slots.map((s) => `<td class="n">${arr.reduce((a, r) => a + (r.by[s] || 0), 0)}</td>`).join('')}<td class="n">${units}</td><td class="n">${arr.reduce((a, r) => a + r.left, 0)}</td></tr></tfoot></table></div></div>
       <div class="panel"><div class="panel-head"><h2>Ordre de retrait</h2></div><div class="table-wrap"><table class="t"><thead><tr><th>Heure</th><th>Client</th><th>Articles</th><th class="n">Total</th><th>Statut</th></tr></thead><tbody>
-        ${list.sort(byPick).map((o) => `<tr><td><b>${fmtSlot(o.pickup_slot)}</b></td><td>${esc(o.customer_name)}<br><small class="muted">${esc(fmtPhone(o.phone))}</small></td><td>${o.items.map((i) => `${i.qty}× ${esc(i.product_name)} (${esc(i.format_name)})`).join('<br>')}${o.note ? `<br><small>📝 ${esc(o.note)}</small>` : ''}</td><td class="n">${money(o.total)}</td><td><span class="badge st-${o.status}">${ST[o.status].label}</span></td></tr>`).join('')}
+        ${list.sort(byPick).map((o) => `<tr><td><b>${fmtSlot(o.pickup_slot)}</b></td><td>${esc(o.customer_name)}<br><small class="muted">${esc(fmtPhone(o.phone))}</small></td><td>${o.items.map((i) => `${i.qty}× ${esc(i.product_name)} (${esc(i.format_name)})`).join('<br>')}${o.note ? `<br><small>Note : ${esc(o.note)}</small>` : ''}</td><td class="n">${money(o.total)}</td><td><span class="badge st-${o.status}">${ST[o.status].label}</span></td></tr>`).join('')}
       </tbody></table></div></div>`
-    : '<div class="panel empty"><div class="big">🧺</div><h3>Rien à préparer</h3><p>Aucune commande pour ce jour.</p></div>'}`;
+    : `<div class="panel empty"><div class="big">${icon('basket')}</div><h3>Rien à préparer</h3><p>Aucune commande pour ce jour.</p></div>`}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -492,36 +494,36 @@ function pageProducts() {
       <button class="btn" type="button" data-action="new-product">${icon('plus')} Nouveau produit</button></div>
     <div class="plist">${ps.map((p, i) => `<div class="prow ${p.active ? '' : 'off'}">
       <div class="order-btns"><button type="button" data-action="move" data-id="${p.id}" data-d="-1" aria-label="Monter" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button><button type="button" data-action="move" data-id="${p.id}" data-d="1" aria-label="Descendre" ${i === ps.length - 1 ? 'disabled' : ''}>${icon('down')}</button></div>
-      ${p.image_url ? `<img class="thumb" src="${esc(p.image_url)}" alt="" loading="lazy">` : `<div class="thumb">${esc(p.emoji)}</div>`}
-      <div><h3>${esc(p.name)} ${p.popular ? '<span class="badge" style="background:var(--gold-s);color:#8a5a00">★ Populaire</span>' : ''}</h3>
+      ${p.image_url ? `<img class="thumb" src="${esc(p.image_url)}" alt="" loading="lazy">` : `<div class="thumb">${icon('bowl')}</div>`}
+      <div><h3>${esc(p.name)} ${p.popular ? `<span class="badge" style="background:var(--gold-s);color:#8a5a00">${icon('star')} Populaire</span>` : ''}</h3>
         <div class="fm">${esc(p.category)} · ${p.formats.map((f) => `${esc(f.name)} ${money(f.price)}${f.stock != null ? ` <b style="color:${f.stock === 0 ? 'var(--red)' : f.stock <= 5 ? '#9a5b00' : 'inherit'}">(${f.stock === 0 ? 'épuisé' : `stock ${f.stock}`})</b>` : ''}${f.active ? '' : ' (masqué)'}`).join(' · ')}</div>
         <div class="fm">${sold[p.id] || 0} vendus sur 30 jours</div></div>
       <div class="ctl"><label class="switch"><input type="checkbox" data-action="toggle-prod" data-k="active" data-id="${p.id}" ${p.active ? 'checked' : ''}>En ligne</label>
         <label class="switch"><input type="checkbox" data-action="toggle-prod" data-k="popular" data-id="${p.id}" ${p.popular ? 'checked' : ''}>Populaire</label>
         <button class="btn btn-sm btn-light" type="button" data-action="edit-product" data-id="${p.id}">${icon('edit')} Modifier</button></div>
-    </div>`).join('') || '<div class="panel empty"><div class="big">🧺</div><h3>Aucun produit</h3></div>'}</div>`;
+    </div>`).join('') || `<div class="panel empty"><div class="big">${icon('basket')}</div><h3>Aucun produit</h3></div>`}</div>`;
 }
 let draft = null;
 function productForm(p) {
-  draft = JSON.parse(JSON.stringify(p || { name: '', description: '', category: '', emoji: '🍽️', image_url: null, popular: false, active: true, formats: [{ name: 'Petit pot', price: 1000, stock: null, active: true }] }));
+  draft = JSON.parse(JSON.stringify(p || { name: '', description: '', category: '', emoji: '', image_url: null, popular: false, active: true, formats: [{ name: 'Petit pot', price: 1000, stock: null, active: true }] }));
   const cats = [...new Set(A.cat.products.map((x) => x.category))];
   openModal({
     title: p ? `Modifier « ${esc(p.name)} »` : 'Nouveau produit', wide: true,
     body: `<form id="pform" novalidate>
-      <div class="img-drop"><div class="prev" id="pimg">${draft.image_url ? `<img src="${esc(draft.image_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">` : esc(draft.emoji)}</div>
+      <div class="img-drop"><div class="prev" id="pimg">${draft.image_url ? `<img src="${esc(draft.image_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">` : icon('bowl')}</div>
         <div><div class="btns"><label class="btn btn-sm btn-light">${icon('img')} ${draft.image_url ? 'Changer la photo' : 'Ajouter une photo'}<input type="file" accept="image/*" data-action="pick-img" hidden></label>
           ${draft.image_url ? '<button class="btn btn-sm btn-ghost" type="button" data-action="rm-img">Retirer</button>' : ''}</div>
           <small class="hint">Format carré conseillé. L’image est automatiquement optimisée.</small></div></div>
       <div class="grid g2"><label class="field"><span>Nom</span><input name="name" required maxlength="80" value="${esc(draft.name)}"></label>
         <label class="field"><span>Catégorie</span><input name="category" list="cats" maxlength="40" value="${esc(draft.category)}" placeholder="Ex : THIAKRY"><datalist id="cats">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label></div>
       <label class="field"><span>Description</span><textarea name="description" maxlength="400" rows="2">${esc(draft.description)}</textarea></label>
-      <div class="grid g2"><label class="field"><span>Emoji (si pas de photo)</span><input name="emoji" maxlength="8" value="${esc(draft.emoji)}"></label>
+      <div class="grid g2"><div></div>
         <div class="field" style="align-content:center;gap:10px"><label class="switch"><input type="checkbox" name="active" ${draft.active ? 'checked' : ''}> En ligne</label><label class="switch"><input type="checkbox" name="popular" ${draft.popular ? 'checked' : ''}> Mis en avant (populaire)</label></div></div>
       <div class="label" style="margin:6px 0 8px">Formats et prix</div>
-      <div class="fmt-row fmt-head"><span>Format</span><span>Prix (FCFA)</span><span>Stock</span><span>Actif</span><span></span></div>
+      <div class="fmt-row fmt-head"><span>Format</span><span>Prix (FCFA)</span><span>Prix barré</span><span>Stock</span><span>Actif</span><span></span></div>
       <div class="fmt-rows" id="fmts"></div>
       <button class="btn btn-sm btn-ghost" type="button" data-action="add-fmt">${icon('plus')} Ajouter un format</button>
-      <p class="hint" style="margin-top:8px">Stock vide = illimité. Le stock diminue à chaque commande et est restitué si elle est annulée.</p>
+      <p class="hint" style="margin-top:8px">Prix barré : l’ancien prix, affiché barré avec un badge de réduction (laisser vide si pas de promo). Stock vide = illimité. Le stock diminue à chaque commande et est restitué si elle est annulée.</p>
     </form>`,
     foot: `${p ? `<button class="btn btn-ghost btn-sm" type="button" data-action="del-product" data-id="${p.id}" style="margin-right:auto;color:var(--red)">${icon('trash')} Supprimer</button>` : ''}
       <button class="btn btn-ghost" type="button" data-action="close-modal">Annuler</button><button class="btn" type="button" data-action="save-product" id="save-p">Enregistrer</button>`,
@@ -532,6 +534,7 @@ function renderFormats() {
   $('#fmts').innerHTML = draft.formats.map((f, i) => `<div class="fmt-row" data-i="${i}">
     <input class="input" aria-label="Nom du format" data-f="name" value="${esc(f.name)}" maxlength="40" placeholder="Petit pot">
     <input class="input" aria-label="Prix" data-f="price" type="number" min="0" step="50" inputmode="numeric" value="${f.price}">
+    <input class="input" aria-label="Prix barré (avant réduction)" data-f="compare" type="number" min="0" step="50" inputmode="numeric" value="${f.compare_price ?? ''}" placeholder="—" ${promosReady() ? '' : 'disabled title="Activez d’abord les promotions"'}>
     <input class="input" aria-label="Stock" data-f="stock" type="number" min="0" inputmode="numeric" value="${f.stock ?? ''}" placeholder="∞">
     <label class="switch" title="Actif"><input type="checkbox" data-f="active" ${f.active ? 'checked' : ''}><span class="sr-only">Actif</span></label>
     <button class="icon-btn" type="button" data-action="rm-fmt" data-i="${i}" aria-label="Supprimer ce format" ${draft.formats.length <= 1 ? 'disabled' : ''}>${icon('trash')}</button></div>`).join('');
@@ -542,12 +545,13 @@ function readFormats() {
     f.name = $('[data-f=name]', row).value.trim(); f.price = Math.round(Number($('[data-f=price]', row).value) || 0);
     const st = $('[data-f=stock]', row).value; f.stock = st === '' ? null : Math.max(0, Math.round(Number(st)));
     f.active = $('[data-f=active]', row).checked;
+    if (promosReady()) { const c = $('[data-f=compare]', row).value; f.compare_price = c === '' ? null : Math.max(0, Math.round(Number(c))); }
   });
 }
 async function saveProduct() {
   readFormats(); const fm = $('#pform');
   draft.name = fm.name.value.trim(); draft.category = (fm.category.value.trim() || draft.name).toUpperCase().slice(0, 40);
-  draft.description = fm.description.value.trim(); draft.emoji = fm.emoji.value.trim() || '🍽️';
+  draft.description = fm.description.value.trim(); draft.emoji = draft.emoji || '';
   draft.active = fm.active.checked; draft.popular = fm.popular.checked;
   if (!draft.name) return toast('Indiquez le nom du produit', 'error');
   draft.formats = draft.formats.filter((f) => f.name);
@@ -557,6 +561,90 @@ async function saveProduct() {
   const b = $('#save-p'); b.classList.add('is-loading');
   try { await A.api.saveProduct(draft); A.cat = await A.api.adminCatalog(); toast('Produit enregistré', 'success'); closeModal(); }
   catch (e) { toast(errMsg(e), 'error'); } finally { b?.classList.remove('is-loading'); }
+}
+
+// ---------------------------------------------------------------------------
+// Promotions : codes promo et prix barrés
+// ---------------------------------------------------------------------------
+const promosReady = () => S().promos_enabled !== undefined;
+const promoLabel = (p) => (p.kind === 'percent' ? `-${p.value} %` : `-${money(p.value)}`);
+async function loadPromos() {
+  if (!promosReady()) { A.promos = []; return; }
+  try { A.promos = await A.api.listPromos(); } catch (e) { A.promos = []; toast(errMsg(e), 'error'); }
+}
+function pagePromos() {
+  if (!promosReady()) {
+    return `<div class="panel install-box"><div class="empty"><div class="big">${icon('percent')}</div></div>
+      <h2 style="font-size:20px;margin-bottom:6px">Activez les promotions</h2>
+      <p class="muted" style="max-width:520px;margin:0 auto 16px">Une petite mise à jour de la base de données est nécessaire, une seule fois. Copiez le script, collez-le dans l’éditeur SQL de Supabase (projet gounass-luxury), puis cliquez sur Run.</p>
+      <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="${esc(PROMO_SQL_URL)}" target="_blank" rel="noopener">${icon('ext')} Copier le script</a>
+      <a class="btn btn-light" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Ouvrir Supabase</a>
+      <button class="btn btn-ghost" type="button" data-action="reload-app">J’ai terminé, recharger</button></p></div>`;
+  }
+  if (!A.promos) { loadPromos().then(() => render(false)); return '<div class="spinner"></div>'; }
+  const stats = {}; A.orders.filter(valid).forEach((o) => { if (o.promo_code) { const r = (stats[o.promo_code] ||= { n: 0, disc: 0, ca: 0 }); r.n++; r.disc += o.discount || 0; r.ca += o.total; } });
+  const t = today(); const strike = A.cat.products.filter((p) => p.formats.some((f) => f.compare_price > f.price));
+  const totDisc = Object.values(stats).reduce((a, r) => a + r.disc, 0); const totCa = Object.values(stats).reduce((a, r) => a + r.ca, 0);
+  return `<div class="grid g3 mb stagger">
+      <div class="panel kpi"><div class="ic o">${icon('ticket')}</div><div class="lbl">Codes actifs</div><div class="val">${countUp(A.promos.filter((p) => p.active).length)}</div><div class="delta muted">sur ${A.promos.length} code${A.promos.length > 1 ? 's' : ''}</div></div>
+      <div class="panel kpi"><div class="ic g">${icon('cash')}</div><div class="lbl">Ventes avec un code · 60 j</div><div class="val">${countUp(totCa, 'm')}</div><div class="delta muted">${Object.values(stats).reduce((a, r) => a + r.n, 0)} commandes</div></div>
+      <div class="panel kpi"><div class="ic r">${icon('percent')}</div><div class="lbl">Remises accordées · 60 j</div><div class="val">${countUp(totDisc, 'm')}</div><div class="delta muted">offertes à vos clients</div></div>
+    </div>
+    <div class="toolbar"><h2 class="grow" style="font-size:18px">Codes promo</h2>
+      <label class="switch"><input type="checkbox" data-action="promos-on" ${S().promos_enabled ? 'checked' : ''}>Codes promo activés</label>
+      <button class="btn" type="button" data-action="new-promo">${icon('plus')} Nouveau code</button></div>
+    <div class="promo-list mb">${A.promos.map((p) => {
+      const st = stats[p.code] || { n: 0, disc: 0 }; const expired = p.ends_on && p.ends_on < t; const soon = p.starts_on && p.starts_on > t;
+      const full = p.max_uses != null && p.used_count >= p.max_uses;
+      const state = !p.active ? 'Désactivé' : expired ? 'Expiré' : soon ? `Dès le ${fmtDay(p.starts_on, { day: 'numeric', month: 'short' })}` : full ? 'Épuisé' : 'Actif';
+      return `<div class="promo-card ${p.active && !expired && !full ? '' : 'off'}">
+        <div class="promo-val">${promoLabel(p)}</div>
+        <div><div class="promo-code">${esc(p.code)} <span class="badge ${state === 'Actif' ? 'st-prete' : 'st-recuperee'}">${state}</span></div>
+          <div class="promo-meta">${p.description ? `<span>${esc(p.description)}</span>` : ''}${p.min_order ? `<span>Dès ${money(p.min_order)}</span>` : '<span>Sans minimum</span>'}${p.ends_on ? `<span>Jusqu’au ${fmtDay(p.ends_on, { day: 'numeric', month: 'short', year: 'numeric' })}</span>` : ''}<span>${p.used_count}${p.max_uses ? ` / ${p.max_uses}` : ''} utilisation${p.used_count > 1 ? 's' : ''}</span>${st.disc ? `<span>${money(st.disc)} offerts</span>` : ''}</div>
+          ${p.max_uses ? `<div class="use-meter"><i style="width:${Math.min(100, (p.used_count / p.max_uses) * 100)}%"></i></div>` : ''}</div>
+        <div class="ctl"><label class="switch"><input type="checkbox" data-action="toggle-promo" data-id="${p.id}" ${p.active ? 'checked' : ''}>Actif</label>
+          <button class="btn btn-sm btn-light" type="button" data-action="copy-promo" data-code="${esc(p.code)}">Partager</button>
+          <button class="btn btn-sm btn-light" type="button" data-action="edit-promo" data-id="${p.id}">${icon('edit')} Modifier</button></div></div>`;
+    }).join('') || `<div class="panel empty"><div class="big">${icon('ticket')}</div><h3>Aucun code promo</h3><p>Créez votre premier code, par exemple BIENVENUE10 pour -10 %.</p></div>`}</div>
+    <div class="panel"><div class="panel-head"><div><h2>Prix barrés sur les produits</h2><p>Affichez une réduction directement sur la carte : prix d’origine barré et badge « -20 % ».</p></div><a class="btn btn-sm btn-light" href="#/produits">${icon('tag')} Gérer les produits</a></div>
+      ${strike.length ? `<div class="ranks">${strike.map((p) => `<div class="rank"><div class="top"><span>${esc(p.name)}</span><b>${p.formats.filter((f) => f.compare_price > f.price).map((f) => `${esc(f.name)} : <s class="muted">${money(f.compare_price)}</s> ${money(f.price)}`).join(' · ')}</b></div></div>`).join('')}</div>`
+        : '<p class="muted">Aucun produit en promotion. Dans Produits → Modifier, remplissez la colonne « Prix barré » d’un format (ex : prix barré 2 500, prix 2 000).</p>'}</div>`;
+}
+function promoForm(p) {
+  const d = p || { code: '', kind: 'percent', value: 10, min_order: 0, max_uses: null, starts_on: '', ends_on: '', active: true, description: '' };
+  A.promoDraft = d.id || null;
+  openModal({
+    title: p ? `Modifier le code ${esc(p.code)}` : 'Nouveau code promo',
+    body: `<form id="promo-form" novalidate>
+      <label class="field"><span>Code</span><input name="code" required maxlength="20" value="${esc(d.code)}" placeholder="BIENVENUE10" style="text-transform:uppercase;font-weight:800;letter-spacing:.05em" autocapitalize="characters"><small>Lettres et chiffres, sans espace (3 à 20 caractères).</small></label>
+      <div class="field"><span>Type de réduction</span><div class="kind-seg">
+        <label><input type="radio" name="kind" value="percent" ${d.kind === 'percent' ? 'checked' : ''}>${icon('percent')} Pourcentage</label>
+        <label><input type="radio" name="kind" value="amount" ${d.kind === 'amount' ? 'checked' : ''}>${icon('cash')} Montant fixe</label></div></div>
+      <div class="grid g2"><label class="field"><span>Valeur <small id="val-unit">(${d.kind === 'percent' ? '%' : 'FCFA'})</small></span><input name="value" type="number" min="1" inputmode="numeric" value="${d.value}" required></label>
+        <label class="field"><span>Commande minimum (FCFA)</span><input name="min_order" type="number" min="0" step="100" inputmode="numeric" value="${d.min_order || 0}"></label></div>
+      <div class="grid g2"><label class="field"><span>Valable à partir du <small>(facultatif)</small></span><input name="starts_on" type="date" value="${d.starts_on || ''}"></label>
+        <label class="field"><span>Jusqu’au <small>(facultatif)</small></span><input name="ends_on" type="date" value="${d.ends_on || ''}"></label></div>
+      <div class="grid g2"><label class="field"><span>Utilisations maximum <small>(vide = illimité)</small></span><input name="max_uses" type="number" min="1" inputmode="numeric" value="${d.max_uses ?? ''}" placeholder="Illimité"></label>
+        <div class="field" style="align-content:end"><label class="switch"><input type="checkbox" name="active" ${d.active ? 'checked' : ''}> Code actif</label></div></div>
+      <label class="field"><span>Description interne <small>(facultatif)</small></span><input name="description" maxlength="200" value="${esc(d.description || '')}" placeholder="Ex : Offre Tabaski, clients fidèles…"></label>
+    </form>`,
+    foot: `${p ? `<button class="btn btn-ghost btn-sm" type="button" data-action="del-promo" data-id="${p.id}" style="margin-right:auto;color:var(--red)">${icon('trash')} Supprimer</button>` : ''}
+      <button class="btn btn-ghost" type="button" data-action="close-modal">Annuler</button><button class="btn" type="button" data-action="save-promo" id="save-promo">Enregistrer</button>`,
+  });
+}
+async function savePromo() {
+  const f = $('#promo-form'); const fd = new FormData(f);
+  const code = String(fd.get('code') || '').trim().toUpperCase().replace(/\s+/g, '');
+  if (!/^[A-Z0-9_-]{3,20}$/.test(code)) return toast('Code invalide : 3 à 20 lettres ou chiffres, sans espace', 'error');
+  const kind = fd.get('kind') === 'amount' ? 'amount' : 'percent'; const value = Math.round(Number(fd.get('value')) || 0);
+  if (value <= 0 || (kind === 'percent' && value > 100)) return toast(kind === 'percent' ? 'Pourcentage entre 1 et 100' : 'Montant supérieur à 0', 'error');
+  const mu = String(fd.get('max_uses') || '').trim();
+  const row = { id: A.promoDraft || undefined, code, kind, value, min_order: Math.max(0, Math.round(Number(fd.get('min_order')) || 0)), max_uses: mu ? Math.max(1, Math.round(Number(mu))) : null,
+    starts_on: fd.get('starts_on') || null, ends_on: fd.get('ends_on') || null, active: fd.get('active') === 'on', description: String(fd.get('description') || '').trim() };
+  if (row.starts_on && row.ends_on && row.ends_on < row.starts_on) return toast('La date de fin est avant la date de début', 'error');
+  const b = $('#save-promo'); b.classList.add('is-loading');
+  try { await A.api.savePromo(row); await loadPromos(); toast(`Code ${code} enregistré`, 'success'); closeModal(); }
+  catch (e) { toast(/duplicate|unique|existe/i.test(e?.message) ? 'Ce code existe déjà' : errMsg(e), 'error'); } finally { b?.classList.remove('is-loading'); }
 }
 
 // ---------------------------------------------------------------------------
@@ -638,7 +726,7 @@ function pageSettings() {
     <div class="panel"><div class="panel-head"><h2>Partager la boutique</h2></div>
       <p class="muted mb">Lien à envoyer à vos clients ou à mettre dans votre statut WhatsApp :</p>
       <div class="toolbar" style="margin:0"><input class="input grow" readonly value="${esc(shopUrl())}" aria-label="Lien de la boutique" id="shop-url"><button class="btn btn-sm btn-light" type="button" data-action="copy-url">Copier</button>
-      <a class="btn btn-sm btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Commandez vos Soow, Thiakry, Ngallakh chez ${s.shop_name} et récupérez-les sans attendre 👉 ${shopUrl()}`)}">${icon('wa')} Partager</a></div>
+      <a class="btn btn-sm btn-wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Commandez vos Soow, Thiakry, Ngallakh chez ${s.shop_name} et récupérez-les sans attendre : ${shopUrl()}`)}">${icon('wa')} Partager</a></div>
       ${A.api.demo ? '<button class="btn btn-sm btn-ghost" style="margin-top:14px" type="button" data-action="reset-demo">Réinitialiser les données de démonstration</button>' : ''}</div>
   </div>`;
 }
@@ -668,7 +756,7 @@ function updateAcceptLbl() { $('#accepting-lbl').textContent = $('#accepting').c
 // ---------------------------------------------------------------------------
 const PAGES = {
   tableau: ['Tableau de bord', pageDashboard], commandes: ['Commandes', pageOrders], historique: ['Historique des ventes', pageHistory], production: ['Production', pageProduction],
-  produits: ['Produits', pageProducts], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
+  produits: ['Produits', pageProducts], promos: ['Promotions', pagePromos], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
 };
 const routeName = () => { const r = location.hash.replace(/^#\/?/, '').split('/')[0]; return PAGES[r] ? r : 'tableau'; };
 function render(scroll = true) {
@@ -721,6 +809,21 @@ document.addEventListener('click', async (e) => {
     }
     case 'save-note': await patchOrder(d.id, { admin_note: $('#admin-note').value.trim(), payment_ref: $('#pay-ref').value.trim() }, 'Enregistré'); break;
     case 'period': A.period = Number(d.p); render(false); break;
+    case 'new-promo': promoForm(null); break;
+    case 'edit-promo': promoForm(A.promos.find((x) => x.id === d.id)); break;
+    case 'save-promo': savePromo(); break;
+    case 'reload-app': location.reload(); break;
+    case 'copy-promo': {
+      const txt = `Profitez du code ${d.code} sur ${S().shop_name} : ${shopUrl()}`;
+      try { await navigator.clipboard.writeText(txt); toast('Message copié, collez-le sur WhatsApp', 'success'); } catch { window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank', 'noopener'); }
+      break;
+    }
+    case 'del-promo': {
+      const p = A.promos.find((x) => x.id === d.id);
+      if (!(await ask(`Supprimer le code <b>${esc(p.code)}</b> ? Les commandes déjà passées gardent leur remise.`, { ok: 'Supprimer', danger: true }))) { promoForm(p); return; }
+      try { await A.api.deletePromo(p.id); await loadPromos(); toast('Code supprimé', 'success'); render(false); } catch (err) { toast(errMsg(err), 'error'); }
+      break;
+    }
     case 'open-day': e.preventDefault(); openDay(d.d); break;
     case 'hist-range': A.hr = d.r; render(false); break;
     case 'hist-csv': histCsv(); break;
@@ -741,7 +844,7 @@ document.addEventListener('click', async (e) => {
     case 'edit-product': productForm(A.cat.products.find((p) => p.id === d.id)); break;
     case 'add-fmt': readFormats(); draft.formats.push({ name: '', price: 0, stock: null, active: true }); renderFormats(); $$('#fmts [data-f=name]').pop().focus(); break;
     case 'rm-fmt': readFormats(); draft.formats.splice(Number(d.i), 1); renderFormats(); break;
-    case 'rm-img': draft.image_url = null; $('#pimg').innerHTML = esc(draft.emoji); t.remove(); break;
+    case 'rm-img': draft.image_url = null; $('#pimg').innerHTML = icon('bowl'); t.remove(); break;
     case 'save-product': saveProduct(); break;
     case 'del-product': {
       const p = A.cat.products.find((x) => x.id === d.id);
@@ -791,6 +894,12 @@ document.addEventListener('change', async (e) => {
     case 'date': if (t.value) { A.f.range = 'date'; A.f.date = t.value; render(false); } break;
     case 'prod-date': if (t.value) { A.prodDay = t.value; render(false); } break;
     case 'h-from': if (t.value) { A.hFrom = t.value; render(false); } break;
+    case 'toggle-promo': {
+      const p = A.promos.find((x) => x.id === d.id);
+      try { await A.api.savePromo({ ...p, active: t.checked }); p.active = t.checked; toast(`Code ${p.code} ${t.checked ? 'activé' : 'désactivé'}`, 'success', 1800); render(false); } catch (err) { toast(errMsg(err), 'error'); t.checked = !t.checked; }
+      break;
+    }
+    case 'promos-on': await saveSettingsPatch({ promos_enabled: t.checked }, t.checked ? 'Codes promo activés' : 'Codes promo désactivés'); break;
     case 'h-to': if (t.value) { A.hTo = t.value; render(false); } break;
     case 'zone': {
       const row = t.closest('[data-zone]'); const z = (A.cat.zones || []).find((x) => x.id === row.dataset.zone);
@@ -819,7 +928,7 @@ document.addEventListener('change', async (e) => {
       const file = t.files?.[0]; if (!file) return;
       const prev = $('#pimg'); prev.innerHTML = '<div class="spinner" style="margin:0"></div>';
       try { const blob = await resizeImage(file, 900); draft.image_url = await A.api.uploadImage(blob); prev.innerHTML = `<img src="${esc(draft.image_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">`; }
-      catch (err) { toast(errMsg(err), 'error'); prev.innerHTML = esc(draft.emoji); }
+      catch (err) { toast(errMsg(err), 'error'); prev.innerHTML = icon('bowl'); }
       break;
     }
     default:
@@ -830,6 +939,7 @@ document.addEventListener('change', async (e) => {
     await saveSettingsPatch(patch, 'Règles enregistrées');
   }
 });
+document.addEventListener('change', (e) => { if (e.target.name === 'kind' && $('#val-unit')) $('#val-unit').textContent = e.target.value === 'percent' ? '(%)' : '(FCFA)'; });
 document.addEventListener('input', debounce((e) => { if (e.target.dataset.action === 'search') { A.f.q = e.target.value; render(false); } }, 200));
 document.addEventListener('submit', async (e) => {
   const f = e.target; e.preventDefault();

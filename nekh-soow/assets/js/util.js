@@ -90,12 +90,12 @@ export const waLink = (num, text) => `https://wa.me/${String(num).replace(/\D/g,
 
 // ---------- Statuts ----------
 export const STATUSES = [
-  { k: 'nouvelle', label: 'Nouvelle', short: 'Reçue', icon: '🆕', next: 'confirmee', action: 'Confirmer' },
-  { k: 'confirmee', label: 'Confirmée', short: 'Confirmée', icon: '✅', next: 'preparation', action: 'Lancer la préparation' },
-  { k: 'preparation', label: 'En préparation', short: 'En préparation', icon: '👩🏾‍🍳', next: 'prete', action: 'Marquer prête' },
-  { k: 'prete', label: 'Prête', short: 'Prête', icon: '🛍️', next: 'recuperee', action: 'Marquer récupérée' },
-  { k: 'recuperee', label: 'Récupérée', short: 'Récupérée', icon: '🎉', next: null },
-  { k: 'annulee', label: 'Annulée', short: 'Annulée', icon: '✖️', next: null },
+  { k: 'nouvelle', label: 'Nouvelle', short: 'Reçue', icon: 'inbox', next: 'confirmee', action: 'Confirmer' },
+  { k: 'confirmee', label: 'Confirmée', short: 'Confirmée', icon: 'check-circle', next: 'preparation', action: 'Lancer la préparation' },
+  { k: 'preparation', label: 'En préparation', short: 'En préparation', icon: 'pot', next: 'prete', action: 'Marquer prête' },
+  { k: 'prete', label: 'Prête', short: 'Prête', icon: 'bag', next: 'recuperee', action: 'Marquer récupérée' },
+  { k: 'recuperee', label: 'Récupérée', short: 'Récupérée', icon: 'check', next: null },
+  { k: 'annulee', label: 'Annulée', short: 'Annulée', icon: 'xc', next: null },
 ];
 export const ST = Object.fromEntries(STATUSES.map((s) => [s.k, s]));
 
