@@ -16,7 +16,7 @@ const ITEMS = [
 
 export function AccessoriesSection({ image, products }: { image: string; products: Product[] }) {
   return (
-    <section className="relative bg-ink-2 py-20 md:py-32">
+    <section className="relative bg-ink-2 py-12 md:py-24">
       <div className="container-luxe grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:gap-24">
         <div className="flex flex-col justify-center">
           <Reveal>
@@ -49,7 +49,7 @@ export function AccessoriesSection({ image, products }: { image: string; product
         <Reveal delay={0.15}>
           <Link href="/accessories" className="group relative block aspect-[4/5] overflow-hidden">
             <Image src={image} alt="Montre, sac, parfum et lunettes GOUNASS LUXURY" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover transition-transform duration-[2200ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-2/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-2/40 to-transparent" />
             <span className="absolute bottom-8 left-8 text-[0.74rem] uppercase tracking-[0.32em] text-ivory">Explorer les accessoires</span>
           </Link>
         </Reveal>

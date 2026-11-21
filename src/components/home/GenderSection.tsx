@@ -20,7 +20,7 @@ interface Props {
 
 export function GenderSection({ eyebrow, title, text, href, image, objectPosition, categories, products, reverse }: Props) {
   return (
-    <section className="container-luxe py-20 md:py-32">
+    <section className="container-luxe py-12 md:py-24">
       <div className={clsx("grid items-center gap-10 lg:grid-cols-2 lg:gap-20", reverse && "lg:[&>*:first-child]:order-2")}>
         <Reveal>
           <Link href={href} className="group relative block aspect-[4/5] overflow-hidden bg-ink-3 lg:aspect-[5/6]">
@@ -32,7 +32,7 @@ export function GenderSection({ eyebrow, title, text, href, image, objectPositio
               className="object-cover transition-transform duration-[2000ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-105"
               style={{ objectPosition }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
             <div className="absolute inset-4 border border-gold/0 transition-colors duration-1000 group-hover:border-gold/40 md:inset-6" />
             <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between">
               <span className="display text-5xl md:text-7xl">{eyebrow}</span>

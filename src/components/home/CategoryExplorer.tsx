@@ -23,7 +23,7 @@ export function CategoryExplorer() {
           <Reveal key={t.label} delay={(i % 4) * 0.07}>
             <Link href={t.href} className="group relative block aspect-[3/4] overflow-hidden border border-white/[0.1]">
               <Image src={t.img} alt={t.label} fill unoptimized sizes="(min-width:768px) 25vw, 50vw" className="object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
               <div className="absolute inset-x-4 bottom-4 md:inset-x-6 md:bottom-6">
                 <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-gold-light">{t.sub}</p>
                 <p className="display mt-1 text-2xl text-ivory md:text-3xl">{t.label}</p>

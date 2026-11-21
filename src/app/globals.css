@@ -262,3 +262,9 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Illustrations produits : rendu plus clair */
+img[src*="produits%2F"][src*=".svg"],
+img[src*="/produits/"][src$=".svg"] {
+  filter: brightness(1.45) saturate(1.05);
+}

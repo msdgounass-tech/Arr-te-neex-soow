@@ -40,11 +40,26 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
 
   return (
     <>
-      <PageTitle title="Tableau de bord" subtitle="Données réelles issues de la base de la boutique.">
+      <PageTitle title="Tableau de bord">
         {canStats && [7, 30, 90].map((d) => (
           <Link key={d} href={`/admin?jours=${d}`} className={`px-3 py-1.5 text-[0.8rem] uppercase tracking-[0.2em] ${d === days ? "bg-gold text-ink" : "border border-white/15 text-ivory/90"}`}>{d} jours</Link>
         ))}
       </PageTitle>
+
+      <div className="mb-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[
+          ["/admin/commandes?statut=en_attente", "Commandes à traiter"],
+          ["/admin/produits/nouveau", "+ Nouveau produit"],
+          ["/admin/produits", "Produits & stock"],
+          ["/admin/livraison", "Livraison"],
+          ["/admin/coupons", "Codes promo"],
+          ["/admin/collections", "Collections"],
+          ["/admin/parametres", "Paramètres & photos"],
+          ["/", "Voir la boutique"],
+        ].map(([href, label]) => (
+          <Link key={href} href={href} className="flex min-h-12 items-center justify-center border border-gold/40 px-3 text-center text-sm text-gold hover:bg-gold hover:text-ink">{label}</Link>
+        ))}
+      </div>
 
       {s && (
         <>

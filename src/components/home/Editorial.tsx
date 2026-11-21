@@ -12,11 +12,11 @@ export function Editorial({ image }: { image: string }) {
   const x = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["6%", "-10%"]);
 
   return (
-    <section ref={ref} className="relative overflow-hidden py-28 md:py-44">
+    <section ref={ref} className="relative overflow-hidden py-20 md:py-36">
       <motion.div style={{ y }} className="absolute inset-[-15%_0]">
-        <Image src={image} alt="" fill sizes="100vw" className="object-cover opacity-45" />
+        <Image src={image} alt="" fill sizes="100vw" className="object-cover object-[75%_30%] opacity-70" />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/55 to-ink" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink via-ink/20 to-ink" />
       <div className="grain absolute inset-0" />
 
       <motion.p style={{ x }} aria-hidden className="display pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap text-[24vw] italic leading-none text-ivory/[0.04]">
