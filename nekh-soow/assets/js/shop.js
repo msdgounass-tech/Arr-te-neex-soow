@@ -793,18 +793,21 @@ window.addEventListener('storage', (e) => { if (e.key === CART_KEY && S.cat) { c
 function playIntro() {
   let seen = false; try { seen = sessionStorage.getItem('ns-intro') === '1'; sessionStorage.setItem('ns-intro', '1'); } catch { /* ignore */ }
   if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash.startsWith('#/suivi')) return;
-  const tiles = Array.from({ length: 16 }, (_, i) => { const x = i % 4, y = Math.floor(i / 4); const dx = (Math.random() - 0.5) * 520, dy = (Math.random() - 0.5) * 520, r = (Math.random() - 0.5) * 220;
-    return `<i style="--x:${x};--y:${y};--dx:${dx}px;--dy:${dy}px;--r:${r}deg;--d:${(i % 5) * 0.06}s"></i>`; }).join('');
+  const name = 'Arrêt nekh soow'; let i = 0;
+  const letters = name.split(' ').map((w, wi) => `<span style="display:inline-block;white-space:nowrap">${[...w].map((ch) => `<span class="${wi ? 'gold' : ''}" style="animation-delay:${1.15 + (i++) * 0.045}s">${ch}</span>`).join('')}</span>`).join(' ');
   const el = document.createElement('div'); el.id = 'intro'; el.setAttribute('aria-hidden', 'true');
-  el.innerHTML = `<div class="intro-stage"><div class="intro-logo">${tiles}<span class="intro-full"></span></div>
-    <svg class="intro-cow" viewBox="0 0 120 70"><g fill="#fff" stroke="#0e1b3d" stroke-width="2.4" stroke-linejoin="round"><path d="M22 30c0-9 9-14 22-14h36c13 0 22 6 22 16v8c0 8-6 13-14 13H36c-8 0-14-6-14-13Z"/><path d="M28 50v14M40 52v12M84 52v12M96 50v14" stroke-linecap="round"/><path d="M102 30c6-1 11 3 11 9 0 5-4 8-9 8"/><ellipse cx="14" cy="30" rx="10" ry="9"/><path d="M8 22l-4-6M20 22l4-6" stroke-linecap="round"/></g><g fill="#0e1b3d"><circle cx="11" cy="28" r="1.6"/><path d="M50 22c6 0 9 5 6 9s-10 3-11-2 1-7 5-7ZM74 34c5 0 8 4 5 7s-9 2-9-2 1-5 4-5Z"/></g><path d="M58 53q4 6 8 0" fill="#f4a8b8" stroke="#0e1b3d" stroke-width="2"/></svg>
-    <svg class="intro-milk" viewBox="0 0 40 120"><path d="M20 0v120" stroke="#fff" stroke-width="9" stroke-linecap="round"/></svg>
-    <div class="intro-title"><b>Arrêt nekh soow</b><span>Le goût authentique du Sénégal</span></div></div>
+  el.innerHTML = `<svg class="intro-milk" viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 40 Q150 0 300 40 T600 40 T900 40 T1200 40 V200 H0Z"/></svg><div class="intro-stage">
+      <div class="intro-mark">
+        <svg class="intro-ring" viewBox="0 0 228 228"><defs><linearGradient id="introGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4c66a"/><stop offset="1" stop-color="#d9951f"/></linearGradient></defs><circle cx="114" cy="114" r="103"/></svg>
+        <div class="intro-logo"></div>
+      </div>
+      <div class="intro-title"><b>${letters}</b><div class="intro-line"></div><small>Le goût authentique du Sénégal</small></div>
+    </div>
     <button type="button" class="intro-skip" data-action="skip-intro">Passer</button>`;
   document.body.appendChild(el); document.body.classList.add('intro-on');
-  S.introTimer = setTimeout(endIntro, 3600);
+  S.introTimer = setTimeout(endIntro, 2900);
 }
-function endIntro() { const el = $('#intro'); if (!el) return; clearTimeout(S.introTimer); el.classList.add('out'); document.body.classList.remove('intro-on'); setTimeout(() => el.remove(), 600); }
+function endIntro() { const el = $('#intro'); if (!el) return; clearTimeout(S.introTimer); el.classList.add('out'); document.body.classList.remove('intro-on'); setTimeout(() => el.remove(), 900); }
 
 // ---------- Fidélité ----------
 async function viewLoyalty() {
