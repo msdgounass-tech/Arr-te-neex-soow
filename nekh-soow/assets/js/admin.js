@@ -200,6 +200,7 @@ function pageDashboard() {
     <div class="panel kpi"><div class="ic r">${icon('cart')}</div><div class="lbl">Panier moyen</div><div class="val">${countUp(sc.avg, 'm')}</div>${delta(sc.avg, sp.avg, `vs ${P} j préc.`)}</div>
     <div class="panel kpi"><div class="ic o">${icon('users')}</div><div class="lbl">Clients différents</div><div class="val">${countUp(sc.clients)}</div><div class="delta muted">${sc.deliveries} livraison${sc.deliveries > 1 ? 's' : ''} · ${money(sc.fees)} de frais</div></div>
   </div>
+  ${visitsPanel()}
   <div class="grid g-main mb">
     <div class="panel"><div class="panel-head"><div><h2>Chiffre d’affaires par jour</h2><p>Touchez une barre pour vérifier les ventes de la journée${best.k ? ` · meilleur jour : ${fmtDay(best.k, { weekday: 'short', day: 'numeric', month: 'short' })} (${money(best.v)})` : ''}</p></div><a class="link" href="#/historique">Historique ${icon('arrow')}</a></div>${barChart(days, vals)}
       <div class="money-split"><div><span class="dot g"></span>Encaissé <b>${money(sc.paid)}</b></div><div><span class="dot o"></span>À encaisser <b>${money(sc.due)}</b></div><div><span class="dot r"></span>Annulées <b>${sc.cancelled}</b></div></div>
@@ -648,6 +649,63 @@ async function savePromo() {
 }
 
 // ---------------------------------------------------------------------------
+// Visites et fidélité (mise à jour v4)
+// ---------------------------------------------------------------------------
+const v4Ready = () => S().loyalty_enabled !== undefined;
+const V4_SQL_URL = 'https://supabase.com/dashboard/project/ejutptsipygbnobkrowt/explorer/notebook/e481ce69-e9aa-4b14-92a0-e783248be7b3';
+const v4Install = (what) => `<div class="panel install-box"><div class="empty"><div class="big">${icon('gift')}</div></div><h2 style="font-size:19px;margin-bottom:6px">Activez ${what}</h2>
+  <p class="muted" style="max-width:520px;margin:0 auto 14px">Une mise à jour de la base est nécessaire, une seule fois : ouvrez le script dans Supabase et cliquez sur Run.</p>
+  <p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="${esc(V4_SQL_URL)}" target="_blank" rel="noopener">${icon('ext')} Ouvrir le script</a><button class="btn btn-ghost" type="button" data-action="reload-app">J’ai terminé, recharger</button></p></div>`;
+function visitsPanel() {
+  if (!v4Ready()) return '';
+  if (!A.visits) { A.visits = []; A.api.listVisits(addDays(today(), -29)).then((v) => { A.visits = v; if (routeName() === 'tableau') render(false); }).catch(() => {}); }
+  const t = today(); const days = Array.from({ length: 14 }, (_, i) => addDays(t, i - 13));
+  const uniq = (from) => new Set(A.visits.filter((v) => v.day >= from).map((v) => v.visitor)).size;
+  const logged = (from) => new Set(A.visits.filter((v) => v.day >= from && v.user_id).map((v) => v.user_id)).size;
+  const per = days.map((d) => A.visits.filter((v) => v.day === d).length); const max = Math.max(1, ...per);
+  return `<div class="panel mb"><div class="panel-head"><div><h2>Visiteurs du site</h2><p>Visiteurs uniques par jour · comptes clients connectés</p></div></div>
+    <div class="grid g4 mb" style="gap:10px">
+      <div class="mini-stat"><span>Aujourd’hui</span><b>${countUp(uniq(t))}</b></div>
+      <div class="mini-stat"><span>7 jours</span><b>${countUp(uniq(addDays(t, -6)))}</b></div>
+      <div class="mini-stat"><span>30 jours</span><b>${countUp(uniq(addDays(t, -29)))}</b></div>
+      <div class="mini-stat"><span>Clients connectés · 30 j</span><b>${countUp(logged(addDays(t, -29)))}</b></div></div>
+    <div class="spark">${per.map((n, i) => `<i style="height:${Math.max(3, (n / max) * 100)}%;animation-delay:${i * 30}ms" title="${fmtDay(days[i], { day: 'numeric', month: 'short' })} : ${n} visiteurs"></i>`).join('')}</div></div>`;
+}
+function pageLoyalty() {
+  if (!v4Ready()) return v4Install('la fidélité');
+  if (!A.rewards) { Promise.all([A.api.listRewards(), A.api.listRedemptions()]).then(([r, h]) => { A.rewards = r; A.redemptions = h; render(false); }).catch((e) => toast(errMsg(e), 'error')); return '<div class="spinner"></div>'; }
+  const s = S(); const l = A.loyal;
+  return `<div class="grid g2 mb">
+    <div class="panel"><div class="panel-head"><h2>Programme fidélité</h2></div>
+      <label class="switch mb"><input type="checkbox" data-action="loyal-on" ${s.loyalty_enabled ? 'checked' : ''}> Programme activé</label>
+      <label class="field"><span>1 point gagné par tranche de (FCFA)</span><input type="number" min="10" step="10" value="${s.loyalty_rate}" data-action="loyal-rate"><small>Les points sont gagnés quand la commande est marquée « Récupérée ».</small></label></div>
+    <div class="panel"><div class="panel-head"><h2>Rechercher un client</h2></div>
+      <form id="loyal-search" class="toolbar" style="margin:0"><div class="input-group grow"><span>+221</span><input name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" value="${esc(l ? fmtPhone(l.phone) : '')}" aria-label="Téléphone"></div><button class="btn btn-sm" type="submit">${icon('search')} Voir</button></form>
+      ${l ? `<div class="loyal-client"><div class="pts">${l.points}<small>points</small></div><div><b>${esc(fmtPhone(l.phone))}</b><div class="muted" style="font-size:13.5px">${l.orders} commande(s) récupérée(s) · ${l.earned} gagnés · ${l.spent} utilisés</div></div></div>
+        ${l.rewards.map((r) => `<div class="reward-row"><span>${esc(r.name)} <small class="muted">${r.cost} pts</small></span><button class="btn btn-xs ${l.points >= r.cost ? 'btn-green' : 'btn-light'}" type="button" data-action="redeem" data-id="${r.id}" ${l.points >= r.cost ? '' : 'disabled'}>Remettre</button></div>`).join('')}` : ''}</div></div>
+  <div class="grid g2">
+    <div class="panel"><div class="panel-head"><h2>Cadeaux</h2><button class="btn btn-sm" type="button" data-action="add-reward">${icon('plus')} Ajouter</button></div>
+      <div class="zones">${A.rewards.map((r) => `<div class="zone-row" data-reward="${r.id}"><input class="input" data-action="reward" data-f="name" value="${esc(r.name)}" maxlength="80" aria-label="Cadeau">
+        <div class="input-group"><input data-action="reward" data-f="cost" type="number" min="1" value="${r.cost}" aria-label="Points"><span>pts</span></div>
+        <label class="switch"><input type="checkbox" data-action="reward" data-f="active" ${r.active ? 'checked' : ''}>Actif</label>
+        <button class="icon-btn" type="button" data-action="del-reward" data-id="${r.id}" aria-label="Supprimer">${icon('trash')}</button></div>`).join('') || '<p class="muted">Aucun cadeau.</p>'}</div></div>
+    <div class="panel"><div class="panel-head"><h2>Derniers cadeaux remis</h2></div>
+      ${A.redemptions.length ? `<div class="table-wrap"><table class="t"><tbody>${A.redemptions.slice(0, 15).map((h) => `<tr><td>${esc(fmtPhone(h.phone))}</td><td>${esc(h.reward_name)}</td><td class="n">-${h.cost}</td><td class="n muted">${fmtDateTime(h.created_at)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">Aucun pour le moment.</p>'}</div></div>`;
+}
+function hoursPanel() {
+  if (S().auto_hours === undefined) return '';
+  const s = S(); const WD = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  return `<div class="panel" style="margin-top:16px"><div class="panel-head"><div><h2>Horaires automatiques</h2><p>La boutique se ferme et s’ouvre toute seule selon ces horaires (heure de Dakar).</p></div>
+      <label class="switch"><input type="checkbox" data-action="auto-hours" ${s.auto_hours ? 'checked' : ''}>Activé</label></div>
+    <form id="hours-form" class="hours">${[1, 2, 3, 4, 5, 6, 0].map((d) => { const h = s.hours?.[d] ?? s.hours?.[String(d)]; return `<div class="hours-row"><label class="switch"><input type="checkbox" name="on${d}" ${h ? 'checked' : ''}><span>${WD[d]}</span></label>
+      <input class="input" type="time" name="o${d}" value="${h?.[0] || '10:00'}" aria-label="Ouverture ${WD[d]}"><span class="muted">à</span><input class="input" type="time" name="c${d}" value="${h?.[1] || '22:00'}" aria-label="Fermeture ${WD[d]}"></div>`; }).join('')}
+      <button class="btn btn-sm" type="submit">Enregistrer les horaires</button></form></div>`;
+}
+async function lookupLoyal(phone) {
+  try { const l = await A.api.loyalty(phone); if (!l.ok) return toast(l.message, 'error'); A.loyal = l; render(false); } catch (e) { toast(errMsg(e), 'error'); }
+}
+
+// ---------------------------------------------------------------------------
 // Créneaux
 // ---------------------------------------------------------------------------
 function pageSlots() {
@@ -720,6 +778,7 @@ function pageSettings() {
       <div class="input-group"><input data-action="zone" data-f="zfee" type="number" min="0" step="100" value="${z.fee}" aria-label="Frais"><span>FCFA</span></div>
       <label class="switch"><input type="checkbox" data-action="zone" data-f="zactive" ${z.active ? 'checked' : ''}>Active</label>
       <button class="icon-btn" type="button" data-action="del-zone" data-id="${z.id}" aria-label="Supprimer">${icon('trash')}</button></div>`).join('') || '<p class="muted">Aucune zone : ajoutez-en une pour proposer la livraison.</p>'}</div></div>
+  ${hoursPanel()}
   <div class="grid g2" style="margin-top:16px">
     <div class="panel"><div class="panel-head"><h2>Mon compte</h2></div><p class="muted mb">Connecté en tant que <b>${esc(A.email)}</b></p>
       ${A.api.demo ? '<p class="hint">Changement de mot de passe indisponible en mode démonstration.</p>' : `<form id="pwd" class="toolbar" style="margin:0"><input class="input grow" type="password" name="p" minlength="8" autocomplete="new-password" placeholder="Nouveau mot de passe (8 caractères min.)" aria-label="Nouveau mot de passe" required><button class="btn btn-sm" type="submit">Changer</button></form>`}</div>
@@ -756,7 +815,7 @@ function updateAcceptLbl() { $('#accepting-lbl').textContent = $('#accepting').c
 // ---------------------------------------------------------------------------
 const PAGES = {
   tableau: ['Tableau de bord', pageDashboard], commandes: ['Commandes', pageOrders], historique: ['Historique des ventes', pageHistory], production: ['Production', pageProduction],
-  produits: ['Produits', pageProducts], promos: ['Promotions', pagePromos], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
+  produits: ['Produits', pageProducts], promos: ['Promotions', pagePromos], fidelite: ['Fidélité', pageLoyalty], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
 };
 const routeName = () => { const r = location.hash.replace(/^#\/?/, '').split('/')[0]; return PAGES[r] ? r : 'tableau'; };
 function render(scroll = true) {
@@ -810,6 +869,14 @@ document.addEventListener('click', async (e) => {
     case 'save-note': await patchOrder(d.id, { admin_note: $('#admin-note').value.trim(), payment_ref: $('#pay-ref').value.trim() }, 'Enregistré'); break;
     case 'period': A.period = Number(d.p); render(false); break;
     case 'new-promo': promoForm(null); break;
+    case 'add-reward': await A.api.saveReward({ name: 'Nouveau cadeau', cost: 100, active: true }); A.rewards = await A.api.listRewards(); render(false); break;
+    case 'del-reward': if (await ask('Supprimer ce cadeau ?', { ok: 'Supprimer', danger: true })) { await A.api.deleteReward(d.id); A.rewards = await A.api.listRewards(); } render(false); break;
+    case 'redeem': {
+      const r = A.loyal.rewards.find((x) => x.id === d.id);
+      if (!(await ask(`Remettre « ${esc(r.name)} » au ${esc(fmtPhone(A.loyal.phone))} ? ${r.cost} points seront déduits.`, { ok: 'Remettre le cadeau' }))) return render(false);
+      try { A.loyal = await A.api.redeem(A.loyal.phone, r.id); A.redemptions = await A.api.listRedemptions(); toast('Cadeau remis, points déduits', 'success'); } catch (err) { toast(errMsg(err), 'error'); }
+      render(false); break;
+    }
     case 'edit-promo': promoForm(A.promos.find((x) => x.id === d.id)); break;
     case 'save-promo': savePromo(); break;
     case 'reload-app': location.reload(); break;
@@ -899,6 +966,15 @@ document.addEventListener('change', async (e) => {
       try { await A.api.savePromo({ ...p, active: t.checked }); p.active = t.checked; toast(`Code ${p.code} ${t.checked ? 'activé' : 'désactivé'}`, 'success', 1800); render(false); } catch (err) { toast(errMsg(err), 'error'); t.checked = !t.checked; }
       break;
     }
+    case 'loyal-on': await saveSettingsPatch({ loyalty_enabled: t.checked }, t.checked ? 'Fidélité activée' : 'Fidélité désactivée'); break;
+    case 'loyal-rate': await saveSettingsPatch({ loyalty_rate: Math.max(10, Math.round(Number(t.value) || 100)) }, 'Taux de points enregistré'); break;
+    case 'auto-hours': await saveSettingsPatch({ auto_hours: t.checked }, t.checked ? 'Horaires automatiques activés' : 'Horaires automatiques désactivés'); break;
+    case 'reward': {
+      const row = t.closest('[data-reward]'); const r = A.rewards.find((x) => x.id === row.dataset.reward);
+      const v = { ...r, name: $('[data-f=name]', row).value.trim() || r.name, cost: Math.max(1, Math.round(Number($('[data-f=cost]', row).value) || r.cost)), active: $('[data-f=active]', row).checked };
+      try { await A.api.saveReward(v); Object.assign(r, v); toast('Cadeau enregistré', 'success', 1500); } catch (err) { toast(errMsg(err), 'error'); }
+      break;
+    }
     case 'promos-on': await saveSettingsPatch({ promos_enabled: t.checked }, t.checked ? 'Codes promo activés' : 'Codes promo désactivés'); break;
     case 'h-to': if (t.value) { A.hTo = t.value; render(false); } break;
     case 'zone': {
@@ -945,6 +1021,12 @@ document.addEventListener('submit', async (e) => {
   const f = e.target; e.preventDefault();
   if (f.id === 'login-form') return login(f);
   if (f.id === 'settings') return saveSettings(f);
+  if (f.id === 'loyal-search') { const ph = normalizePhone(new FormData(f).get('phone')); if (!ph) return toast('Numéro invalide', 'error'); return lookupLoyal(ph); }
+  if (f.id === 'hours-form') {
+    const fd = new FormData(f); const hours = {};
+    for (const d of [0, 1, 2, 3, 4, 5, 6]) { const o = fd.get(`o${d}`), c = fd.get(`c${d}`); if (!fd.get(`on${d}`)) { hours[d] = null; continue; } if (!o || !c || o >= c) return toast('Pour chaque jour ouvert, l’heure de fermeture doit être après l’ouverture', 'error'); hours[d] = [o, c]; }
+    return saveSettingsPatch({ hours }, 'Horaires enregistrés');
+  }
   if (f.id === 'add-slot') {
     const s = normalizeSlot(f.t.value); if (!s) return toast('Heure invalide', 'error');
     if (S().slot_times.includes(s)) return toast('Ce créneau existe déjà', 'error');

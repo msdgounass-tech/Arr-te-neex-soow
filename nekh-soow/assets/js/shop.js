@@ -3,7 +3,7 @@ import { CONFIG } from './config.js';
 import { getApi, IS_DEMO } from './api.js';
 import {
   $, $$, esc, money, store, toast, errMsg, dakarNow, addDays, relDay, fmtDay, fmtSlot, fmtPhone, fmtDateTime,
-  openDays, slotStates, normalizePhone, waLink, ST, STATUSES, icsFor, download, debounce,
+  openState, uid, openDays, slotStates, normalizePhone, waLink, ST, STATUSES, icsFor, download, debounce,
 } from './util.js';
 
 const CART_KEY = 'ns-cart';
@@ -108,7 +108,8 @@ function productCard(p) {
 const skeletonGrid = (n = 3) => `<div class="products">${Array.from({ length: n }, () => '<div class="skeleton skel-product"></div>').join('')}</div>`;
 
 function heroChip() {
-  const s = settings();
+  const s = settings(); const os = openState(s);
+  if (!os.open) return `<span class="hero-chip closed"><span class="dot"></span>Fermé${os.next ? ` · ouvre ${relDay(os.next.day).toLowerCase()} à ${fmtSlot(os.next.at)}` : ''}</span>`;
   if (!s.accepting_orders) return '<span class="hero-chip closed"><span class="dot"></span>Commandes en ligne suspendues</span>';
   const n = nextSlot();
   if (!n) return '<span class="hero-chip closed"><span class="dot"></span>Aucun créneau libre pour le moment</span>';
@@ -196,11 +197,12 @@ const waveUrl = (amount) => { const l = settings().wave_link; if (!l) return '';
 
 function viewCheckout() {
   const lines = cartLines(); const s = settings();
+  const os = openState(s);
+  if (!s.accepting_orders || !os.open) {
+    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon(os.open ? 'pause' : 'clock')}</div><h3>${os.open ? 'Commandes en ligne suspendues' : 'La boutique est fermée'}</h3><p>${!os.open && os.next ? `Nous rouvrons ${relDay(os.next.day).toLowerCase()} à ${fmtSlot(os.next.at)}. ` : ''}${esc(s.announcement || 'Revenez un peu plus tard ou contactez-nous sur WhatsApp.')}</p><p style="margin-top:18px"><a class="btn btn-wa" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></p></div></div></div>`;
+  }
   if (!lines.length) {
     return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('bag')}</div><h3>Votre panier est vide</h3><p>Ajoutez quelques douceurs avant de commander.</p><p style="margin-top:18px"><a class="btn" href="#/menu">Voir les produits</a></p></div></div></div>`;
-  }
-  if (!s.accepting_orders) {
-    return `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('pause')}</div><h3>Commandes en ligne suspendues</h3><p>${esc(s.announcement || 'Revenez un peu plus tard ou contactez-nous sur WhatsApp.')}</p><p style="margin-top:18px"><a class="btn btn-wa" href="${waLink(s.whatsapp)}" target="_blank" rel="noopener">${icon('wa')} Nous écrire</a></p></div></div></div>`;
   }
   if (!deliveryOn()) S.co.mode = 'retrait';
   const me = S.user || store.get(ME_KEY, {});
@@ -514,7 +516,7 @@ async function viewAccount() {
           <p class="hint" style="text-align:center;margin-top:10px">Aucun e-mail de vérification : votre compte est actif immédiatement.</p>
         </form>`}
       </div>
-      <p style="text-align:center;margin-top:16px"><a class="btn btn-light" href="#/menu">Commander sans compte</a></p>
+      <p style="text-align:center;margin-top:16px"><a class="btn btn-light" href="#/menu">Commander sans compte</a>${S.cat.settings.loyalty_enabled ? ` <a class="btn btn-light" href="#/fidelite">${icon('gift')} Mes points fidélité</a>` : ''}</p>
     </div></div>`;
     return;
   }
@@ -528,6 +530,7 @@ async function viewAccount() {
           <button class="btn" type="submit">Enregistrer</button>
           <button class="btn btn-light" type="button" data-action="logout" style="margin-left:6px">Se déconnecter</button>
         </form></div>
+      ${S.cat.settings.loyalty_enabled && !S.api.offline ? `<a class="card loyal-link" href="#/fidelite">${icon('gift')}<div><b>Mes points fidélité</b><small>Voir mes points et mes cadeaux</small></div>${icon('arrow')}</a>` : ''}
       <div class="card"><h2 style="font-size:19px;margin-bottom:12px">Mes commandes</h2><div id="acc-orders"><div class="spinner"></div></div></div>
     </div>
   </div></div>`;
@@ -672,10 +675,10 @@ function reveal() {
   $$('.reveal:not(.in)').forEach((el) => (observer ? observer.observe(el) : el.classList.add('in')));
 }
 function setNav(name) {
-  const key = { home: 'home', menu: 'menu', 'mes-commandes': 'suivi', suivi: 'suivi', contact: 'contact', compte: 'compte' }[name];
+  const key = { home: 'home', menu: 'menu', 'mes-commandes': 'suivi', suivi: 'suivi', contact: 'contact', compte: 'compte', fidelite: 'compte' }[name];
   $$('[data-nav]').forEach((a) => { const on = a.dataset.nav === key; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
-const TITLES = { home: '', menu: 'La carte', commande: 'Commande', suivi: 'Suivi de commande', 'mes-commandes': 'Suivre ma commande', contact: 'Contact', confidentialite: 'Confidentialité', compte: 'Mon compte' };
+const TITLES = { home: '', menu: 'La carte', commande: 'Commande', suivi: 'Suivi de commande', 'mes-commandes': 'Suivre ma commande', contact: 'Contact', confidentialite: 'Confidentialité', compte: 'Mon compte', fidelite: 'Fidélité' };
 
 function render(scroll = false) {
   if (!S.cat) return; // catalogue pas encore chargé : boot() affichera la page
@@ -685,6 +688,7 @@ function render(scroll = false) {
   const view = $('#view');
   if (r.name === 'suivi' && r.arg) viewTrack(r.arg, r.query.get('new') === '1');
   else if (r.name === 'compte') viewAccount();
+  else if (r.name === 'fidelite') viewLoyalty();
   else {
     const fn = { home: viewHome, menu: viewMenu, commande: viewCheckout, 'mes-commandes': viewMyOrders, contact: viewContact, confidentialite: viewPrivacy }[r.name] || viewHome;
     view.innerHTML = fn();
@@ -745,6 +749,8 @@ document.addEventListener('click', async (e) => {
     case 'forget': [CART_KEY, ME_KEY, MY_KEY].forEach(store.del); cart = []; renderCartBadge(); toast('Données effacées de cet appareil', 'success'); break;
     case 'reload': location.reload(); break;
     case 'apply-promo': applyPromo(); break;
+    case 'skip-intro': endIntro(); break;
+    case 'loyal-change': S.loyalPhone = null; store.del('ns-loyal-phone'); viewLoyalty(); break;
     case 'remove-promo': S.co.promo = null; $('#promo-box').innerHTML = promoBox(); renderTotals(); break;
     case 'auth-tab': S.authTab = d.t; viewAccount(); break;
     case 'logout': await S.api.customerSignOut(); S.user = null; renderAccountTab(); toast('Vous êtes déconnecté(e)', 'info'); render(); break;
@@ -755,6 +761,7 @@ document.addEventListener('submit', async (e) => {
   const f = e.target;
   if (f.id === 'co-form') { e.preventDefault(); submitOrder(f); }
   if (f.id === 'login-form' || f.id === 'signup-form') { e.preventDefault(); authSubmit(f); }
+  if (f.id === 'loyal-form') { e.preventDefault(); const ph = String(new FormData(f).get('phone') || ''); if (!normalizePhone(ph)) return toast('Numéro invalide : 9 chiffres', 'error'); S.loyalPhone = normalizePhone(ph); store.set('ns-loyal-phone', S.loyalPhone); viewLoyalty(); }
   if (f.id === 'profile-form') {
     e.preventDefault(); const fd = new FormData(f); const raw = String(fd.get('phone') || '').trim(); const phone = raw ? normalizePhone(raw) : '';
     if (raw && !phone) return toast('Numéro de téléphone invalide', 'error');
@@ -782,7 +789,51 @@ window.addEventListener('storage', (e) => { if (e.key === CART_KEY && S.cat) { c
 // ---------------------------------------------------------------------------
 // Démarrage
 // ---------------------------------------------------------------------------
+// ---------- Animation d'entrée ----------
+function playIntro() {
+  let seen = false; try { seen = sessionStorage.getItem('ns-intro') === '1'; sessionStorage.setItem('ns-intro', '1'); } catch { /* ignore */ }
+  if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches || location.hash.startsWith('#/suivi')) return;
+  const tiles = Array.from({ length: 16 }, (_, i) => { const x = i % 4, y = Math.floor(i / 4); const dx = (Math.random() - 0.5) * 520, dy = (Math.random() - 0.5) * 520, r = (Math.random() - 0.5) * 220;
+    return `<i style="--x:${x};--y:${y};--dx:${dx}px;--dy:${dy}px;--r:${r}deg;--d:${(i % 5) * 0.06}s"></i>`; }).join('');
+  const el = document.createElement('div'); el.id = 'intro'; el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = `<div class="intro-stage"><div class="intro-logo">${tiles}<span class="intro-full"></span></div>
+    <svg class="intro-cow" viewBox="0 0 120 70"><g fill="#fff" stroke="#0e1b3d" stroke-width="2.4" stroke-linejoin="round"><path d="M22 30c0-9 9-14 22-14h36c13 0 22 6 22 16v8c0 8-6 13-14 13H36c-8 0-14-6-14-13Z"/><path d="M28 50v14M40 52v12M84 52v12M96 50v14" stroke-linecap="round"/><path d="M102 30c6-1 11 3 11 9 0 5-4 8-9 8"/><ellipse cx="14" cy="30" rx="10" ry="9"/><path d="M8 22l-4-6M20 22l4-6" stroke-linecap="round"/></g><g fill="#0e1b3d"><circle cx="11" cy="28" r="1.6"/><path d="M50 22c6 0 9 5 6 9s-10 3-11-2 1-7 5-7ZM74 34c5 0 8 4 5 7s-9 2-9-2 1-5 4-5Z"/></g><path d="M58 53q4 6 8 0" fill="#f4a8b8" stroke="#0e1b3d" stroke-width="2"/></svg>
+    <svg class="intro-milk" viewBox="0 0 40 120"><path d="M20 0v120" stroke="#fff" stroke-width="9" stroke-linecap="round"/></svg>
+    <div class="intro-title"><b>Arrêt nekh soow</b><span>Le goût authentique du Sénégal</span></div></div>
+    <button type="button" class="intro-skip" data-action="skip-intro">Passer</button>`;
+  document.body.appendChild(el); document.body.classList.add('intro-on');
+  S.introTimer = setTimeout(endIntro, 3600);
+}
+function endIntro() { const el = $('#intro'); if (!el) return; clearTimeout(S.introTimer); el.classList.add('out'); document.body.classList.remove('intro-on'); setTimeout(() => el.remove(), 600); }
+
+// ---------- Fidélité ----------
+async function viewLoyalty() {
+  const view = $('#view'); const s = settings();
+  if (!s.loyalty_enabled || S.api.offline || typeof S.api.loyalty !== 'function') { view.innerHTML = `<div class="view"><div class="wrap"><div class="empty" style="padding-top:60px"><div class="big">${icon('gift')}</div><h3>Programme fidélité bientôt disponible</h3></div></div></div>`; return; }
+  const phone = S.user?.phone || S.loyalPhone || store.get('ns-loyal-phone');
+  const head = `<div class="page-head"><h1 class="page-title">Fidélité</h1><p>Gagnez <b>1 point par tranche de ${money(s.loyalty_rate || 100)}</b> sur chaque commande récupérée, puis échangez vos points contre des cadeaux.</p></div>`;
+  const form = `<form id="loyal-form" class="card loyal-form" novalidate><label class="field" style="margin:0"><span>Votre numéro de téléphone</span><div class="input-group"><span>+221</span><input name="phone" type="tel" inputmode="tel" placeholder="77 123 45 67" value="${esc(fmtPhone(phone || ''))}" aria-label="Téléphone"></div></label><button class="btn" type="submit">Voir mes points</button></form>`;
+  if (!phone) { view.innerHTML = `<div class="view"><div class="wrap account">${head}${form}<p class="hint" style="text-align:center;margin-top:10px">Ou <a href="#/compte">connectez-vous</a> pour retrouver vos points automatiquement.</p></div></div>`; return; }
+  view.innerHTML = `<div class="view"><div class="wrap account">${head}<div class="spinner"></div></div></div>`;
+  let l; try { l = await S.api.loyalty(phone); } catch (e) { toast(errMsg(e), 'error'); return; }
+  if (!l?.ok) { view.innerHTML = `<div class="view"><div class="wrap account">${head}${form}<p class="promo-err">${esc(l?.message || '')}</p></div></div>`; return; }
+  const next = l.rewards.find((r) => r.cost > l.points); const goal = next?.cost || l.rewards[l.rewards.length - 1]?.cost || 1;
+  view.innerHTML = `<div class="view"><div class="wrap account">${head}
+    <div class="loyal-hero"><small>Mes points · ${esc(fmtPhone(l.phone))}</small><div class="loyal-pts" data-to="${l.points}">0</div><span>points disponibles</span>
+      <div class="loyal-bar"><i style="width:${Math.min(100, (l.points / goal) * 100)}%"></i></div>
+      <p>${next ? `Encore <b>${next.cost - l.points} points</b> pour : ${esc(next.name)}` : l.rewards.length ? 'Bravo ! Vous pouvez échanger vos points en boutique.' : ''}</p></div>
+    <div class="card"><h2 style="font-size:18px;margin-bottom:10px">Cadeaux à gagner</h2>
+      ${l.rewards.map((r) => `<div class="reward ${l.points >= r.cost ? 'ok' : ''}">${icon('gift')}<div><b>${esc(r.name)}</b><small>${r.cost} points</small></div><span class="badge ${l.points >= r.cost ? 'st-prete' : ''}">${l.points >= r.cost ? 'Disponible' : `${r.cost - l.points} pts manquants`}</span></div>`).join('') || '<p class="hint">Aucun cadeau pour le moment.</p>'}
+      <p class="hint" style="margin-top:10px">Pour recevoir un cadeau, présentez votre numéro lors du retrait : nous déduisons les points.</p></div>
+    <div class="card"><p class="hint">${l.orders} commande(s) récupérée(s) · ${l.earned} points gagnés · ${l.spent} utilisés</p>
+      ${l.history.length ? `<div style="margin-top:8px">${l.history.map((h) => `<div class="sum-line"><span>${esc(h.reward)}</span><b>-${h.cost} pts</b></div>`).join('')}</div>` : ''}
+      ${S.user ? '' : `<p style="margin-top:10px"><button class="line-del" type="button" data-action="loyal-change">Changer de numéro</button></p>`}</div>
+  </div></div>`;
+  const el = $('.loyal-pts'); const to = l.points; const t0 = performance.now(); const tick = (t) => { const k = Math.min(1, (t - t0) / 900); el.textContent = Math.round(to * (1 - (1 - k) ** 3)); if (k < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick);
+}
+
 async function boot() {
+  playIntro();
   $('#year').textContent = new Date().getFullYear();
   if (IS_DEMO) $('#demo').hidden = false;
   document.body.classList.add('shop');
@@ -800,6 +851,7 @@ async function boot() {
   if (!s.accepting_orders) { ann.hidden = false; ann.classList.add('closed'); ann.textContent = s.announcement || 'Les commandes en ligne sont momentanément suspendues.'; }
   else if (s.announcement) { ann.hidden = false; ann.textContent = s.announcement; }
   $('#foot-addr').textContent = `${s.address} · ${fmtPhone(s.phone)}`;
+  try { if (!sessionStorage.getItem('ns-visit') && S.api.trackVisit) { let v = store.get('ns-visitor'); if (!v) { v = uid(); store.set('ns-visitor', v); } sessionStorage.setItem('ns-visit', '1'); S.api.trackVisit(v).catch(() => {}); } } catch { /* ignore */ }
   $('#wa-float').href = waLink(s.whatsapp, `Bonjour ${s.shop_name}, `);
   sanitizeCart(); renderCartBadge(); renderAccountTab(); render();
   // Rafraîchit le catalogue quand l'onglet redevient visible (prix / stock à jour)

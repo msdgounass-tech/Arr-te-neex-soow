@@ -48,6 +48,8 @@ async function createSupabaseApi() {
       p_fulfillment: o.fulfillment || 'retrait', p_zone: o.zone || null, p_address: o.address || '',
       ...(o.promo ? { p_promo: o.promo } : {}),
     }).then(ok),
+    loyalty: (phone) => sb.rpc('ns_loyalty', { p_phone: phone }).then(ok),
+    trackVisit: (visitor) => sb.rpc('ns_track_visit', { p_visitor: visitor }).then(ok),
     checkPromo: (code, subtotal) => sb.rpc('ns_check_promo', { p_code: code, p_subtotal: subtotal }).then(ok),
     trackOrder: (token) => sb.rpc('ns_track_order', { p_token: token }).then(ok),
     cancelOrder: (token) => sb.rpc('ns_cancel_order', { p_token: token }).then(ok),
@@ -89,6 +91,12 @@ async function createSupabaseApi() {
       if (z.id) ok(await sb.from('ns_delivery_zones').update(row).eq('id', z.id)); else ok(await sb.from('ns_delivery_zones').insert(row));
     },
     async deleteZone(id) { ok(await sb.from('ns_delivery_zones').delete().eq('id', id)); },
+    async listVisits(from) { return ok(await sb.from('ns_visits').select('day, visitor, user_id, hits').gte('day', from).limit(20000)); },
+    async listRewards() { return ok(await sb.from('ns_rewards').select('*').order('cost')); },
+    async saveReward(r) { const row = { name: r.name, cost: r.cost, active: r.active }; if (r.id) ok(await sb.from('ns_rewards').update(row).eq('id', r.id)); else ok(await sb.from('ns_rewards').insert(row)); },
+    async deleteReward(id) { ok(await sb.from('ns_rewards').delete().eq('id', id)); },
+    redeem: (phone, rewardId) => sb.rpc('ns_redeem', { p_phone: phone, p_reward: rewardId }).then(ok),
+    async listRedemptions() { return ok(await sb.from('ns_redemptions').select('*').order('created_at', { ascending: false }).limit(50)); },
     async listPromos() { return ok(await sb.from('ns_promos').select('*').order('created_at', { ascending: false })); },
     async savePromo(p) {
       const row = { code: p.code, kind: p.kind, value: p.value, min_order: p.min_order, max_uses: p.max_uses ?? null, starts_on: p.starts_on || null, ends_on: p.ends_on || null, active: p.active, description: p.description || '' };

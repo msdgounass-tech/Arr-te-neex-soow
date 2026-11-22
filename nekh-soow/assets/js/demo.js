@@ -1,7 +1,7 @@
 // Mode démonstration : reproduit fidèlement les règles de la base Supabase
 // (validation, capacité des créneaux, stock, garde-fous) dans le navigateur.
 // Les données restent sur cet appareil. Identifiants back-office : demo / demo
-import { addDays, dakarNow, normalizePhone, slotMinutes, store, uid, weekday } from './util.js';
+import { openState, addDays, dakarNow, normalizePhone, slotMinutes, store, uid, weekday } from './util.js';
 
 const KEY = 'ns-demo-v1';
 const AUTH = 'ns-demo-auth';
@@ -72,13 +72,16 @@ function seed() {
       });
     }
   }
-  settings.promos_enabled = true;
+  settings.promos_enabled = true; settings.loyalty_enabled = true; settings.loyalty_rate = 100; settings.auto_hours = false;
+  settings.hours = Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map((d) => [d, ['10:00', '22:00']]));
+  const rewards = [{ id: uid(), name: 'Petit pot de Soow Piir offert', cost: 50, active: true }, { id: uid(), name: 'Grand pot au choix offert', cost: 150, active: true }];
+  const visits = []; for (let d = -29; d <= 0; d++) { const n = 8 + Math.floor(rnd() * 25); for (let k = 0; k < n; k++) visits.push({ day: addDays(today, d), visitor: uid(), user_id: rnd() < 0.2 ? uid() : null, hits: 1 + Math.floor(rnd() * 4) }); }
   const promos = [
     { id: uid(), code: 'BIENVENUE10', kind: 'percent', value: 10, min_order: 2000, max_uses: null, used_count: 3, starts_on: null, ends_on: null, active: true, description: 'Bienvenue : -10 % dès 2 000 FCFA', created_at: new Date().toISOString() },
     { id: uid(), code: 'TABASKI', kind: 'amount', value: 500, min_order: 0, max_uses: 50, used_count: 12, starts_on: null, ends_on: null, active: false, description: 'Fête : -500 FCFA', created_at: new Date().toISOString() },
   ];
   products[0].formats[1].compare_price = 2500;
-  return { settings, products, zones, promos, closedDates: [], closedSlots: [], orders, seq };
+  return { settings, products, zones, promos, rewards, visits, redemptions: [], closedDates: [], closedSlots: [], orders, seq };
 }
 
 function promoCalc(db, code, sub) {
@@ -97,7 +100,7 @@ function promoCalc(db, code, sub) {
 
 export function createDemoApi() {
   let db = store.get(KEY);
-  if (!db || !db.settings || !db.zones || !db.promos) { db = seed(); store.set(KEY, db); }
+  if (!db || !db.settings || !db.zones || !db.promos || !db.rewards) { db = seed(); store.set(KEY, db); }
   const CUST = 'ns-demo-customer';
   const listeners = new Set();
   const bc = 'BroadcastChannel' in window ? new BroadcastChannel('ns-demo') : null;
@@ -129,6 +132,7 @@ export function createDemoApi() {
       reload();
       const s = db.settings; const now = dakarNow();
       if (!s.accepting_orders) fail('FERME', 'Les commandes sont momentanément suspendues');
+      if (!openState(s).open) fail('FERME', 'La boutique est fermée en ce moment, revenez pendant nos horaires d’ouverture');
       const name = String(o.name || '').trim();
       if (name.length < 2 || name.length > 80) fail('NOM', 'Indiquez votre nom');
       const phone = normalizePhone(o.phone); if (!phone) fail('TEL', 'Numéro de téléphone sénégalais invalide');
@@ -173,6 +177,19 @@ export function createDemoApi() {
       db.orders.push(order); save({ type: 'INSERT', order });
       return delay({ number: order.number, token: order.tracking_token, total: order.total });
     },
+    async loyalty(phone) {
+      reload(); const p = normalizePhone(phone); if (!p) return delay({ ok: false, message: 'Numéro de téléphone invalide' });
+      const rate = db.settings.loyalty_rate || 100; const done = db.orders.filter((o) => o.phone === p && o.status === 'recuperee');
+      const earned = done.reduce((a, o) => a + Math.floor(o.total / rate), 0); const hist = db.redemptions.filter((r) => r.phone === p); const spent = hist.reduce((a, r) => a + r.cost, 0);
+      return delay({ ok: true, phone: p, earned, spent, points: earned - spent, orders: done.length, rate, rewards: db.rewards.filter((r) => r.active).sort((a, b) => a.cost - b.cost), history: hist.map((r) => ({ reward: r.reward_name, cost: r.cost, at: r.created_at })) });
+    },
+    async trackVisit(v) { reload(); const day = dakarNow().day; const x = db.visits.find((y) => y.day === day && y.visitor === v); if (x) x.hits++; else db.visits.push({ day, visitor: v, user_id: store.get(CUST)?.id || null, hits: 1 }); save(); },
+    async listVisits(from) { needAdmin(); reload(); return delay(db.visits.filter((v) => v.day >= from)); },
+    async listRewards() { needAdmin(); reload(); return delay(db.rewards); },
+    async saveReward(r) { needAdmin(); reload(); if (r.id) Object.assign(db.rewards.find((x) => x.id === r.id), r); else db.rewards.push({ ...r, id: uid() }); save(); },
+    async deleteReward(id) { needAdmin(); reload(); db.rewards = db.rewards.filter((x) => x.id !== id); save(); },
+    async redeem(phone, rid) { needAdmin(); const l = await this.loyalty(phone); const r = db.rewards.find((x) => x.id === rid); if (l.points < r.cost) fail('POINTS', `Points insuffisants (${l.points} sur ${r.cost})`); db.redemptions.push({ id: uid(), phone: l.phone, reward_name: r.name, cost: r.cost, created_at: new Date().toISOString() }); save(); return this.loyalty(phone); },
+    async listRedemptions() { needAdmin(); reload(); return delay([...db.redemptions].reverse()); },
     async checkPromo(code, subtotal) { reload(); return delay(promoCalc(db, code, subtotal)); },
     async listPromos() { needAdmin(); reload(); return delay(db.promos); },
     async savePromo(p) { needAdmin(); reload(); if (db.promos.some((x) => x.code === p.code && x.id !== p.id)) fail('CODE', 'Ce code existe déjà'); if (p.id) Object.assign(db.promos.find((x) => x.id === p.id), p); else db.promos.unshift({ ...p, id: uid(), used_count: 0, created_at: new Date().toISOString() }); save(); },

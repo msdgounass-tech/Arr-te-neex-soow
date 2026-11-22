@@ -165,3 +165,14 @@ export function toast(text, kind = 'info', ms = 3200) {
   box.appendChild(el);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, ms);
 }
+
+// ---------- Horaires automatiques ----------
+const hoursOf = (s, d) => (s.hours ? (s.hours[d] ?? s.hours[String(d)] ?? null) : null);
+export function openState(s) {
+  if (!s?.auto_hours || !s.hours) return { open: true };
+  const n = dakarNow(); const h = hoursOf(s, weekday(n.day));
+  const open = !!h && n.minutes >= slotMinutes(h[0]) && n.minutes < slotMinutes(h[1]);
+  let next = null;
+  for (let i = 0; i < 8 && !open; i++) { const d = addDays(n.day, i); const x = hoursOf(s, weekday(d)); if (!x || (i === 0 && n.minutes >= slotMinutes(x[0]))) continue; next = { day: d, at: x[0] }; break; }
+  return { open, closes: h?.[1], next };
+}

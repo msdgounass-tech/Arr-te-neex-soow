@@ -556,3 +556,50 @@ body.shop .nav .nav-admin { display: inline-grid; place-items: center; }
 .promo-ok small { color: var(--ink-2); font-size: 13px; }
 .totals .row.discount, .sum-line.discount { color: var(--green); font-weight: 700; }
 .sum-line.discount b { color: var(--green); }
+
+/* ==========================================================================
+   V4 : animation d'entrée (logo démonté puis remonté, vache, lait), fidélité
+   ========================================================================== */
+body.intro-on { overflow: hidden; }
+#intro { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #2f6fd6 0%, #1b3f8b 45%, #0e1b3d 100%); transition: opacity .6s ease, visibility .6s; }
+#intro.out { opacity: 0; visibility: hidden; }
+.intro-stage { position: relative; display: grid; justify-items: center; gap: 22px; }
+.intro-logo { --s: min(220px, 56vw); position: relative; width: var(--s); height: var(--s); border-radius: 50%; }
+.intro-logo i { position: absolute; width: 25%; height: 25%; left: calc(var(--x) * 25%); top: calc(var(--y) * 25%); background: url(../img/logo-hero.webp) no-repeat; background-size: 400% 400%; background-position: calc(var(--x) * 33.333%) calc(var(--y) * 33.333%); animation: tileBreak 1.9s cubic-bezier(.7, 0, .2, 1) both; animation-delay: var(--d); }
+.intro-full { position: absolute; inset: 0; border-radius: 50%; background: url(../img/logo-hero.webp) center / cover; opacity: 0; filter: drop-shadow(0 14px 30px rgba(0, 0, 0, .45)); animation: logoLock .7s ease 2s forwards, logoBeat 1.2s ease 2.7s; }
+@keyframes tileBreak {
+  0%, 18% { transform: none; opacity: 1; }
+  48% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(.7); opacity: .85; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes logoLock { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes logoBeat { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.06); } }
+.intro-cow { position: absolute; width: 96px; left: 50%; bottom: 74px; transform: translateX(-260%); animation: cowWalk 1.4s cubic-bezier(.3, .7, .3, 1) .9s forwards, cowBob .35s ease-in-out .9s 4 alternate; }
+@keyframes cowWalk { to { transform: translateX(-190%); } }
+@keyframes cowBob { to { margin-bottom: 4px; } }
+.intro-milk { position: absolute; width: 18px; height: 110px; left: 50%; top: -96px; margin-left: -9px; transform-origin: top; transform: scaleY(0); animation: milkPour .8s ease-in 1.5s forwards, milkStop .3s ease 2.3s forwards; }
+@keyframes milkPour { to { transform: scaleY(1); } }
+@keyframes milkStop { to { opacity: 0; transform: scaleY(1) translateY(40px); } }
+.intro-title { text-align: center; color: #fff; opacity: 0; animation: fadeUp .7s ease 2.3s forwards; }
+.intro-title b { display: block; font-size: clamp(28px, 7vw, 40px); font-weight: 900; background: linear-gradient(90deg, #fff, #f4c66a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.intro-title span { font-size: 15px; opacity: .8; letter-spacing: .04em; }
+.intro-skip { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(20px + var(--safe-b)); background: rgba(255, 255, 255, .14); color: #fff; border: 1px solid rgba(255, 255, 255, .3); border-radius: 99px; padding: 8px 16px; font: 600 14px var(--f-body); cursor: pointer; }
+@media (max-width: 520px) { .intro-cow { width: 74px; bottom: 64px; } }
+
+/* Fidélité */
+.loyal-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); margin-bottom: 16px; }
+.loyal-link svg { width: 26px; height: 26px; color: var(--gold); flex: none; }
+.loyal-link svg:last-child { width: 18px; color: var(--ink-3); margin-left: auto; }
+.loyal-link small { display: block; color: var(--ink-3); }
+.loyal-form { display: grid; gap: 12px; max-width: 480px; margin: 0 auto; }
+.loyal-hero { text-align: center; color: #fff; border-radius: 24px; padding: 26px 20px; margin-bottom: 16px; background: linear-gradient(120deg, #1b3f8b, #2f6fd6, #d9951f); background-size: 200% 200%; animation: grad 8s ease infinite; box-shadow: 0 18px 36px -16px rgba(27, 63, 139, .6); }
+.loyal-hero small { opacity: .8; font-weight: 600; }
+.loyal-pts { font-size: 64px; font-weight: 900; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.loyal-bar { height: 10px; border-radius: 99px; background: rgba(255, 255, 255, .25); margin: 14px auto 10px; max-width: 360px; overflow: hidden; }
+.loyal-bar i { display: block; height: 100%; background: #fff; border-radius: inherit; transform-origin: left; animation: barFill 1.1s cubic-bezier(.2, .8, .2, 1) both .2s; }
+@keyframes barFill { from { transform: scaleX(0); } }
+.reward { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.reward:last-of-type { border-bottom: 0; }
+.reward svg { width: 24px; height: 24px; color: var(--ink-3); flex: none; }
+.reward.ok svg { color: var(--green); }
+.reward div { flex: 1; } .reward small { display: block; color: var(--ink-3); }
