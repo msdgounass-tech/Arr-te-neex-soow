@@ -753,7 +753,7 @@ document.addEventListener('click', async (e) => {
     case 'loyal-change': S.loyalPhone = null; store.del('ns-loyal-phone'); viewLoyalty(); break;
     case 'remove-promo': S.co.promo = null; $('#promo-box').innerHTML = promoBox(); renderTotals(); break;
     case 'auth-tab': S.authTab = d.t; viewAccount(); break;
-    case 'logout': await S.api.customerSignOut(); S.user = null; renderAccountTab(); toast('Vous êtes déconnecté(e)', 'info'); render(); break;
+    case 'logout': await S.api.customerSignOut(); S.user = null; S.authTab = 'login'; renderAccountTab(); toast('Vous êtes déconnecté(e)', 'info'); render(); break;
     default:
   }
 });

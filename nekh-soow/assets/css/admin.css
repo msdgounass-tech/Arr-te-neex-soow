@@ -388,3 +388,13 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .hours-row { display: grid; grid-template-columns: 150px 1fr auto 1fr; gap: 10px; align-items: center; }
 .hours-row .input { min-height: 40px; padding: 6px 10px; }
 @media (max-width: 560px) { .hours-row { grid-template-columns: 1fr 1fr auto 1fr; } .hours-row .switch span { font-size: 13px; } }
+
+/* Barre du bas : 5 boutons + menu « Plus » */
+@media (max-width: 900px) { .mtab { display: grid !important; grid-template-columns: repeat(5, 1fr); overflow: visible; } .mtab a { flex: none; font-size: 10.5px; } }
+.mtab button { display: grid; justify-items: center; gap: 3px; padding: 9px 0 8px; color: rgba(255, 255, 255, .6); background: none; border: 0; font: 600 10.5px var(--f-body); cursor: pointer; position: relative; }
+.mtab button.on { color: #fff; } .mtab button.on svg { color: var(--gold-l); } .mtab button svg { width: 22px; height: 22px; }
+.more-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.more-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 92px; padding: 12px; border-radius: 16px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); color: var(--ink); text-decoration: none; font: 700 14px var(--f-body); text-align: center; border: 0; cursor: pointer; animation: popIn .3s var(--ease) both; }
+.more-item svg { width: 26px; height: 26px; color: var(--navy); }
+.more-item.shop { background: var(--gold-s); } .more-item.shop svg { color: #8a5a00; }
+@keyframes popIn { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }

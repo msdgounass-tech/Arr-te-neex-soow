@@ -706,6 +706,42 @@ async function lookupLoyal(phone) {
 }
 
 // ---------------------------------------------------------------------------
+// Clients et menu « Plus »
+// ---------------------------------------------------------------------------
+function pageClients() {
+  const q = (A.cq || '').trim().toLowerCase(); const rate = S().loyalty_rate || 100; const t = today();
+  const m = {};
+  A.orders.forEach((o) => {
+    const c = (m[o.phone] ||= { phone: o.phone, name: o.customer_name, n: 0, spent: 0, last: '', pts: 0, account: false });
+    if (o.created_at > c.last) { c.last = o.created_at; c.name = o.customer_name; }
+    if (o.user_id) c.account = true;
+    if (valid(o)) { c.n++; c.spent += o.total; }
+    if (o.status === 'recuperee') c.pts += Math.floor(o.total / rate);
+  });
+  const all = Object.values(m).sort((a, b) => b.spent - a.spent);
+  const list = all.filter((c) => !q || [c.name, c.phone, fmtPhone(c.phone)].join(' ').toLowerCase().includes(q));
+  const acc = all.filter((c) => c.account).length;
+  if (!A.visits && v4Ready()) visitsPanel();
+  const logged = new Set((A.visits || []).filter((v) => v.user_id && v.day >= addDays(t, -29)).map((v) => v.user_id)).size;
+  return `<div class="grid g4 mb stagger">
+      <div class="panel kpi"><div class="ic">${icon('users')}</div><div class="lbl">Clients · 60 j</div><div class="val">${countUp(all.length)}</div></div>
+      <div class="panel kpi"><div class="ic g">${icon('check')}</div><div class="lbl">Avec un compte</div><div class="val">${countUp(acc)}</div><div class="delta muted">${all.length ? Math.round((acc / all.length) * 100) : 0} % des clients</div></div>
+      <div class="panel kpi"><div class="ic o">${icon('bell')}</div><div class="lbl">Comptes connectés · 30 j</div><div class="val">${countUp(logged)}</div></div>
+      <div class="panel kpi"><div class="ic r">${icon('cash')}</div><div class="lbl">Dépense moyenne</div><div class="val">${countUp(all.length ? all.reduce((a, c) => a + c.spent, 0) / all.length : 0, 'm')}</div></div></div>
+    <div class="toolbar"><label class="search grow">${icon('search')}<input class="input" type="search" placeholder="Rechercher : nom ou téléphone" value="${esc(A.cq || '')}" data-action="client-search" aria-label="Rechercher un client"></label></div>
+    <div class="panel"><div class="table-wrap"><table class="t"><thead><tr><th>Client</th><th class="n">Commandes</th><th class="n">Total dépensé</th><th class="n">Points</th><th>Dernière commande</th><th></th></tr></thead><tbody>
+      ${list.slice(0, 200).map((c) => `<tr><td><b>${esc(c.name)}</b>${c.account ? ' <span class="badge st-prete">Compte</span>' : ''}<br><small class="muted">${esc(fmtPhone(c.phone))}</small></td><td class="n">${c.n}</td><td class="n">${money(c.spent)}</td><td class="n">${c.pts}</td><td><small>${fmtDateTime(c.last)}</small></td>
+        <td><a class="btn btn-xs btn-wa" href="${waLink(c.phone, `Bonjour ${firstName(c.name)}, `)}" target="_blank" rel="noopener" aria-label="WhatsApp">${icon('wa')}</a></td></tr>`).join('') || '<tr><td colspan="6" class="muted">Aucun client.</td></tr>'}
+    </tbody></table></div></div>`;
+}
+function moreMenu() {
+  const items = [['production', 'Production', 'chef'], ['promos', 'Promotions', 'percent'], ['fidelite', 'Fidélité', 'gift'], ['clients', 'Clients', 'users'], ['creneaux', 'Créneaux', 'clock'], ['reglages', 'Réglages et horaires', 'gear']];
+  openModal({ title: 'Menu', body: `<div class="more-grid">${items.map(([k, l, i]) => `<a class="more-item" href="#/${k}">${icon(i)}<span>${l}</span></a>`).join('')}
+      <a class="more-item shop" href="./">${icon('store')}<span>Retour à la boutique</span></a>
+      <button class="more-item" type="button" data-action="logout">${icon('out')}<span>Déconnexion</span></button></div>` });
+}
+
+// ---------------------------------------------------------------------------
 // Créneaux
 // ---------------------------------------------------------------------------
 function pageSlots() {
@@ -815,14 +851,15 @@ function updateAcceptLbl() { $('#accepting-lbl').textContent = $('#accepting').c
 // ---------------------------------------------------------------------------
 const PAGES = {
   tableau: ['Tableau de bord', pageDashboard], commandes: ['Commandes', pageOrders], historique: ['Historique des ventes', pageHistory], production: ['Production', pageProduction],
-  produits: ['Produits', pageProducts], promos: ['Promotions', pagePromos], fidelite: ['Fidélité', pageLoyalty], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
+  produits: ['Produits', pageProducts], promos: ['Promotions', pagePromos], fidelite: ['Fidélité', pageLoyalty], clients: ['Clients', pageClients], creneaux: ['Créneaux', pageSlots], reglages: ['Réglages', pageSettings],
 };
 const routeName = () => { const r = location.hash.replace(/^#\/?/, '').split('/')[0]; return PAGES[r] ? r : 'tableau'; };
 function render(scroll = true) {
   if (!A.cat) return;
   const r = routeName(); const [title, fn] = PAGES[r];
   $('#page-title').textContent = title;
-  $$('[data-nav]').forEach((a) => { const on = a.dataset.nav === r; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  const inMore = ['production', 'promos', 'fidelite', 'clients', 'creneaux', 'reglages'].includes(r);
+  $$('[data-nav]').forEach((a) => { const on = a.dataset.nav === r || (inMore && a.dataset.nav === 'plus'); a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   const ae = document.activeElement; const keep = ae?.dataset?.action === 'search' ? ae.selectionStart : null;
   $('#page').innerHTML = fn();
   if (scroll || A.lastRoute !== r) { $('#page').classList.remove('page-in'); void $('#page').offsetWidth; $('#page').classList.add('page-in'); }
@@ -869,6 +906,7 @@ document.addEventListener('click', async (e) => {
     case 'save-note': await patchOrder(d.id, { admin_note: $('#admin-note').value.trim(), payment_ref: $('#pay-ref').value.trim() }, 'Enregistré'); break;
     case 'period': A.period = Number(d.p); render(false); break;
     case 'new-promo': promoForm(null); break;
+    case 'more-menu': moreMenu(); break;
     case 'add-reward': await A.api.saveReward({ name: 'Nouveau cadeau', cost: 100, active: true }); A.rewards = await A.api.listRewards(); render(false); break;
     case 'del-reward': if (await ask('Supprimer ce cadeau ?', { ok: 'Supprimer', danger: true })) { await A.api.deleteReward(d.id); A.rewards = await A.api.listRewards(); } render(false); break;
     case 'redeem': {
@@ -1016,7 +1054,10 @@ document.addEventListener('change', async (e) => {
   }
 });
 document.addEventListener('change', (e) => { if (e.target.name === 'kind' && $('#val-unit')) $('#val-unit').textContent = e.target.value === 'percent' ? '(%)' : '(FCFA)'; });
-document.addEventListener('input', debounce((e) => { if (e.target.dataset.action === 'search') { A.f.q = e.target.value; render(false); } }, 200));
+document.addEventListener('input', debounce((e) => {
+  if (e.target.dataset.action === 'search') { A.f.q = e.target.value; render(false); }
+  if (e.target.dataset.action === 'client-search') { A.cq = e.target.value; render(false); const i = $('[data-action=client-search]'); i?.focus(); i?.setSelectionRange(i.value.length, i.value.length); }
+}, 250));
 document.addEventListener('submit', async (e) => {
   const f = e.target; e.preventDefault();
   if (f.id === 'login-form') return login(f);
