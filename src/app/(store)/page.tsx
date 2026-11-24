@@ -85,14 +85,14 @@ export default async function HomePage() {
       <CategoryExplorer />
 
       {/* 4. Nouveautés */}
-      <section className="container-luxe py-12 md:py-24">
+      <section className="theme-light"><div className="container-luxe py-12 md:py-24">
         <SectionHeading eyebrow="Nouveautés" title="Les dernières arrivées" href="/nouveautes" />
         {news.items.length ? (
           <ProductGrid products={news.items} />
         ) : (
           <EmptyState title="La collection arrive" text="Les premières pièces sont en cours de sélection. Inscrivez-vous à la newsletter pour être informé de leur mise en ligne." />
         )}
-      </section>
+      </div></section>
 
       {/* 5. Meilleures ventes (calculées sur les commandes réelles) */}
       {best.length > 0 && (
@@ -111,10 +111,10 @@ export default async function HomePage() {
 
       {/* 8. Promotions */}
       {promos.items.length > 0 && (
-        <section className="container-luxe py-12 md:py-24">
+        <section className="theme-light"><div className="container-luxe py-12 md:py-24">
           <SectionHeading eyebrow="Offres privilèges" title="Promotions" href="/promotions" />
           <ProductGrid products={promos.items} />
-        </section>
+        </div></section>
       )}
 
       {/* 9. Bannière éditoriale */}

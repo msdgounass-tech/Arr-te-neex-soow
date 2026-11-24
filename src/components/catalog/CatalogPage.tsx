@@ -59,7 +59,7 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
   };
 
   return (
-    <div className="container-luxe">
+    <div className="theme-light pb-16"><div className="container-luxe">
       <header className="pb-12 pt-16 text-center md:pb-16 md:pt-24">
         <Reveal>
           <p className="eyebrow">{eyebrow}</p>
@@ -99,6 +99,6 @@ export async function CatalogPage({ eyebrow, title, intro, basePath, base, searc
           ))}
         </nav>
       )}
-    </div>
+    </div></div>
   );
 }
