@@ -87,7 +87,7 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
                 {n.children && (
                   <div className="invisible absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 translate-y-2 border border-white/[0.12] bg-ink-2/98 p-2 opacity-0 shadow-2xl backdrop-blur-xl transition-all duration-300 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                     {n.children.map((c) => (
-                      <Link key={c.href} href={c.href} className="block px-4 py-2.5 text-sm text-ivory/90 transition-colors hover:bg-white/[0.05] hover:text-gold">
+                      <Link key={c.href} href={c.href} prefetch={false} className="block px-4 py-2.5 text-sm text-ivory/90 transition-colors hover:bg-white/[0.05] hover:text-gold">
                         {c.label}
                       </Link>
                     ))}

@@ -1,0 +1,28 @@
+{
+  "projet": "gounass-luxury (ejutptsipygbnobkrowt)",
+  "sauvegarde_le": "2026-11-07T17:17:53Z",
+  "contexte": "Éléments ajoutés par erreur le 2026-11-07 (migration high_tech) : 21 catégories high-tech et colonnes products.brand / products.specs. Aucun produit ne les utilise (0 produit avec marque, 0 avec caractéristiques, 0 dans ces catégories). Totaux au moment de la sauvegarde : 51 produits, 3 commandes, 40 catégories.",
+  "categories_ajoutees": [
+    {"id":"d066f6ad-4d0c-481c-a4a4-94336d7348f2","parent_id":null,"name":"Téléphonie","slug":"telephonie","position":100},
+    {"id":"632ce5c5-4254-449d-b288-3282f9d41f80","parent_id":"d066f6ad-4d0c-481c-a4a4-94336d7348f2","name":"Smartphones","slug":"smartphones","position":101},
+    {"id":"8a492dd1-9abd-4a61-95af-7e2892560eff","parent_id":"d066f6ad-4d0c-481c-a4a4-94336d7348f2","name":"Tablettes","slug":"tablettes","position":102},
+    {"id":"b8a9f69d-c75a-4793-8eca-0e04b3d4d656","parent_id":null,"name":"Informatique","slug":"informatique","position":110},
+    {"id":"4946ec3a-451a-462d-8a88-79d88e91ffa8","parent_id":"b8a9f69d-c75a-4793-8eca-0e04b3d4d656","name":"Ordinateurs portables","slug":"ordinateurs-portables","position":111},
+    {"id":"c3da2074-8cd1-4550-9785-80da0e4b7377","parent_id":"b8a9f69d-c75a-4793-8eca-0e04b3d4d656","name":"Ordinateurs de bureau","slug":"ordinateurs-bureau","position":112},
+    {"id":"bc18753a-d5da-47db-9309-5042dbcb213f","parent_id":"b8a9f69d-c75a-4793-8eca-0e04b3d4d656","name":"Écrans","slug":"ecrans","position":113},
+    {"id":"5e8ebae0-fcbd-429f-95c4-f42ff3d0e261","parent_id":null,"name":"Audio","slug":"audio","position":120},
+    {"id":"5095c075-9d41-4d28-83a2-e7e37c39f2ee","parent_id":"5e8ebae0-fcbd-429f-95c4-f42ff3d0e261","name":"Écouteurs & casques","slug":"ecouteurs-casques","position":121},
+    {"id":"fdfd9d99-4b00-480f-9101-99e04e2e42d9","parent_id":"5e8ebae0-fcbd-429f-95c4-f42ff3d0e261","name":"Enceintes","slug":"enceintes","position":122},
+    {"id":"1c16b20d-ec4f-4f70-8671-baf3267d522e","parent_id":null,"name":"Objets connectés","slug":"objets-connectes","position":130},
+    {"id":"a0baff6f-144e-4575-b2ff-cf7363890398","parent_id":"1c16b20d-ec4f-4f70-8671-baf3267d522e","name":"Montres connectées","slug":"montres-connectees","position":131},
+    {"id":"6506f2ee-85be-4bee-b1cc-abcc06e119b7","parent_id":"1c16b20d-ec4f-4f70-8671-baf3267d522e","name":"Bracelets connectés","slug":"bracelets-connectes","position":132},
+    {"id":"8248ae0e-51ed-4094-9614-cbe5873686ea","parent_id":null,"name":"TV & Gaming","slug":"tv-gaming","position":140},
+    {"id":"0954b85c-5cd5-44ee-a79d-a9eaa3d56cc0","parent_id":"8248ae0e-51ed-4094-9614-cbe5873686ea","name":"Téléviseurs","slug":"televiseurs","position":141},
+    {"id":"e18b5633-30d6-48aa-b964-d66e4e1fb98a","parent_id":"8248ae0e-51ed-4094-9614-cbe5873686ea","name":"Consoles & jeux","slug":"consoles-jeux","position":142},
+    {"id":"01b5c7cf-0fc1-4cda-923c-aed5a1aafd1e","parent_id":null,"name":"Accessoires","slug":"accessoires-tech","position":150},
+    {"id":"446e962a-7cb1-4cc8-aa29-1cc5dcff66aa","parent_id":"01b5c7cf-0fc1-4cda-923c-aed5a1aafd1e","name":"Chargeurs & câbles","slug":"chargeurs-cables","position":151},
+    {"id":"23509ba4-f3d8-41f3-afb6-e610546b040e","parent_id":"01b5c7cf-0fc1-4cda-923c-aed5a1aafd1e","name":"Coques & protections","slug":"coques-protections","position":152},
+    {"id":"9510f960-eb95-44c5-9918-59e8cb03e26c","parent_id":"01b5c7cf-0fc1-4cda-923c-aed5a1aafd1e","name":"Batteries externes","slug":"batteries-externes","position":153},
+    {"id":"9bf49151-bb71-4a20-98be-272275db53a6","parent_id":"01b5c7cf-0fc1-4cda-923c-aed5a1aafd1e","name":"Stockage","slug":"stockage","position":154}
+  ]
+}

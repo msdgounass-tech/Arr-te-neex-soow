@@ -38,7 +38,7 @@ export function Gallery({ images, name }: { images: ProductImage[]; name: string
   const current = images[index];
 
   return (
-    <div className="flex flex-col-reverse gap-4 md:flex-row">
+    <div className="flex min-w-0 flex-col-reverse gap-4 md:flex-row">
       {count > 1 && (
         <div className="no-scrollbar flex gap-3 overflow-x-auto md:w-20 md:flex-col md:overflow-visible">
           {images.map((img, i) => (
@@ -55,7 +55,7 @@ export function Gallery({ images, name }: { images: ProductImage[]; name: string
       )}
 
       <div
-        className="group relative aspect-[3/4] flex-1 cursor-zoom-in overflow-hidden bg-ink-3"
+        className="group relative aspect-[3/4] w-full min-w-0 flex-1 cursor-zoom-in overflow-hidden bg-ink-3"
         onMouseMove={(e) => {
           const r = e.currentTarget.getBoundingClientRect();
           setZoom({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });

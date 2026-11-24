@@ -57,7 +57,7 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
               <ul className="space-y-3.5">
                 {c.links.map(([label, href]) => (
                   <li key={href}>
-                    <Link href={href} className="link-luxe text-sm text-ivory/90 hover:text-ivory">
+                    <Link href={href} prefetch={false} className="link-luxe text-sm text-ivory/90 hover:text-ivory">
                       {label}
                     </Link>
                   </li>
@@ -105,8 +105,8 @@ export function Footer({ store, logoUrl }: { store: StoreSettings; logoUrl?: str
       <div className="container-luxe flex flex-col items-center justify-between gap-4 py-8 text-[0.8rem] uppercase tracking-[0.24em] text-mist text-center md:flex-row md:text-left">
         <p>© {year} GOUNASS LUXURY — Tous droits réservés</p>
         <div className="flex flex-wrap justify-center gap-6">
-          <Link href="/conditions" className="hover:text-ivory">Conditions de vente</Link>
-          <Link href="/confidentialite" className="hover:text-ivory">Confidentialité</Link>
+          <Link href="/conditions" prefetch={false} className="hover:text-ivory">Conditions de vente</Link>
+          <Link href="/confidentialite" prefetch={false} className="hover:text-ivory">Confidentialité</Link>
           <span>Paiement : Wave · Orange Money · Carte · Livraison</span>
         </div>
       </div>
