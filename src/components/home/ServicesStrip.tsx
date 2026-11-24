@@ -14,7 +14,7 @@ const items = (freeAbove: number | null, common: boolean) => [
 /** Engagements réels de la boutique (fournis par le propriétaire). */
 export function ServicesStrip({ freeAbove, common = true }: { freeAbove: number | null; common?: boolean }) {
   return (
-    <section className="border-y border-white/[0.1] bg-ink-2">
+    <section className="theme-light border-y border-white/[0.1] bg-ink-2">
       <div className="container-luxe grid grid-cols-2 divide-white/[0.1] lg:grid-cols-4 lg:divide-x">
         {items(freeAbove, common).map((it, i) => (
           <Reveal key={it.title} delay={i * 0.06} className="px-2 py-7 text-center lg:px-6 lg:py-9">

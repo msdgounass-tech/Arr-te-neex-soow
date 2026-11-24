@@ -268,3 +268,24 @@ img[src*="produits%2F"][src*=".svg"],
 img[src*="/produits/"][src$=".svg"] {
   filter: brightness(1.45) saturate(1.05);
 }
+
+/* Seconde couleur claire (crème) : sections alternées pour un site moins sombre.
+   Les couleurs sont inversées localement, les composants s'adaptent seuls. */
+.theme-light {
+  --color-ink: #f4ede2;
+  --color-ink-2: #ebe0cd;
+  --color-ink-3: #e2d4bc;
+  --color-line: #cdb994;
+  --color-ivory: #2a1b13;
+  --color-mist: #5e4a38;
+  --color-white: #2a1b13;
+  --color-gold: #9c7c3f;
+  --color-gold-light: #8a6a32;
+  background: #f4ede2;
+  color: #2a1b13;
+}
+.theme-light .gold-text {
+  background: none;
+  -webkit-text-fill-color: #9c7c3f;
+  color: #9c7c3f;
+}
