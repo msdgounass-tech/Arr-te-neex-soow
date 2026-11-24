@@ -13,7 +13,7 @@ export function Toast() {
     return () => clearTimeout(t);
   }, [toast]);
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-[90] flex justify-center px-4">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-20 xl:bottom-6 z-[90] flex justify-center px-4">
       <AnimatePresence>
         {visible && toast && (
           <motion.div

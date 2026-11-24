@@ -33,13 +33,13 @@ export function Hero({ image, logoUrl }: { image: string; logoUrl?: string }) {
         </motion.div>
       </motion.div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/30 to-transparent md:from-ink/80 md:via-ink/15" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/55 via-transparent to-transparent md:from-ink/75 md:via-ink/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-transparent to-ink/20" />
       
 
       <motion.div style={{ opacity: fade }} className="container-luxe relative flex h-full flex-col justify-end pb-20 md:justify-center md:pb-0">
         <div className="max-w-2xl pt-24">
-          <motion.div {...item(0.5)} className="flex items-center gap-4">
+          <motion.div {...item(0.5)} className="hidden items-center gap-4 md:flex">
             <BrandLogo size={112} src={logoUrl} priority className="h-20 w-20 shadow-[0_10px_40px_-10px_rgba(198,161,92,.55)] ring-1 ring-gold/50 md:h-28 md:w-28" />
             <div className="leading-none">
               <p className="text-[0.74rem] tracking-[0.5em] text-ivory">GOUNASS LUXURY</p>

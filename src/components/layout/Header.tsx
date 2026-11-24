@@ -143,9 +143,9 @@ export function Header({ announcement, logoUrl }: { announcement?: string; logoU
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 top-[72px] z-[55] overflow-y-auto bg-ink lg:top-[84px] xl:hidden"
+            className="fixed inset-0 z-[55] overflow-y-auto bg-ink pt-36 xl:hidden"
           >
-            <div className="container-luxe flex min-h-full flex-col py-8">
+            <div className="container-luxe flex min-h-full flex-col pb-24 pt-8">
               {staffRole && (
                 <div className="mb-8 border border-gold/40 bg-gold/[0.06] p-4">
                   <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-gold">Espace administration</p>

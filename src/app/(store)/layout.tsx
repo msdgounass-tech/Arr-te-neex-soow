@@ -5,6 +5,7 @@ import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { SessionSync } from "@/components/layout/SessionSync";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { getSettings } from "@/lib/queries";
+import { BottomNav } from "@/components/layout/BottomNav";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { toWhatsAppNumber } from "@/lib/format";
 import { SITE_URL } from "@/lib/env";
@@ -34,9 +35,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer store={store} logoUrl={home.logo_url} />
+      <div aria-hidden className="h-16 xl:hidden" />
       <CartDrawer />
       <SearchOverlay />
       <SessionSync />
+      <BottomNav />
       <WhatsAppFloat number={toWhatsAppNumber(store.whatsapp)} />
     </>
   );

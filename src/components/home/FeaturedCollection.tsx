@@ -16,7 +16,7 @@ export function FeaturedCollection({ collection, products, fallbackImage }: { co
           sizes="100vw"
           className={`${!collection.image_url && fallbackImage.endsWith(".svg") ? "object-contain object-top md:object-cover md:object-center" : "object-cover"} transition-transform duration-[2400ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.03]`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-ink/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-transparent" />
         <div className="container-luxe relative flex h-full flex-col items-center justify-end pb-16 text-center md:pb-24">
           <Reveal>
             <p className="eyebrow">Collection vedette{collection.is_exclusive ? " · Exclusive" : ""}</p>

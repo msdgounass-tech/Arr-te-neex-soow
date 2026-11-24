@@ -21,7 +21,7 @@ export function ProductPurchase({ product }: { product: Product }) {
 
   const firstInStock = variants.find((v) => (v.inventory?.quantity ?? 0) > 0) || variants[0];
   const [color, setColor] = useState<string | null>(firstInStock?.color ?? null);
-  const [size, setSize] = useState<string | null>(sizes.length === 1 ? sizes[0] : null);
+  const [size, setSize] = useState<string | null>(firstInStock?.size ?? (sizes.length === 1 ? sizes[0] : null));
   const [qty, setQty] = useState(1);
   const [error, setError] = useState("");
   const add = useCart((s) => s.add);

@@ -1,7 +1,6 @@
 import { Hero } from "@/components/home/Hero";
 import { ServicesStrip } from "@/components/home/ServicesStrip";
 import { CategoryExplorer } from "@/components/home/CategoryExplorer";
-import { CategoryRail } from "@/components/home/CategoryRail";
 import { GenderSection } from "@/components/home/GenderSection";
 import { AccessoriesSection } from "@/components/home/AccessoriesSection";
 import { FeaturedCollection } from "@/components/home/FeaturedCollection";
@@ -36,26 +35,15 @@ const WOMEN = [
 ];
 
 export default async function HomePage() {
-  const [{ home }, men, women, news, best, promos, collections] = await Promise.all([
+  const [{ home }, news, best, promos, collections] = await Promise.all([
     getSettings(),
-    getProducts({ gender: "homme", limit: 4 }),
-    getProducts({ gender: "femme", limit: 4 }),
-    getProducts({ isNew: true, limit: 8 }),
-    getBestSellers(8),
-    getProducts({ onSale: true, limit: 8 }),
+        getProducts({ isNew: true, limit: 4 }),
+    getBestSellers(4),
+    getProducts({ onSale: true, limit: 4 }),
     getCollections(),
   ]);
 
-  const both = (s: string) => [`homme-${s}`, `femme-${s}`];
-  const [zones, watches, shoes, bags, perfumes, jewels, glasses] = await Promise.all([
-    getDeliveryZones(),
-    getProducts({ categorySlugs: both("montres"), limit: 4 }),
-    getProducts({ categorySlugs: both("chaussures"), limit: 4 }),
-    getProducts({ categorySlugs: both("sacs"), limit: 4 }),
-    getProducts({ categorySlugs: both("parfums"), limit: 4 }),
-    getProducts({ categorySlugs: both("bijoux"), limit: 4 }),
-    getProducts({ categorySlugs: both("lunettes"), limit: 4 }),
-  ]);
+  const zones = await getDeliveryZones();
   const featured = collections.find((c) => c.is_featured) || null;
   const featuredProducts = featured ? (await getProducts({ collectionSlug: featured.slug, limit: 4 })).items : [];
 
@@ -77,7 +65,7 @@ export default async function HomePage() {
         image={home.men_image || heroImg}
         objectPosition="67% 20%"
         categories={MEN}
-        products={men.items}
+        products={[]}
       />
 
       {/* 3. Collection Femme */}
@@ -90,14 +78,14 @@ export default async function HomePage() {
         image={home.women_image || heroImg}
         objectPosition="100% 30%"
         categories={WOMEN}
-        products={women.items}
+        products={[]}
       />
 
       {/* Exploration par catégorie */}
       <CategoryExplorer />
 
       {/* 4. Nouveautés */}
-      <section className="container-luxe py-20 md:py-28">
+      <section className="container-luxe py-12 md:py-24">
         <SectionHeading eyebrow="Nouveautés" title="Les dernières arrivées" href="/nouveautes" />
         {news.items.length ? (
           <ProductGrid products={news.items} />
@@ -108,7 +96,7 @@ export default async function HomePage() {
 
       {/* 5. Meilleures ventes (calculées sur les commandes réelles) */}
       {best.length > 0 && (
-        <section className="container-luxe py-20 md:py-28">
+        <section className="container-luxe py-12 md:py-24">
           <SectionHeading eyebrow="Meilleures ventes" title="Les pièces les plus convoitées" href="/meilleures-ventes" />
           <ProductGrid products={best} />
         </section>
@@ -117,20 +105,13 @@ export default async function HomePage() {
       {/* 6. Accessoires exclusifs */}
       <AccessoriesSection image={accImg} products={[]} />
 
-      {/* Sections par catégorie */}
-      <CategoryRail eyebrow="L'heure GOUNASS" title="Montres" href="/montres" products={watches.items} />
-      <CategoryRail tone="soft" eyebrow="Souliers" title="Chaussures" href="/chaussures" products={shoes.items} />
-      <CategoryRail eyebrow="Maroquinerie" title="Sacs" href="/accessories?type=sacs" products={bags.items} />
-      <CategoryRail tone="soft" eyebrow="Fragrances" title="Parfums" href="/accessories?type=parfums" products={perfumes.items} />
-      <CategoryRail eyebrow="Éclat" title="Bijoux" href="/accessories?type=bijoux" products={jewels.items} />
-      <CategoryRail tone="soft" eyebrow="Solaires" title="Lunettes" href="/accessories?type=lunettes" products={glasses.items} />
 
       {/* 7. Collection vedette */}
       {featured && <FeaturedCollection collection={featured} products={featuredProducts} fallbackImage={DEFAULT_IMAGES.collection} />}
 
       {/* 8. Promotions */}
       {promos.items.length > 0 && (
-        <section className="container-luxe py-20 md:py-28">
+        <section className="container-luxe py-12 md:py-24">
           <SectionHeading eyebrow="Offres privilèges" title="Promotions" href="/promotions" />
           <ProductGrid products={promos.items} />
         </section>
@@ -140,7 +121,7 @@ export default async function HomePage() {
       <Editorial image={home.editorial_image || heroImg} />
 
       {/* 10. Newsletter */}
-      <section className="container-luxe py-20 md:py-28">
+      <section className="container-luxe py-12 md:py-24">
         <Reveal className="relative overflow-hidden border border-gold/25 bg-ink-2 px-6 py-16 text-center md:px-16 md:py-24">
           <div className="absolute inset-x-0 top-0 hairline" />
           <p className="eyebrow">Le cercle GOUNASS</p>

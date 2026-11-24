@@ -13,7 +13,7 @@ export function WhatsAppFloat({ number }: { number: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Écrire à GOUNASS LUXURY sur WhatsApp"
-      className="fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-[#1f8a4c] text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.6)] ring-1 ring-white/20 transition-transform hover:scale-105 md:bottom-7 md:right-7"
+      className="fixed bottom-24 right-3 z-[70] flex h-12 w-12 xl:h-14 xl:w-14 items-center justify-center rounded-full bg-[#1f8a4c] text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.6)] ring-1 ring-white/20 transition-transform hover:scale-105 xl:bottom-7 xl:right-7"
     >
       <WhatsAppIcon width={28} height={28} />
     </a>
