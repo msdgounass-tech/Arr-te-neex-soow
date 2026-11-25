@@ -1,0 +1,93 @@
+/* Système d'animations MSD Shoppy — source unique (voir docs/marketplace/ANIMATIONS.md).
+   Les mêmes valeurs existent pour Motion dans src/lib/motion/tokens.ts (test : tests/unit/motion-tokens.test.ts). */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-press: 160ms;
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-reveal: 300ms;
+  --dur-modal: 300ms;
+  --dur-sheet: 400ms;
+  --dur-toast: 400ms;
+  --stagger: 50ms;
+}
+
+/* Appui : retour immédiat sur tout élément pressable */
+.press { transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+.press:active { transform: scale(0.97); }
+
+/* Cartes : appui partout, ombre au survol uniquement avec une souris */
+.card-interactive { position: relative; transition: transform var(--dur-press) var(--ease-out); }
+.card-interactive::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: 0 10px 30px -12px rgb(28 34 48 / 0.25); opacity: 0; transition: opacity var(--dur-fast) ease;
+}
+.card-interactive:active { transform: scale(0.98); }
+@media (hover: hover) and (pointer: fine) {
+  .card-interactive:hover::after { opacity: 1; }
+  .card-interactive:hover .card-zoom { transform: scale(1.03); }
+}
+.card-zoom { transition: transform var(--dur-reveal) var(--ease-out); }
+
+/* Entrée de page (template.tsx) */
+.page-enter { animation: page-in var(--dur-base) var(--ease-out); }
+@keyframes page-in { from { opacity: 0; transform: translateY(4px); } }
+
+/* Apparition au défilement : accueil et pages vitrines uniquement */
+.reveal { opacity: 0; transform: translateY(8px);
+  transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--stagger)); }
+.reveal[data-visible="true"] { opacity: 1; transform: none; }
+
+/* Image : fondu au chargement pour éviter l'apparition brutale */
+.fade-img { opacity: 0; transition: opacity var(--dur-base) ease; }
+.fade-img[data-loaded="true"] { opacity: 1; }
+
+/* Favori : petit rebond au changement d'état (transition interruptible) */
+.fav-icon { transition: transform var(--dur-press) var(--ease-out), color var(--dur-fast) ease, fill var(--dur-fast) ease; }
+.fav-btn:active .fav-icon { transform: scale(0.85); }
+.fav-btn[data-active="true"] .fav-icon { transform: scale(1); }
+
+/* Notifications : transitions (jamais de keyframes), entrée par le bas */
+.toast { transition: transform var(--dur-toast) ease, opacity var(--dur-toast) ease; }
+.toast[data-state="open"] { @starting-style { opacity: 0; transform: translateY(100%); } }
+.toast[data-state="closing"] { opacity: 0; transform: translateY(100%); }
+
+/* Menus et listes déroulantes : depuis le déclencheur */
+.popover { transform-origin: var(--origin, top right); transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+.popover { @starting-style { opacity: 0; transform: scale(0.96); } }
+
+/* Indicateur d'onglet */
+.tab-indicator { transition: transform var(--dur-base) var(--ease-in-out); }
+
+/* Chargement */
+.skeleton { background: var(--color-mist); animation: pulse 1.4s linear infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
+
+/* Coche de réussite (moments rares) */
+.success-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw 420ms var(--ease-out) 120ms forwards; }
+.success-ring { transform-origin: center; animation: ring-in 360ms var(--ease-out); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes ring-in { from { opacity: 0; transform: scale(0.9); } }
+
+/* Accordéon */
+.collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-base) var(--ease-out); }
+.collapse[data-open="true"] { grid-template-rows: 1fr; }
+.collapse > * { overflow: hidden; }
+
+/* Mouvement réduit : mêmes durées, opacité seule, plus aucun déplacement */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation-name: fade; }
+  .reveal, .reveal[data-visible="true"] { transform: none; }
+  .press:active, .card-interactive:active, .fav-btn:active .fav-icon { transform: none; }
+  .card-interactive:hover .card-zoom { transform: none; }
+  .toast[data-state="open"] { @starting-style { transform: none; } }
+  .toast[data-state="closing"] { transform: none; }
+  .popover { @starting-style { transform: none; } }
+  .skeleton { animation: none; }
+  .success-check { animation-duration: 1ms; }
+  .success-ring { animation-name: fade; }
+}
+@keyframes fade { from { opacity: 0; } }
