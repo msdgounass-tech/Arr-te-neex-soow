@@ -69,7 +69,7 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
   **Reste** : autoriser l'application GitHub de Vercel sur le dépôt, puis brancher le dépôt (branche `ccr-9ced9e68-fhugy8`) ;
   ajouter `SUPABASE_SERVICE_ROLE_KEY` (secret, envoi des photos) dans Vercel.
 - Auth Supabase : le service d'e-mail par défaut n'envoie qu'aux membres de l'équipe → brancher un SMTP (Resend ou Brevo, gratuits)
-  et régler Site URL / Redirect URLs sur l'adresse Vercel. Ne pas désactiver la confirmation d'e-mail : le badge « E-mail confirmé » perdrait son sens.
+  et régler Site URL / Redirect URLs sur l'adresse Vercel. (Badge « E-mail confirmé » retiré en migration 7 : la confirmation peut rester désactivée.)
 
 ## En ligne
 
@@ -83,7 +83,8 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
   actions via fonctions `admin_*` (migration 9). Pages : vue d'ensemble, paiements, boutiques, produits, commandes, utilisateurs, signalements, avis.
 - Mode démo : `NEXT_PUBLIC_DEMO_MODE=1` sur Vercel, page **/demo**, 6 comptes `@demo.msdshoppy.sn` (mot de passe DemoMSD2026),
   boutiques `is_demo`. Scripts : `scripts/demo/*`. Suppression : `supabase/demo/remove_demo.sql`.
-- Inscriptions publiques : toujours bloquées tant que « Confirm email » reste actif (`/auth/v1/settings` → `mailer_autoconfirm: false`).
+- Inscriptions publiques : **ouvertes** (2026-11-26) — « Confirm email » désactivé, liaison manuelle et connexions anonymes désactivées.
+  Testé : inscription → session immédiate + profil créé (compte de test supprimé). Reste : Site URL / Redirect URLs, puis SMTP (Brevo) pour « mot de passe oublié ».
 
 ## Journal
 
