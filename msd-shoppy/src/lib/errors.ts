@@ -31,6 +31,7 @@ const MESSAGES: Record<string, string> = {
   BOUTIQUE_ACTIVE: "Fermez d'abord votre boutique avant de supprimer votre compte. Contactez l'assistance.",
   COMMANDES_EN_COURS: "Vous avez des commandes en cours. Attendez qu'elles soient terminées ou annulées.",
   DONNEES_PERSONNELLES_RESTANTES: "La suppression n'a pas pu effacer toutes vos données. Réessayez.",
+  COMPTE_REQUIS: "Créez un compte (e-mail et mot de passe) pour effectuer cette action.",
   SLUG_INDISPONIBLE: "Ce nom est déjà très utilisé. Essayez une variante.",
 };
 

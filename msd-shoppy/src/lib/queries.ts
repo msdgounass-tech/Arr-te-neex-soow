@@ -4,7 +4,7 @@ import { supabasePublic } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { Category, Domain, Product, ProductCardData, ProductImage, ProductVariant, Region, Review, Shop, Trust, DeliveryZone } from "@/lib/types";
 
-const CARD_SELECT = "id, slug, title, price, compare_at_price, availability, shop:shops!inner(id, slug, name, city), images:product_images(id, product_id, url, width, height, position)";
+const CARD_SELECT = "id, slug, title, price, compare_at_price, availability, shop:shops!inner(id, slug, name, city, is_demo), images:product_images(id, product_id, url, width, height, position)";
 
 type RawCard = Omit<ProductCardData, "image"> & { images: ProductImage[] | null; shop: ProductCardData["shop"] | ProductCardData["shop"][] };
 function toCard(r: RawCard): ProductCardData {

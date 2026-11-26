@@ -29,6 +29,7 @@ export function ProductCard({ p, trust, priority = false }: { p: ProductCardData
           </p>
           <p className="mt-1 flex items-center gap-1 truncate text-xs text-slate">
             <span className="truncate">{p.shop.name}</span>
+            {p.shop.is_demo && <span className="shrink-0 rounded bg-mist px-1 text-[10px] font-semibold text-slate">Démo</span>}
             {trust && trust.reviews_count > 0 && trust.average_rating != null && (
               <span className="inline-flex shrink-0 items-center gap-0.5 text-ink"><Icon name="star" size={12} filled className="text-orange" />{trust.average_rating}</span>
             )}

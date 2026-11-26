@@ -13,7 +13,7 @@ export interface Shop {
   id: string; owner_id: string; slug: string; name: string; logo_url: string | null; cover_url: string | null;
   description: string; domain_id: number; country_code: string; region: string; city: string; address_public: string | null;
   public_phone: string | null; public_whatsapp: string | null; public_email: string | null; return_policy: string | null;
-  is_published: boolean; verified_at: string | null; created_at: string;
+  is_published: boolean; verified_at: string | null; created_at: string; is_demo?: boolean;
 }
 
 export interface ProductImage { id: string; product_id: string; url: string; width: number; height: number; position: number }
@@ -28,7 +28,7 @@ export interface Product {
 }
 export type ProductCardData = Pick<Product, "id" | "slug" | "title" | "price" | "compare_at_price" | "availability"> & {
   image: ProductImage | null;
-  shop: Pick<Shop, "id" | "slug" | "name" | "city">;
+  shop: Pick<Shop, "id" | "slug" | "name" | "city" | "is_demo">;
 };
 
 export interface DeliveryZone {

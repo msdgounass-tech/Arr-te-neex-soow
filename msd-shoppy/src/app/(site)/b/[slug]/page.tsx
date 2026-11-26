@@ -56,6 +56,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug: str
         <div className="mt-3 grid gap-6 md:grid-cols-[1fr_340px]">
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold md:text-3xl">{shop.name}{shop.verified_at && <Icon name="badge" size={22} className="text-success" title="Boutique vérifiée" />}</h1>
+            {shop.is_demo && <p className="mt-2 inline-flex rounded-full bg-mist px-3 py-1 text-xs font-semibold text-slate">Boutique de démonstration : produits, commandes et avis fictifs</p>}
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate">
               {domain && <span>{domain.name}</span>}
               <span className="inline-flex items-center gap-1"><Icon name="map-pin" size={14} />{shop.city}, {shop.region}</span>

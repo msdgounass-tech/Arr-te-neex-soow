@@ -197,3 +197,13 @@ update public.subscriptions set trial_ends_at = now() - interval '1 minute', sta
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 select pg_temp.ok(not public.shop_can_manage(public.my_shop_id()), 'shop_can_manage = faux après expiration (utilisé par l''action serveur)');
 select pg_temp.ok(pg_temp.fails($$insert into public.shop_specialties (shop_id, category_id) values (public.my_shop_id(), 1)$$, null), 'ajout de spécialité refusé après expiration');
+
+-- ── Comptes anonymes bloqués
+reset role;
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000a0', null);
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a0","role":"authenticated","is_anonymous":true}', false);
+set role authenticated;
+select pg_temp.ok(pg_temp.fails($$select public.create_shop('Anonyme', '', (select id from public.domains limit 1), null, 'SN', 'Dakar', 'Dakar', '771234567', null, null)$$, 'COMPTE_REQUIS'),
+  'un compte anonyme ne peut pas ouvrir de boutique');
+reset role;
+select pg_temp.ok((select count(*) = 0 from public.shops where is_demo), 'aucune boutique de démo par défaut');

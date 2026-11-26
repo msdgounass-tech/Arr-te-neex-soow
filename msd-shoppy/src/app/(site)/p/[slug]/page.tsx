@@ -64,6 +64,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <Gallery images={images} title={product.title} />
         <div>
           <h1 className="text-2xl font-bold leading-tight md:text-3xl">{product.title}</h1>
+          {shop.is_demo && <p className="mt-2 inline-flex rounded-full bg-mist px-3 py-1 text-xs font-semibold text-slate">Produit de démonstration</p>}
           <div className="mt-2"><TrustMini trust={trust} shopSlug={shop.slug} /></div>
           <div className="mt-5"><BuyBox product={product} variants={variants} shop={shop} image={images[0]?.url ?? null} /></div>
           <div className="mt-3"><ContactButtons shopId={shop.id} productId={product.id} phone={shop.public_phone} whatsapp={shop.public_whatsapp} message={waMessage} /></div>

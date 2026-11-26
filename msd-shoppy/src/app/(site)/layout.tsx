@@ -4,7 +4,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Providers } from "@/components/layout/Providers";
 import { SetupNotice } from "@/components/ui/bits";
 import { getUser } from "@/lib/auth";
-import { isSupabaseConfigured } from "@/lib/env";
+import { isDemoMode, isSupabaseConfigured } from "@/lib/env";
+import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 
 async function unreadCount(userId: string | undefined) {
@@ -24,6 +25,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </a>
       <Header signedIn={Boolean(user)} unread={unread} />
       {!isSupabaseConfigured && <SetupNotice />}
+      {isDemoMode && (
+        <p className="bg-ink px-4 py-2 text-center text-xs text-white">
+          Mode démo : les boutiques marquées « Démo » contiennent des données fictives. <Link href="/demo" className="font-semibold underline">Essayer avec un compte de démonstration</Link>
+        </p>
+      )}
       <main id="contenu" className="pb-24 md:pb-0">{children}</main>
       <Footer />
       <BottomNav />
