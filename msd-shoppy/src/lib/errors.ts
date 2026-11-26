@@ -50,4 +50,4 @@ export function friendlyError(error: unknown): string {
   return "Une erreur est survenue. Réessayez dans un instant.";
 }
 
-export type ActionResult<T = undefined> = { ok: true; data?: T; message?: string } | { ok: false; error: string; fields?: Record<string, string> };
+export type ActionResult<T = undefined> = { ok: true; data?: T; message?: string } | { ok: false; error: string; fields?: Record<string, string>; data?: T };

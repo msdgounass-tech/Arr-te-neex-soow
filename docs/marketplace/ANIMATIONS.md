@@ -1,6 +1,6 @@
 # Système d'animations de la marketplace
 
-Statut : **architecture validée sur le papier, rien n'est encore codé.**
+Statut : **implémenté** dans `msd-shoppy/` (novembre 2026). Corrections issues de la vérification technique appliquées (section 8).
 Toute animation du site passe par ce système. Aucune page ne définit ses propres courbes, durées ou keyframes.
 Les valeurs viennent des skills `animate` / `review-animations` (`.claude/skills/`) et ne doivent pas être réinventées.
 
@@ -33,7 +33,8 @@ Les valeurs viennent des skills `animate` / `review-animations` (`.claude/skills
 
 - Bibliothèque unique : **`motion` ≥ 14.2** (accélération matérielle de `x`/`y`/`scale`). Version exacte figée au démarrage du code.
   Pas de GSAP, Lottie, react-spring, Vaul, Sonner, AutoAnimate ni `tailwindcss-animate`.
-- Chargement allégé : `LazyMotion` + `domAnimation` + composants `m.*` (≈ 15 Ko au lieu de ≈ 34 Ko), chargé seulement là où Motion sert.
+- Chargement : `LazyMotion` avec les fonctions **complètes** (`domMax`, nécessaires au glisser) importées **à la demande** par `LazyMotionScope`,
+  placé autour de chaque composant qui utilise Motion (Sheet, DemoPlayer). Le fournisseur racine ne contient que `MotionConfig reducedMotion="user"`.
 - Pages transitions : pas d'API View Transitions (encore expérimentale dans Next.js). Entrée CSS via `template.tsx`.
 
 ## 3. Jetons (source unique)
@@ -62,7 +63,7 @@ Un test unitaire compare les deux fichiers pour qu'ils ne divergent jamais.
 | Situation | Composant / classe | Recette |
 | --- | --- | --- |
 | **Changement de page** | `app/**/template.tsx` → classe `.page-enter` | opacité 0→1 + `translateY(4px)`→0, `--dur-base`, `--ease-out`. Onglets de la barre du bas (très fréquents) : opacité seule. |
-| **Apparition au défilement** | `<Reveal>` + `<Stagger>` | `IntersectionObserver` natif + classes CSS, une seule fois, `translateY(8px)` + opacité, cascade 50 ms. **Accueil et pages vitrines seulement**, jamais sur les grilles du catalogue. |
+| **Apparition au défilement** | `<Reveal index>` | `IntersectionObserver` partagé, **seuil 15 % de l'élément** (pas de marge négative : un élément en bas de page doit pouvoir apparaître), une seule fois, `translateY(8px)` + opacité, cascade 50 ms via `--i`. **Accueil et pages vitrines seulement**, jamais sur les grilles du catalogue. |
 | **Boutons** | classe `.press` | `:active` → `scale(0.97)`, `--dur-press`. Aucune animation de survol hors couleur. |
 | **Cartes produit / boutique** | classe `.card-interactive` | Appui `scale(0.98)` ; survol (souris seulement) : ombre via l'opacité d'un pseudo-élément, `--dur-fast`. Pas de soulèvement 3D. |
 | **Images produits** | `<FadeImage>` | Opacité 0→1 au chargement, `--dur-base` : évite l'apparition brutale. Dimensions réservées (aucun décalage de mise en page). |
@@ -115,3 +116,18 @@ tests/motion-tokens.test.ts           cohérence CSS ↔ TS
 - Une modification de jeton dans `motion.css` (et `tokens.ts`) change tout le site d'un coup.
 - Contrôle : `grep -rnE "cubic-bezier|transition: all|ease-in[^-]|scale\(0\)" src --include=*.tsx` doit rester vide hors `src/styles/motion.css` et `src/lib/motion/`.
 - Revue : lancer `/review-animations` sur chaque lot touchant l'interface avant fusion.
+
+## 8. Corrections issues de la vérification technique (maquette testée dans Chromium)
+
+| Problème constaté | Correction appliquée |
+| --- | --- |
+| Marge `-10%` : un élément tout en bas de page restait invisible | Seuil `threshold: 0.15`, sans marge |
+| `domAnimation` n'inclut pas le glisser : la feuille ne se fermait pas au doigt | `domMax` chargé à la demande (`src/lib/motion/features.ts`) |
+| Motion chargé dans le layout racine : ≈ 480 Ko de JS sur chaque page | `LazyMotionScope` par composant : ≈ 173 Ko par page |
+| Image déjà en cache avant l'hydratation : pouvait rester à opacité 0 | `FadeImage` vérifie `img.complete` au montage |
+
+## 9. Fichiers réels
+
+`src/styles/motion.css` · `src/lib/motion/{tokens,presets,features}.ts` · `src/components/motion/{MotionProvider,LazyMotionScope,Reveal,FadeImage,SuccessMark}.tsx` ·
+`src/components/ui/{Sheet,Toaster,toast}.tsx` · `src/app/(site)/template.tsx` · `tests/unit/motion-tokens.test.ts`.
+Les onglets, accordéons (`<details>`) et barres de progression utilisent directement les classes et jetons CSS.

@@ -47,7 +47,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="cat-title" className="container-page mt-8">
+      {domains.length > 0 && <section aria-labelledby="cat-title" className="container-page mt-8">
         <h2 id="cat-title" className="mb-4 text-xl font-bold md:text-2xl">Catégories</h2>
         <ul className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-8">
           {domains.map((d) => (
@@ -59,7 +59,7 @@ export default async function HomePage() {
             </li>
           ))}
         </ul>
-      </section>
+      </section>}
 
       {empty ? (
         <section className="container-page mt-10">

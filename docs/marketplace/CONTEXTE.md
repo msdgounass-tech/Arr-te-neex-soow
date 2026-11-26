@@ -1,65 +1,66 @@
-# Marketplace multi-vendeurs — contexte et reprise
+# MSD Shoppy — contexte et reprise
 
-Fichier de reprise : à lire en premier dans toute nouvelle session sur la marketplace, avant d'ouvrir d'autres fichiers.
-À mettre à jour à la fin de chaque étape (section « Journal »).
+Fichier de reprise : à lire en premier dans toute nouvelle session, avant d'ouvrir d'autres fichiers.
+À mettre à jour à chaque étape importante (section « Journal »).
 
-## Projet en bref
+## Projet
 
-- Marketplace multi-vendeurs, site web responsive (pas d'application native), marché sénégalais d'abord, extensible à d'autres pays.
-- **Nom non choisi : ne jamais en proposer ni en inventer.** Le nom sera une constante de configuration unique.
-- Un compte unique par utilisateur, à la fois acheteur et vendeur. Les visiteurs consultent sans compte.
-- Navigation mobile en 5 onglets : Accueil, Explorer, Vendre, Favoris, Compte.
-- Boutiques : modèle graphique commun, domaine principal + niches, localisation et zones de livraison.
-- Produits : photos multiples, variantes (taille, couleur), stock, score de qualité de présentation (distinct de la confiance).
-- Confiance : commandes réellement terminées (annulées exclues), avis liés à une commande, note, ancienneté, coordonnées vérifiées, taux de réponse, badges à critères vérifiables.
-- Commandes : le vendeur confirme, refuse, prépare, expédie et termine ; paiement et livraison réglés directement avec le vendeur.
-- Boutons : Appel, WhatsApp, Commander, Favori ; coordonnées publiques choisies par le vendeur (jamais le numéro privé).
-- « Promouvoir sur Facebook » : lien prêt + copie + ouverture de Facebook Ads Manager. Pas d'intégration Meta.
-- Assistant vendeur : guides interactifs et conseils contextuels, sans IA externe en V1, ignorables et consultables à tout moment.
-- Abonnements : 7 jours d'essai gratuit puis formule payante (tarifs à définir). États : essai, actif, paiement en attente, expiré, suspendu. **Aucune suppression automatique.**
-- Design : blanc dominant, orange en accent, texte foncé, gris clair, arrondis légers, mobile d'abord, animations légères (voir `ANIMATIONS.md`).
-- Administration centrale : phase séparée, hors V1.
-- Objectif : V1 fonctionnelle en 4 à 5 jours.
+- **Nom officiel : MSD Shoppy.** Marketplace multi-vendeurs, site responsive mobile d'abord, Sénégal d'abord (extensible : table `countries`).
+- Un compte = acheteur et vendeur. Consultation libre sans compte. Navigation mobile : Accueil, Explorer, **Vendre** (centre, mis en avant), Favoris, Compte.
+- Code : `msd-shoppy/` (application Next.js autonome). Documentation technique : `msd-shoppy/README.md`. Animations : `docs/marketplace/ANIMATIONS.md`.
 
-## Architecture retenue (proposée, en attente de validation)
+## Décisions techniques prises (carte blanche du propriétaire, 2026-11-26)
 
-Next.js (App Router) + TypeScript + Tailwind 4 · Supabase (PostgreSQL + RLS, Auth, Storage) dédié · Vercel · recherche PostgreSQL (`unaccent`, `pg_trgm`) · Resend · Sentry · Motion pour les animations.
+| Question | Décision | Raison |
+| --- | --- | --- |
+| Dépôt | Sous-dossier `msd-shoppy/` de ce dépôt | Seul dépôt accessible à cette session ; déplaçable tel quel dans un dépôt dédié |
+| Base de données | Supabase **dédié** (à créer) ; jamais `gounass-luxury` (4 applications, tables `products`/`orders` déjà prises) | Isolation des données et des comptes |
+| Panier | Multi-boutiques, **une commande par boutique** | Chaque vendeur gère ses commandes ; frais de livraison par boutique |
+| Commande sans compte | **Non** (consultation libre, commande avec compte) | Avis vérifiés, suivi, notifications |
+| Expiration de l'abonnement | Boutique masquée, gestion en lecture seule, commandes en cours toujours traitables, **rien n'est supprimé** | Demande du cahier des charges |
+| Paiement des abonnements (V1) | Le vendeur déclare la référence Wave / Orange Money → statut « paiement en attente » → validation par un administrateur | Aucun paiement simulé ; API Wave/Orange Money à brancher plus tard |
+| Paiement des achats | Directement au vendeur (à la livraison, Wave, Orange Money) | MSD Shoppy n'encaisse rien en V1 |
+| Fin de commande | Vendeur : livrée → terminée ; ou client : « J'ai bien reçu » (expédiée/livrée → terminée) | Seules les commandes terminées comptent comme ventes |
+| Badges | Calculés en base : e-mail confirmé, vendeur confirmé (5 commandes, 3 avis ≥ 4/5), très réactif (90 % < 24 h), établie (6 mois) ; « vérifiée » par l'admin | Critères vérifiables, non attribuables par le vendeur |
+| Qualité des fiches | Score 0–100 en base (photos 30, titre 15, description 25, prix 10, catégorie 10, disponibilité 10) ; obligatoire pour publier : catégorie + 1 photo | Ne bloque jamais au-delà de l'obligatoire |
+| Statistiques | Événements réels (visites, consultations, appels, WhatsApp, partages, favoris), 1 fois par session, visites du vendeur exclues | Aucune statistique inventée |
+| Langue / monnaie | Français, FCFA (XOF) | V1 Sénégal |
+| Tarifs | Aucun (table `subscription_plans` vide) | À valider par le propriétaire |
+| Ambiance sonore | Composée en Web Audio, désactivée par défaut, jamais de démarrage automatique | Aucun fichier, aucun impact sur le chargement |
 
-## Décisions en attente (posées le 2026-11-25)
+## État au 2026-11-26
 
-1. Dépôt dédié (recommandé) ou sous-dossier de ce dépôt ?
-2. Projet Supabase dédié : passer à Pro ou mettre en pause `nder-wouram` (offre gratuite = 2 projets actifs, tous pris) ?
-3. Panier multi-boutiques (une commande par boutique) ou commande directe par boutique ?
-4. Commande sans compte autorisée ?
-5. Boutique après expiration : masquée au public, données conservées (proposé) ?
-6. Paiement des abonnements en V1 : lien Wave / Orange Money + validation manuelle ?
-7. FCFA et français uniquement en V1 ?
+Construit et vérifié : base (5 migrations, 58 tests métier/sécurité), 44 routes, 16 tests unitaires, compilation de production, captures mobile/ordinateur.
+Revue des animations : `/review-animations` exécuté (voir journal).
 
-## Points d'attention
+**Bloquant pour les tests de bout en bout avec de vraies données** : aucun projet Supabase dédié n'existe encore
+(offre gratuite = 2 projets actifs, déjà utilisés) et l'environnement cloud refuse le téléchargement des binaires Supabase locaux.
 
-- Ce dépôt contient d'autres projets (GOUNASS LUXURY à la racine, `nekh-soow/`, `legacy/`) : **ne pas les modifier**.
-- Le projet Supabase `gounass-luxury` héberge déjà quatre applications : ne pas y créer les tables de la marketplace.
-- Vercel Hobby interdit l'usage commercial : passer à Pro au lancement public.
+## Reste à faire (prochaines phases)
+
+- Créer le projet Supabase dédié, appliquer les migrations, configurer l'e-mail (SMTP), puis tester les parcours complets en navigateur.
+- Écran d'administration de la plateforme (validation des paiements d'abonnement, vérification des boutiques, modération, catégories).
+- Formules et tarifs d'abonnement ; intégration Wave / Orange Money après accès marchand.
+- Codes promo, mise en avant payante, fidélité ; retours, remboursements, réclamations (`shops.return_policy` déjà prévu).
+- Suivi des erreurs (Sentry) et sauvegardes (`pg_dump` planifié) au moment du déploiement.
 
 ## Skills du projet (`.claude/skills/`)
 
 | Quand | Skill |
 | --- | --- |
-| Créer ou refondre une page, choisir typographie, couleurs, mise en page | `frontend-design` |
-| Construire une animation précise | `animate` (+ `RECIPES.md`) |
-| Soigner un composant interactif (boutons, menus, gestes, finitions) | `emil-design-eng` |
-| Revoir le mouvement d'un lot avant fusion | `/review-animations` (manuel) |
+| Créer ou refondre une page | `frontend-design` |
+| Construire une animation | `animate` (+ `RECIPES.md`) |
+| Finitions d'un composant interactif | `emil-design-eng` |
+| Contrôler les animations d'un lot | `/review-animations` (manuel ; en session automatique : `claude -p "/review-animations …"`) |
 
-Ne charger un skill que pour la tâche qui le concerne. Les jetons et le catalogue d'animations sont dans `ANIMATIONS.md` :
-s'y référer plutôt que relire les skills à chaque fois.
+## Méthode de reprise
 
-## Méthode de reprise et d'économie de contexte
-
-1. Lire ce fichier, puis seulement les fichiers concernés par l'étape en cours.
-2. Travailler par lot (une étape du plan = un ou plusieurs commits ciblés), noter l'avancement dans le journal ci-dessous.
-3. Ne pas relire un fichier déjà lu dans la session s'il n'a pas changé ; utiliser `grep` pour retrouver un symbole.
-4. Chaque fin d'étape : commit + push sur la branche de travail, puis mise à jour du journal.
+1. Lire ce fichier, puis `msd-shoppy/README.md` si besoin de détails ; n'ouvrir que les fichiers de l'étape en cours.
+2. Base de test locale : `pg_createcluster 16 shoppy --port 54322 && pg_ctlcluster 16 shoppy start`, puis `PG_AS=postgres msd-shoppy/scripts/test-db.sh`.
+3. `cd msd-shoppy && npm install && npm test && npx tsc --noEmit && npx next build`.
+4. Chaque fin d'étape : commit + push sur la branche de travail, mise à jour du journal.
 
 ## Journal
 
-- **2026-11-25** — Analyse de l'environnement et plan de construction présentés. Installation des skills `frontend-design`, `emil-design-eng`, `animate`, `review-animations` (voir `.claude/skills/SOURCES.md`). Architecture d'animations rédigée (`ANIMATIONS.md`). Aucun code du site écrit. En attente des réponses aux décisions ci-dessus et du feu vert pour le développement.
+- **2026-11-25** — Analyse de l'environnement, plan, installation des 4 skills, architecture d'animations, vérification technique (maquette Motion testée, 3 corrections).
+- **2026-11-26** — Développement de MSD Shoppy : schéma, RLS et fonctions métier (58 tests) ; design system (orange #F26B1D / #C9480B, encre #1C2230, Bricolage Grotesque + Onest) ; expérience client complète ; espace vendeur complet avec assistant ; abonnements (essai, déclaration, rappels) ; promotion Facebook ; centre d'aide ; SEO (métadonnées, JSON-LD Product/Store, sitemap, robots, aperçu Open Graph). Aucun déploiement.

@@ -179,3 +179,11 @@ select public.delete_my_account();
 reset role;
 select pg_temp.ok((select count(*) = 2 from public.orders where recipient_name = 'Client supprimé'), 'suppression du compte : commandes anonymisées, pas effacées');
 select pg_temp.ok((select full_name = 'Compte supprimé' from public.profiles where id = '00000000-0000-0000-0000-00000000000c'), 'données personnelles effacées');
+
+-- ── Rappels d'abonnement (idempotents)
+reset role;
+update public.subscriptions set status = 'trial', trial_ends_at = now() + interval '1 day' where shop_id = (select id from public.shops where name = 'Bamba Tech');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select public.ensure_subscription_reminders();
+select public.ensure_subscription_reminders();
+select pg_temp.ok((select count(*) = 1 from public.notifications where title = 'Votre essai gratuit se termine bientôt'), 'rappel de fin d''essai créé une seule fois');
