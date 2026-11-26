@@ -10,15 +10,16 @@ import type { ProductCardData, Trust } from "@/lib/types";
 
 export const revalidate = 60;
 
-function Section({ title, href, children, index = 0 }: { title: string; href?: string; children: React.ReactNode; index?: number }) {
+function Section({ title, href, children, reveal = true }: { title: string; href?: string; children: React.ReactNode; reveal?: boolean }) {
+  const Wrap = reveal ? Reveal : "section";
   return (
-    <Reveal as="section" index={index} className="container-page mt-10">
+    <Wrap {...(reveal ? { as: "section" as const } : {})} className="container-page mt-10">
       <div className="mb-4 flex items-end justify-between gap-4">
         <h2 className="text-xl font-bold md:text-2xl">{title}</h2>
         {href && <Link href={href} className="link shrink-0 text-sm">Tout voir</Link>}
       </div>
       {children}
-    </Reveal>
+    </Wrap>
   );
 }
 
@@ -71,14 +72,14 @@ export default async function HomePage() {
         </section>
       ) : (
         <>
-          <Section title="Nouveautés" href="/explorer?tri=newest"><ProductRail items={newest.items} trust={trust} /></Section>
+          <Section title="Nouveautés" href="/explorer?tri=newest" reveal={false}><ProductRail items={newest.items} trust={trust} /></Section>
           {shops.length > 0 && (
-            <Section title="Boutiques à découvrir" href="/explorer?vue=boutiques" index={1}>
+            <Section title="Boutiques à découvrir" href="/explorer?vue=boutiques">
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{shops.map((s) => <li key={s.id}><ShopCard shop={s} domain={domainById.get(s.domain_id)} /></li>)}</ul>
             </Section>
           )}
-          <Section title="Produits populaires" href="/explorer?tri=popular" index={2}><ProductRail items={popular.items} trust={trust} /></Section>
-          <Section title="Recommandés pour vous" href="/explorer" index={3}><ProductRail items={recommended.items} trust={trust} /></Section>
+          <Section title="Produits populaires" href="/explorer?tri=popular"><ProductRail items={popular.items} trust={trust} /></Section>
+          <Section title="Recommandés pour vous" href="/explorer"><ProductRail items={recommended.items} trust={trust} /></Section>
         </>
       )}
 

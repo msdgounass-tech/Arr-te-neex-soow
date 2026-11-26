@@ -14,7 +14,7 @@ test("courbes identiques en CSS et en TypeScript", () => {
 
 test("durées identiques en CSS et en TypeScript", () => {
   for (const [key, value] of Object.entries(dur)) {
-    const name = key === "stagger" ? "stagger" : `dur-${key}`;
+    const name = key === "stagger" ? "stagger" : `dur-${key.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}`;
     assert.equal(cssVar(name), `${Math.round(value * 1000)}ms`, name);
   }
 });

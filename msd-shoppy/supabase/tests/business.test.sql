@@ -187,3 +187,10 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
 select public.ensure_subscription_reminders();
 select public.ensure_subscription_reminders();
 select pg_temp.ok((select count(*) = 1 from public.notifications where title = 'Votre essai gratuit se termine bientôt'), 'rappel de fin d''essai créé une seule fois');
+
+-- ── Boutique expirée : les spécialités ne peuvent pas être recréées (l'action serveur bloque avant toute suppression)
+reset role;
+update public.subscriptions set trial_ends_at = now() - interval '1 minute', status = 'trial' where shop_id = (select id from public.shops where name = 'Bamba Tech');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.ok(not public.shop_can_manage(public.my_shop_id()), 'shop_can_manage = faux après expiration (utilisé par l''action serveur)');
+select pg_temp.ok(pg_temp.fails($$insert into public.shop_specialties (shop_id, category_id) values (public.my_shop_id(), 1)$$, null), 'ajout de spécialité refusé après expiration');

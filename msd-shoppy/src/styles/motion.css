@@ -10,6 +10,7 @@
   --dur-reveal: 300ms;
   --dur-modal: 300ms;
   --dur-sheet: 400ms;
+  --dur-sheet-exit: 250ms;
   --dur-toast: 400ms;
   --stagger: 50ms;
 }
@@ -30,27 +31,33 @@
   .card-interactive:hover .card-zoom { transform: scale(1.03); }
 }
 .card-zoom { transition: transform var(--dur-reveal) var(--ease-out); }
+.fade-img.card-zoom { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
+/* Un appui sur un bouton intérieur (favori) ne fait pas réagir la carte entière */
+.card-interactive:has(.fav-btn:active) { transform: none; }
 
-/* Entrée de page (template.tsx) */
-.page-enter { animation: page-in var(--dur-base) var(--ease-out); }
-@keyframes page-in { from { opacity: 0; transform: translateY(4px); } }
+/* Entrée de page (template.tsx) : navigation fréquente → fondu court uniquement */
+.page-enter { animation: fade var(--dur-fast) var(--ease-out); }
 
-/* Apparition au défilement : accueil et pages vitrines uniquement */
-.reveal { opacity: 0; transform: translateY(8px);
+/* Apparition au défilement : accueil et pages vitrines uniquement.
+   Masqué seulement quand le JS tourne (html[data-js]) : sans JS, le contenu reste visible. */
+html[data-js] .reveal:not([data-visible="true"]) { opacity: 0; transform: translateY(8px); }
+.reveal {
   transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out);
-  transition-delay: calc(var(--i, 0) * var(--stagger)); }
-.reveal[data-visible="true"] { opacity: 1; transform: none; }
+  transition-delay: calc(min(var(--i, 0), 5) * var(--stagger)); }
 
 /* Image : fondu au chargement pour éviter l'apparition brutale */
-.fade-img { opacity: 0; transition: opacity var(--dur-base) ease; }
+.fade-img { opacity: 0; transition: opacity var(--dur-base) var(--ease-out); }
 .fade-img[data-loaded="true"] { opacity: 1; }
 
 /* Favori : petit rebond au changement d'état (transition interruptible) */
-.fav-icon { transition: transform var(--dur-press) var(--ease-out), color var(--dur-fast) ease, fill var(--dur-fast) ease; }
-.fav-btn:active .fav-icon { transform: scale(0.85); }
-.fav-btn[data-active="true"] .fav-icon { transform: scale(1); }
+.fav-icon { transition: transform var(--dur-press) var(--ease-out), color var(--dur-fast) ease; }
+.fav-btn:active .fav-icon { transform: scale(0.9); }
 
-/* Notifications : transitions (jamais de keyframes), entrée par le bas */
+/* Notifications : transitions (jamais de keyframes), entrée et sortie par le bas.
+   L'emplacement se replie (hauteur de grille) pour que les voisins glissent au lieu de sauter. */
+.toast-slot { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur-toast) ease; }
+.toast-slot[data-state="closing"] { grid-template-rows: 0fr; }
+.toast-slot > * { min-height: 0; }
 .toast { transition: transform var(--dur-toast) ease, opacity var(--dur-toast) ease; }
 .toast[data-state="open"] { @starting-style { opacity: 0; transform: translateY(100%); } }
 .toast[data-state="closing"] { opacity: 0; transform: translateY(100%); }
@@ -67,8 +74,8 @@
 @keyframes pulse { 50% { opacity: 0.55; } }
 
 /* Coche de réussite (moments rares) */
-.success-check { stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw 420ms var(--ease-out) 120ms forwards; }
-.success-ring { transform-origin: center; animation: ring-in 360ms var(--ease-out); }
+.success-check { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 420ms var(--ease-out) 120ms forwards; }
+.success-ring { transform-box: fill-box; transform-origin: center; animation: ring-in 360ms var(--ease-out); }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes ring-in { from { opacity: 0; transform: scale(0.9); } }
 
@@ -79,12 +86,12 @@
 
 /* Mouvement réduit : mêmes durées, opacité seule, plus aucun déplacement */
 @media (prefers-reduced-motion: reduce) {
-  .page-enter { animation-name: fade; }
-  .reveal, .reveal[data-visible="true"] { transform: none; }
+  html[data-js] .reveal:not([data-visible="true"]) { transform: none; }
   .press:active, .card-interactive:active, .fav-btn:active .fav-icon { transform: none; }
   .card-interactive:hover .card-zoom { transform: none; }
   .toast[data-state="open"] { @starting-style { transform: none; } }
   .toast[data-state="closing"] { transform: none; }
+  .toast-slot { transition-duration: 1ms; }
   .popover { @starting-style { transform: none; } }
   .skeleton { animation: none; }
   .success-check { animation-duration: 1ms; }

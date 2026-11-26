@@ -16,9 +16,9 @@ export function Checklist({ steps, done, total, compact = false }: { steps: Step
         <span className="text-sm font-semibold text-orange-text">{done} / {total}</span>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-mist" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label="Étapes terminées">
-        <div className="h-full origin-left rounded-full bg-orange-strong" style={{ transform: `scaleX(${done / total})`, transition: "transform var(--dur-reveal) var(--ease-out)" }} />
+        <div className="h-full rounded-full bg-orange-strong" style={{ transform: `translateX(${(done / total) * 100 - 100}%)`, transition: "transform var(--dur-reveal) var(--ease-out)" }} />
       </div>
-      <ul className="mt-4 space-y-2" aria-busy={pending}>
+      <ul className={`mt-4 space-y-2 transition-opacity duration-150 ${pending ? "opacity-60" : ""}`} aria-busy={pending}>
         {list.map((s) => (
           <li key={s.key} className={`flex items-start gap-3 rounded-xl p-2 ${s.dismissed ? "opacity-60" : ""}`}>
             <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full ${s.done ? "bg-success text-white" : "border-2 border-line"}`}>{s.done && <Icon name="check" size={14} strokeWidth={3} />}</span>
@@ -30,10 +30,10 @@ export function Checklist({ steps, done, total, compact = false }: { steps: Step
                   <Link href={`/vendeur/assistant#${s.key}`} className="link">Comment faire ?</Link>
                   <Link href={`/vendeur/assistant?demo=${s.key}`} className="link">Voir la démonstration</Link>
                   {s.dismissed
-                    ? <button type="button" className="text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "reset"); })}>Reprendre</button>
-                    : <button type="button" className="text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "dismissed"); })}>Ignorer pour l'instant</button>}
+                    ? <button type="button" className="press text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "reset"); })}>Reprendre</button>
+                    : <button type="button" className="press text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "dismissed"); })}>Ignorer pour l'instant</button>}
                   {!["create_shop", "complete_profile", "choose_domain", "first_products", "improve_presentation"].includes(s.key) &&
-                    <button type="button" className="text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "done"); })}>Marquer comme fait</button>}
+                    <button type="button" className="press text-slate hover:text-ink" onClick={() => start(async () => { await setAssistantStepAction(s.key, "done"); })}>Marquer comme fait</button>}
                 </div>
               )}
             </div>

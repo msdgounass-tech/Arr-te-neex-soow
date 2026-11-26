@@ -11,8 +11,8 @@ export function QualityPanel({ input }: { input: QualityInput }) {
       <div className="mt-3 flex items-center gap-4">
         <svg width="64" height="64" viewBox="0 0 36 36" aria-hidden="true" className="-rotate-90">
           <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--color-mist)" strokeWidth="4" />
-          <circle cx="18" cy="18" r="15.5" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(score / 100) * 97.4} 97.4`}
-            style={{ transition: "stroke-dasharray var(--dur-reveal) var(--ease-out)" }} />
+          <circle cx="18" cy="18" r="15.5" fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" pathLength={100} strokeDasharray="100" strokeDashoffset={100 - score}
+            style={{ transition: "stroke-dashoffset var(--dur-reveal) var(--ease-out), stroke var(--dur-fast) ease" }} />
         </svg>
         <div><p className="font-display text-2xl font-bold">{score}<span className="text-sm text-slate"> / 100</span></p><p className="text-sm" style={{ color }}>{label}</p></div>
       </div>

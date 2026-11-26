@@ -84,6 +84,8 @@ export async function updateShopAction(_: ActionResult | null, form: FormData): 
   if (!parsed.success) return { ok: false, error: "Vérifiez les informations de la boutique.", fields: fieldErrors(parsed.error) };
   const { sb, shop } = await ctx();
   if (!shop) return { ok: false, error: "Boutique introuvable." };
+  const { data: canManage } = await sb.rpc("shop_can_manage", { p_shop: shop.id });
+  if (!canManage) return { ok: false, error: friendlyError("ABONNEMENT_INACTIF") };
   const { specialties, ...d } = parsed.data;
   const patch: Record<string, unknown> = { ...d, public_phone: d.public_phone || null, public_whatsapp: d.public_whatsapp || null, public_email: d.public_email || null,
     return_policy: String(form.get("return_policy") ?? "").trim().slice(0, 1000) || null, address_public: String(form.get("address_public") ?? "").trim().slice(0, 200) || null,

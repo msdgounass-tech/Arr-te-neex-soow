@@ -16,8 +16,12 @@ export const viewport: Viewport = { themeColor: "#ffffff", width: "device-width"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
-      <body className="min-h-dvh">{children}</body>
+    <html lang="fr" suppressHydrationWarning>
+      <body className="min-h-dvh">
+        {/* Active les apparitions au défilement uniquement si JavaScript s'exécute */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.dataset.js=''" }} />
+        {children}
+      </body>
     </html>
   );
 }

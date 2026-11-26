@@ -12,6 +12,7 @@ export const dur = {
   reveal: 0.3,
   modal: 0.3,
   sheet: 0.4,
+  sheetExit: 0.25,
   toast: 0.4,
   stagger: 0.05,
 } as const;
