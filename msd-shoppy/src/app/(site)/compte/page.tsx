@@ -19,6 +19,13 @@ export default async function AccountPage() {
           <span className="text-sm text-white/80">{mine ? "Accéder à mon espace vendeur" : "7 jours d'essai gratuit, sans engagement"}</span></span>
         <Icon name="chevron-right" />
       </Link>
+      {profile?.is_platform_admin && (
+        <Link href="/admin" className="press mt-3 flex items-center gap-4 rounded-3xl border-2 border-orange-strong p-5">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-orange-soft text-orange-text"><Icon name="shield" size={24} /></span>
+          <span className="flex-1"><b className="block">Administration de MSD Shoppy</b><span className="text-sm text-slate">Toutes les boutiques, commandes, paiements et utilisateurs</span></span>
+          <Icon name="chevron-right" />
+        </Link>
+      )}
       <div className="mt-6"><AccountMenu /></div>
     </div>
   );

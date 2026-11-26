@@ -207,3 +207,18 @@ select pg_temp.ok(pg_temp.fails($$select public.create_shop('Anonyme', '', (sele
   'un compte anonyme ne peut pas ouvrir de boutique');
 reset role;
 select pg_temp.ok((select count(*) = 0 from public.shops where is_demo), 'aucune boutique de démo par défaut');
+
+-- ── Administration de la plateforme
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.ok(pg_temp.fails($$select public.admin_overview()$$, 'INTERDIT'), 'un vendeur ne peut pas ouvrir la vue d''ensemble admin');
+select pg_temp.ok(pg_temp.fails($$select * from public.admin_users()$$, 'INTERDIT'), 'un vendeur ne peut pas lister les utilisateurs');
+select pg_temp.ok((select count(*) = 0 from public.orders where shop_id <> public.my_shop_id()), 'un vendeur ne lit toujours pas les commandes des autres');
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000ad');
+select pg_temp.ok((public.admin_overview() ->> 'shops')::int >= 2, 'l''administrateur voit la vue d''ensemble');
+select pg_temp.ok((select count(*) >= 4 from public.admin_users()), 'l''administrateur liste les utilisateurs avec leur e-mail');
+select pg_temp.ok((select count(*) >= 2 from public.orders), 'l''administrateur lit toutes les commandes');
+select public.admin_set_subscription((select id from public.shops where name = 'Bamba Tech'), 'suspend');
+select pg_temp.ok((select status = 'suspended' from public.subscriptions where shop_id = (select id from public.shops where name = 'Bamba Tech')), 'suspension d''une boutique');
+select public.admin_set_subscription((select id from public.shops where name = 'Bamba Tech'), 'activate', 30);
+select pg_temp.ok((select status = 'active' and current_period_end > now() + interval '29 days' from public.subscriptions where shop_id = (select id from public.shops where name = 'Bamba Tech')), 'activation 30 jours');

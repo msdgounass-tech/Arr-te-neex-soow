@@ -22,7 +22,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
   const user = await getUser();
   if (!user) return null;
   const supabase = await supabaseServer();
-  const { data } = await supabase.from("profiles").select("id, full_name, phone, avatar_url, notify_promotions").eq("id", user.id).maybeSingle();
+  const { data } = await supabase.from("profiles").select("id, full_name, phone, avatar_url, notify_promotions, is_platform_admin").eq("id", user.id).maybeSingle();
   return data as Profile | null;
 });
 
@@ -48,6 +48,13 @@ export const getMyShop = cache(async (): Promise<MyShop | null> => {
   const status = effectiveStatus(sub);
   return { shop: shop as Shop, subscription: sub, status, canManage: status === "trial" || status === "active" };
 });
+
+export async function requireAdmin() {
+  await requireUser("/admin");
+  const profile = await getProfile();
+  if (!profile?.is_platform_admin) redirect("/compte");
+  return profile;
+}
 
 export async function requireShop() {
   await requireUser("/vendeur");

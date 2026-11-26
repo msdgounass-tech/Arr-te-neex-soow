@@ -9,6 +9,7 @@ def base(bg1, bg2, size=1000):
         t = y / size; c = tuple(int(bg1[i] * (1 - t) + bg2[i] * t) for i in range(3)); d.line([(0, y), (size, y)], fill=c)
     return im, d
 def tag(d):
+    return
     d.rounded_rectangle([40, 40, 230, 110], 30, fill=(28, 34, 48)); d.text((70, 52), "DÉMO", font=font(40), fill=(255, 255, 255))
 def wax(d, box, c1, c2, seed):
     random.seed(seed); x0, y0, x1, y1 = box

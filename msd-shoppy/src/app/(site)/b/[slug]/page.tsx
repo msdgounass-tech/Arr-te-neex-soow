@@ -50,7 +50,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug: str
         {shop.cover_url && <Image src={shop.cover_url} alt="" fill priority sizes="100vw" className="object-cover" />}
       </div>
       <div className="container-page">
-        <div className="-mt-10 flex items-end gap-4">
+        <div className="relative z-10 -mt-10 flex items-end gap-4">
           <div className="rounded-3xl bg-white p-1"><ShopAvatar shop={shop} size={88} /></div>
         </div>
         <div className="mt-3 grid gap-6 md:grid-cols-[1fr_340px]">

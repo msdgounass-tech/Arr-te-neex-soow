@@ -29,8 +29,8 @@ export default async function SellerLayout({ children }: { children: React.React
           {status !== "suspended" && <Link href="/vendeur/abonnement" className="font-semibold underline">Réactiver ma boutique</Link>}
         </div>
       )}
-      <div className="grid gap-6 md:grid-cols-[230px_1fr]">
-        <aside className="md:sticky md:top-20 md:h-fit">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[230px_minmax(0,1fr)]">
+        <aside className="min-w-0 md:sticky md:top-20 md:h-fit">
           <Link href={`/b/${shop.slug}`} className="press mb-4 hidden items-center gap-3 rounded-2xl p-2 hover:bg-mist md:flex">
             <ShopAvatar shop={shop} size={40} /><span className="min-w-0"><b className="block truncate text-sm">{shop.name}</b><span className="text-xs text-slate">Voir ma boutique</span></span>
           </Link>

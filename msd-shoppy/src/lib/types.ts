@@ -61,7 +61,7 @@ export interface Notification {
   id: string; kind: "order" | "subscription" | "shop" | "tip" | "announcement"; title: string; body: string; link: string | null;
   is_promotional: boolean; read_at: string | null; created_at: string;
 }
-export interface Profile { id: string; full_name: string; phone: string | null; avatar_url: string | null; notify_promotions: boolean }
+export interface Profile { id: string; full_name: string; phone: string | null; avatar_url: string | null; notify_promotions: boolean; is_platform_admin?: boolean }
 export interface Address {
   id: string; user_id: string; label: string; recipient_name: string; phone: string; country_code: string; region: string;
   city: string; details: string; is_default: boolean;

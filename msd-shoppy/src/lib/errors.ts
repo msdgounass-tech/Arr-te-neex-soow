@@ -32,6 +32,9 @@ const MESSAGES: Record<string, string> = {
   COMMANDES_EN_COURS: "Vous avez des commandes en cours. Attendez qu'elles soient terminées ou annulées.",
   DONNEES_PERSONNELLES_RESTANTES: "La suppression n'a pas pu effacer toutes vos données. Réessayez.",
   COMPTE_REQUIS: "Créez un compte (e-mail et mot de passe) pour effectuer cette action.",
+  ACTION_INVALIDE: "Action non reconnue.",
+  BOUTIQUE_INTROUVABLE: "Boutique introuvable.",
+  PAIEMENT_INTROUVABLE: "Ce paiement a déjà été traité.",
   SLUG_INDISPONIBLE: "Ce nom est déjà très utilisé. Essayez une variante.",
 };
 
