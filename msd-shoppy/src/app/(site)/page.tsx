@@ -43,7 +43,7 @@ export default async function HomePage() {
           <h1 className="max-w-2xl text-[2rem] font-extrabold leading-[1.05] text-white md:text-5xl">
             Les boutiques du Sénégal, réunies en un seul endroit.
           </h1>
-          <p className="mt-3 max-w-xl text-base text-white/95 md:text-lg">Trouvez un produit, comparez les vendeurs et commandez directement chez eux.</p>
+          <p className="mt-3 max-w-xl text-base font-medium text-ink md:text-lg">Trouvez un produit, comparez les vendeurs et commandez directement chez eux.</p>
           <div className="mt-5 max-w-2xl"><Suspense fallback={<div className="h-14 rounded-full bg-white" />}><HeaderSearch large placeholder="Robe wax, téléphone, engrais…" /></Suspense></div>
         </div>
       </section>
