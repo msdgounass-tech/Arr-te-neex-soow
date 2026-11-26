@@ -54,7 +54,7 @@ export interface SubscriptionPlan { code: string; name: string; price_xof: numbe
 
 export interface Trust {
   completed_orders: number; reviews_count: number; average_rating: number | null; member_since: string; days_active: number;
-  verified: boolean; email_verified: boolean; response_rate: number | null; avg_response_hours: number | null; badges: string[];
+  verified: boolean; response_rate: number | null; avg_response_hours: number | null; badges: string[];
 }
 export interface Review { id: string; order_id: string; shop_id: string; rating: number; comment: string; created_at: string }
 export interface Notification {

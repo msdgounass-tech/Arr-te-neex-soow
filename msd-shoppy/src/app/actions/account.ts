@@ -85,6 +85,11 @@ export async function deleteAccountAction(_: ActionResult | null, form: FormData
   if (form.get("confirm") !== "SUPPRIMER") return { ok: false, error: "Saisissez SUPPRIMER pour confirmer." };
   const { sb, user } = await userOrFail();
   if (!user) return { ok: false, error: "Connectez-vous pour continuer." };
+  // Données personnelles effacées avec les droits de l'utilisateur (règles RLS), puis anonymisation en base.
+  for (const table of ["addresses", "favorite_products", "favorite_shops", "notifications", "assistant_progress"]) {
+    const { error: e } = await sb.from(table).delete().eq("user_id", user.id);
+    if (e) return { ok: false, error: friendlyError(e) };
+  }
   const { error } = await sb.rpc("delete_my_account");
   if (error) return { ok: false, error: friendlyError(error) };
   if (hasServiceRole()) {

@@ -6,7 +6,6 @@ import { formatDate, plural } from "@/lib/format";
 
 export const BADGES: Record<string, { label: string; icon: string; rule: string }> = {
   verified: { label: "Boutique vérifiée", icon: "badge", rule: "Identité et coordonnées contrôlées par l'équipe MSD Shoppy." },
-  email_verified: { label: "E-mail confirmé", icon: "mail", rule: "Le vendeur a confirmé son adresse e-mail." },
   trusted_seller: { label: "Vendeur confirmé", icon: "shield", rule: "Au moins 5 commandes terminées et une note moyenne de 4/5 ou plus sur 3 avis minimum." },
   responsive: { label: "Très réactif", icon: "clock", rule: "Répond à 90 % des commandes en moins de 24 h (sur 5 commandes minimum)." },
   established: { label: "Boutique établie", icon: "store", rule: "Active sur MSD Shoppy depuis plus de 6 mois." },

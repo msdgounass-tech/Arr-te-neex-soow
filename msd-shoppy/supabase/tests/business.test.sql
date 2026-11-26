@@ -140,8 +140,7 @@ select pg_temp.as_anon();
 select pg_temp.ok((public.get_shop_trust((select id from public.shops where name = 'Awa Couture')) ->> 'completed_orders')::int = 1,
   'confiance : seules les commandes terminées comptent (annulée exclue)');
 select pg_temp.ok((public.get_shop_trust((select id from public.shops where name = 'Awa Couture')) ->> 'average_rating')::numeric = 5, 'note moyenne issue des avis vérifiés');
-select pg_temp.ok((public.get_shop_trust((select id from public.shops where name = 'Awa Couture')) -> 'badges') ? 'email_verified', 'badge e-mail vérifié attribué automatiquement');
-select pg_temp.ok(not ((public.get_shop_trust((select id from public.shops where name = 'Bamba Tech')) -> 'badges') ? 'email_verified'), 'pas de badge sans vérification');
+select pg_temp.ok(jsonb_array_length(public.get_shop_trust((select id from public.shops where name = 'Awa Couture')) -> 'badges') = 0, 'aucun badge sans critère réellement atteint (boutique récente, 1 commande)');
 
 -- Statistiques : les visites du client comptent, celles du vendeur non
 reset role;
@@ -175,6 +174,10 @@ select pg_temp.ok((select count(*) = 1 from public.products), 'après validation
 -- ── Suppression de compte client
 reset role;
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+insert into public.addresses (user_id, recipient_name, phone, region, city) values (auth.uid(), 'Coumba', '770000000', 'Dakar', 'Dakar');
+select pg_temp.ok(pg_temp.fails($$select public.delete_my_account()$$, 'DONNEES_PERSONNELLES_RESTANTES'), 'suppression refusée tant que les données personnelles ne sont pas effacées');
+delete from public.addresses; delete from public.favorite_products; delete from public.favorite_shops; delete from public.notifications; delete from public.assistant_progress;
+select pg_temp.ok((select count(*) = 0 from public.addresses), 'l''utilisateur efface lui-même ses données personnelles (règles RLS)');
 select public.delete_my_account();
 reset role;
 select pg_temp.ok((select count(*) = 2 from public.orders where recipient_name = 'Client supprimé'), 'suppression du compte : commandes anonymisées, pas effacées');

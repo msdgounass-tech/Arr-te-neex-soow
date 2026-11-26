@@ -3,7 +3,6 @@ import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
-import { supabaseAdmin, hasServiceRole } from "@/lib/supabase/admin";
 import { friendlyError, type ActionResult } from "@/lib/errors";
 import { imageSize } from "@/lib/image-meta";
 import { isValidSenegalPhone } from "@/lib/format";
@@ -42,18 +41,17 @@ function fieldErrors(err: z.ZodError) {
 }
 
 /** Envoie une image dans le stockage après vérification du propriétaire. Retourne l'URL publique. */
-async function storeImage(shopId: string, file: File, folder: string): Promise<{ url: string; width: number; height: number } | { error: string }> {
-  if (!hasServiceRole()) return { error: "Le stockage des images n'est pas encore configuré sur ce serveur." };
+/** Envoi avec la session du vendeur : Supabase Storage n'accepte que le dossier de sa propre boutique (règle media_owner_insert). */
+async function storeImage(sb: Awaited<ReturnType<typeof supabaseServer>>, shopId: string, file: File, folder: string): Promise<{ url: string; width: number; height: number } | { error: string }> {
   if (file.size > MAX_BYTES) return { error: "Image trop lourde (5 Mo maximum)." };
   const bytes = new Uint8Array(await file.arrayBuffer());
   const meta = imageSize(bytes);
   if (!meta) return { error: "Format non pris en charge. Utilisez une photo JPEG, PNG ou WebP." };
   if (meta.width < 200 || meta.height < 200) return { error: "Image trop petite (200 × 200 pixels minimum)." };
   const path = `shops/${shopId}/${folder}/${randomUUID()}.${meta.type === "jpeg" ? "jpg" : meta.type}`;
-  const admin = supabaseAdmin();
-  const { error } = await admin.storage.from("media").upload(path, bytes, { contentType: `image/${meta.type}`, cacheControl: "31536000", upsert: false });
+  const { error } = await sb.storage.from("media").upload(path, bytes, { contentType: `image/${meta.type}`, cacheControl: "31536000", upsert: false });
   if (error) return { error: "L'envoi de l'image a échoué. Réessayez." };
-  return { url: admin.storage.from("media").getPublicUrl(path).data.publicUrl, width: meta.width, height: meta.height };
+  return { url: sb.storage.from("media").getPublicUrl(path).data.publicUrl, width: meta.width, height: meta.height };
 }
 
 export async function createShopAction(_: ActionResult<{ slug: string }> | null, form: FormData): Promise<ActionResult<{ slug: string }>> {
@@ -70,7 +68,7 @@ export async function createShopAction(_: ActionResult<{ slug: string }> | null,
   const logo = form.get("logo");
   let warning: string | undefined;
   if (logo instanceof File && logo.size > 0) {
-    const up = await storeImage(id as string, logo, "logo");
+    const up = await storeImage(sb, id as string, logo, "logo");
     if ("error" in up) warning = `Boutique créée, mais le logo n'a pas pu être enregistré : ${up.error}`;
     else await sb.from("shops").update({ logo_url: up.url }).eq("id", id);
   }
@@ -93,7 +91,7 @@ export async function updateShopAction(_: ActionResult | null, form: FormData): 
   for (const [key, folder] of [["logo", "logo"], ["cover", "cover"]] as const) {
     const f = form.get(key);
     if (f instanceof File && f.size > 0) {
-      const up = await storeImage(shop.id, f, folder);
+      const up = await storeImage(sb, shop.id, f, folder);
       if ("error" in up) return { ok: false, error: up.error };
       patch[`${key}_url`] = up.url;
     }
@@ -179,7 +177,7 @@ export async function uploadProductImageAction(productId: string, form: FormData
   if ((count ?? 0) >= 8) return { ok: false, error: "8 photos maximum par produit." };
   const file = form.get("file");
   if (!(file instanceof File)) return { ok: false, error: "Aucune image reçue." };
-  const up = await storeImage(shop.id, file, "products");
+  const up = await storeImage(sb, shop.id, file, "products");
   if ("error" in up) return { ok: false, error: up.error };
   const { data, error } = await sb.from("product_images").insert({ product_id: productId, url: up.url, width: up.width, height: up.height, position: count ?? 0 }).select("id").single();
   if (error) return { ok: false, error: friendlyError(error) };
