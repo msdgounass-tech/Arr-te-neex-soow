@@ -77,6 +77,14 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 - Déploiement : envoi direct par l'API Vercel (jeton d'équipe msd-tech enregistré comme secret réseau de l'environnement cloud) ;
   le dépôt GitHub n'est pas relié (compte GitHub de Vercel = MSD18gns, dépôt = msdgounass-tech).
 
+## Administration et démo (2026-11-26)
+
+- Espace **/admin** réservé aux profils `is_platform_admin` (compte propriétaire msdgounass@… créé confirmé). Lecture complète via RLS `admin_read`,
+  actions via fonctions `admin_*` (migration 9). Pages : vue d'ensemble, paiements, boutiques, produits, commandes, utilisateurs, signalements, avis.
+- Mode démo : `NEXT_PUBLIC_DEMO_MODE=1` sur Vercel, page **/demo**, 6 comptes `@demo.msdshoppy.sn` (mot de passe DemoMSD2026),
+  boutiques `is_demo`. Scripts : `scripts/demo/*`. Suppression : `supabase/demo/remove_demo.sql`.
+- Inscriptions publiques : toujours bloquées tant que « Confirm email » reste actif (`/auth/v1/settings` → `mailer_autoconfirm: false`).
+
 ## Journal
 
 - **2026-11-25** — Analyse de l'environnement, plan, installation des 4 skills, architecture d'animations, vérification technique (maquette Motion testée, 3 corrections).
