@@ -31,7 +31,7 @@ Fichier de reprise : à lire en premier dans toute nouvelle session, avant d'ouv
 ## État au 2026-11-26
 
 Construit et vérifié : base (5 migrations, 58 tests métier/sécurité), 44 routes, 16 tests unitaires, compilation de production, captures mobile/ordinateur.
-Revue des animations : `/review-animations` exécuté (voir journal).
+Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, puis **Approuver** (détail dans `ANIMATIONS.md`, section 10). Accessibilité : axe-core, 0 violation WCAG A/AA sur 10 pages.
 
 **Bloquant pour les tests de bout en bout avec de vraies données** : aucun projet Supabase dédié n'existe encore
 (offre gratuite = 2 projets actifs, déjà utilisés) et l'environnement cloud refuse le téléchargement des binaires Supabase locaux.

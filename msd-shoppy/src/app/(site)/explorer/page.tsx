@@ -44,7 +44,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
     const pageHref = (n: number) => { const p = new URLSearchParams(sp as Record<string, string>); p.set("page", String(n)); return `/explorer?${p}`; };
     content = res.items.length ? (
       <>
-        <ProductGrid items={res.items} trust={trust} priorityCount={4} />
+        <ProductGrid items={res.items} trust={trust} priorityCount={8} />
         {pages > 1 && (
           <nav aria-label="Pages" className="mt-8 flex items-center justify-center gap-2">
             {page > 1 && <Link className="btn btn-secondary press" href={pageHref(page - 1)}>Précédent</Link>}

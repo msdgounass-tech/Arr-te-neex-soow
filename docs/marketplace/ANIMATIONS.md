@@ -138,7 +138,7 @@ Les onglets, accordéons (`<details>`) et barres de progression utilisent direct
 | --- | --- | --- |
 | 1 | Bloquer | Défilement au doigt bloqué par le glisser de la feuille, zoom des cartes sans transition, triple pression sur le cœur, contenu au-dessus de la ligne de flottaison masqué, toasts qui sautent, sortie de feuille lente, démonstration non directionnelle, anneaux SVG |
 | 2 | Bloquer | Images et sections masquées avant l'hydratation, feuille vidée pendant sa sortie, fondu de page supprimé, zoom ramené à 200 ms, entrée des toasts, synchronisation en mouvement réduit, préchargement de la feuille |
-| 3 | voir `docs/marketplace/CONTEXTE.md` (journal) | |
+| 3 | **Approuver** | Finitions appliquées : repli des toasts supprimé en mouvement réduit, sorties en fondu à 150 ms, 8 images prioritaires dans Explorer |
 
 Règles ajoutées : un élément n'est masqué pour une apparition que s'il est **sous la ligne de flottaison** au moment de l'observation ;
 une image n'est masquée en attendant son chargement que **si JavaScript s'exécute** ; une feuille garde son contenu pendant sa sortie.

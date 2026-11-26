@@ -91,6 +91,7 @@ html[data-js] .fade-img:not([data-loaded="true"]) { opacity: 0; }
   .card-interactive:hover .card-zoom { transform: none; }
   .toast[data-state="open"] { @starting-style { transform: none; } }
   .toast[data-state="closing"] { transform: none; }
+  .toast-slot { transition: none; }
   .popover { @starting-style { transform: none; } }
   .skeleton { animation: none; }
   .success-check { animation-duration: 1ms; }
