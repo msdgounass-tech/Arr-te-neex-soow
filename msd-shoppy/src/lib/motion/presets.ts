@@ -24,6 +24,14 @@ export const backdropMotion = {
   transition: { duration: dur.sheet, ease: ease.out },
 } as const;
 
+/** Mouvement réduit : voile à la même durée que le panneau. */
+export const backdropFadeMotion = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0, transition: { duration: dur.sheetExit, ease: ease.out } },
+  transition: { duration: dur.base, ease: ease.out },
+} as const;
+
 /** Mouvement réduit : la feuille apparaît en fondu, sans glissement. */
 export const sheetFadeMotion = {
   initial: { opacity: 0 },

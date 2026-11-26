@@ -5,7 +5,7 @@ let observer: IntersectionObserver | null = null;
 function getObserver() {
   observer ??= new IntersectionObserver((entries) => {
     for (const e of entries) {
-      if (e.isIntersecting) { (e.target as HTMLElement).dataset.visible = "true"; observer!.unobserve(e.target); }
+      if (e.isIntersecting) { (e.target as HTMLElement).dataset.reveal = "visible"; observer!.unobserve(e.target); }
     }
   }, { threshold: 0.15 });
   return observer;
@@ -18,6 +18,9 @@ export function Reveal({ children, index = 0, className = "", as: Tag = "div" }:
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Déjà visible à l'écran (ou au-dessus) : jamais masqué. Sinon on attend qu'il entre dans la vue.
+    if (el.getBoundingClientRect().top < window.innerHeight) return;
+    el.dataset.reveal = "pending";
     const obs = getObserver();
     obs.observe(el);
     return () => obs.unobserve(el);

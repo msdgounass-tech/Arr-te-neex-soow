@@ -30,32 +30,32 @@
   .card-interactive:hover::after { opacity: 1; }
   .card-interactive:hover .card-zoom { transform: scale(1.03); }
 }
-.card-zoom { transition: transform var(--dur-reveal) var(--ease-out); }
-.fade-img.card-zoom { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
+.card-zoom { transition: transform var(--dur-base) var(--ease-out); }
+.fade-img.card-zoom { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
 /* Un appui sur un bouton intérieur (favori) ne fait pas réagir la carte entière */
 .card-interactive:has(.fav-btn:active) { transform: none; }
 
-/* Entrée de page (template.tsx) : navigation fréquente → fondu court uniquement */
-.page-enter { animation: fade var(--dur-fast) var(--ease-out); }
+/* Changement de page : aucune animation (action la plus fréquente du site). */
 
 /* Apparition au défilement : accueil et pages vitrines uniquement.
-   Masqué seulement quand le JS tourne (html[data-js]) : sans JS, le contenu reste visible. */
-html[data-js] .reveal:not([data-visible="true"]) { opacity: 0; transform: translateY(8px); }
+   Seuls les éléments situés sous la ligne de flottaison au moment de l'observation sont masqués (data-reveal="pending"). */
+.reveal[data-reveal="pending"] { opacity: 0; transform: translateY(8px); }
 .reveal {
   transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out);
   transition-delay: calc(min(var(--i, 0), 5) * var(--stagger)); }
 
 /* Image : fondu au chargement pour éviter l'apparition brutale */
-.fade-img { opacity: 0; transition: opacity var(--dur-base) var(--ease-out); }
-.fade-img[data-loaded="true"] { opacity: 1; }
+.fade-img { transition: opacity var(--dur-base) var(--ease-out); }
+html[data-js] .fade-img:not([data-loaded="true"]) { opacity: 0; }
 
-/* Favori : petit rebond au changement d'état (transition interruptible) */
+/* Favori : retour discret à l'appui (transition interruptible) */
 .fav-icon { transition: transform var(--dur-press) var(--ease-out), color var(--dur-fast) ease; }
-.fav-btn:active .fav-icon { transform: scale(0.9); }
+.fav-btn:active .fav-icon { transform: scale(0.95); }
 
 /* Notifications : transitions (jamais de keyframes), entrée et sortie par le bas.
    L'emplacement se replie (hauteur de grille) pour que les voisins glissent au lieu de sauter. */
 .toast-slot { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur-toast) ease; }
+.toast-slot[data-state="open"] { @starting-style { grid-template-rows: 0fr; } }
 .toast-slot[data-state="closing"] { grid-template-rows: 0fr; }
 .toast-slot > * { min-height: 0; }
 .toast { transition: transform var(--dur-toast) ease, opacity var(--dur-toast) ease; }
@@ -86,12 +86,11 @@ html[data-js] .reveal:not([data-visible="true"]) { opacity: 0; transform: transl
 
 /* Mouvement réduit : mêmes durées, opacité seule, plus aucun déplacement */
 @media (prefers-reduced-motion: reduce) {
-  html[data-js] .reveal:not([data-visible="true"]) { transform: none; }
+  .reveal[data-reveal="pending"] { transform: none; }
   .press:active, .card-interactive:active, .fav-btn:active .fav-icon { transform: none; }
   .card-interactive:hover .card-zoom { transform: none; }
   .toast[data-state="open"] { @starting-style { transform: none; } }
   .toast[data-state="closing"] { transform: none; }
-  .toast-slot { transition-duration: 1ms; }
   .popover { @starting-style { transform: none; } }
   .skeleton { animation: none; }
   .success-check { animation-duration: 1ms; }

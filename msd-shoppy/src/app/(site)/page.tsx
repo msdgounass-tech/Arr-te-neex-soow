@@ -72,7 +72,7 @@ export default async function HomePage() {
         </section>
       ) : (
         <>
-          <Section title="Nouveautés" href="/explorer?tri=newest" reveal={false}><ProductRail items={newest.items} trust={trust} /></Section>
+          <Section title="Nouveautés" href="/explorer?tri=newest" reveal={false}><ProductRail items={newest.items} trust={trust} priority /></Section>
           {shops.length > 0 && (
             <Section title="Boutiques à découvrir" href="/explorer?vue=boutiques">
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{shops.map((s) => <li key={s.id}><ShopCard shop={s} domain={domainById.get(s.domain_id)} /></li>)}</ul>

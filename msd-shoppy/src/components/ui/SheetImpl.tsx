@@ -2,7 +2,7 @@
 import { useEffect, useId, useRef } from "react";
 import { AnimatePresence, m, useDragControls, useReducedMotion } from "motion/react";
 import { LazyMotionScope } from "@/components/motion/LazyMotionScope";
-import { backdropMotion, sheetMotion, sheetFadeMotion, drawerMotion, DISMISS_DISTANCE, DISMISS_VELOCITY } from "@/lib/motion/presets";
+import { backdropMotion, backdropFadeMotion, sheetMotion, sheetFadeMotion, drawerMotion, DISMISS_DISTANCE, DISMISS_VELOCITY } from "@/lib/motion/presets";
 import { Icon } from "./Icon";
 
 /**
@@ -15,6 +15,9 @@ export function SheetImpl({ open, onClose, title, children, footer, side = "auto
   const panel = useRef<HTMLDivElement>(null);
   const controls = useDragControls();
   const reduce = useReducedMotion();
+  // Pendant l'animation de sortie, on garde le dernier contenu affiché (pas de feuille vide qui glisse).
+  const last = useRef({ title, children, footer });
+  if (open) last.current = { title, children, footer };
   const isDesktop = typeof window !== "undefined" && side === "auto" && window.matchMedia("(min-width: 768px)").matches;
 
   useEffect(() => {
@@ -42,7 +45,7 @@ export function SheetImpl({ open, onClose, title, children, footer, side = "auto
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50" key="sheet-root">
-            <m.div {...backdropMotion} className="absolute inset-0 bg-ink/40" onClick={onClose} />
+            <m.div {...(reduce ? backdropFadeMotion : backdropMotion)} className="absolute inset-0 bg-ink/40" onClick={onClose} />
             <m.div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId}
               {...(reduce ? sheetFadeMotion : isDesktop ? drawerMotion : sheetMotion)}
               drag={isDesktop || reduce ? false : "y"} dragListener={false} dragControls={controls}
@@ -55,14 +58,14 @@ export function SheetImpl({ open, onClose, title, children, footer, side = "auto
               <div onPointerDown={(e) => { if (!isDesktop) controls.start(e); }} className={isDesktop ? "" : "touch-none"}>
               {!isDesktop && <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-line" aria-hidden="true" />}
               <div className="flex items-center justify-between gap-3 px-5 pb-3 pt-3 md:pt-5">
-                <h2 id={titleId} className="text-lg font-semibold">{title}</h2>
+                <h2 id={titleId} className="text-lg font-semibold">{last.current.title}</h2>
                 <button type="button" onClick={onClose} className="press -mr-2 rounded-full p-2 hover:bg-mist" aria-label="Fermer">
                   <Icon name="x" />
                 </button>
               </div>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">{children}</div>
-              {footer ? <div className="safe-bottom border-t border-line px-5 py-3">{footer}</div> : null}
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">{last.current.children}</div>
+              {last.current.footer ? <div className="safe-bottom border-t border-line px-5 py-3">{last.current.footer}</div> : null}
             </m.div>
           </div>
         )}

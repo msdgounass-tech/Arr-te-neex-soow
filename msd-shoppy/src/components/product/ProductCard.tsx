@@ -49,10 +49,10 @@ export function ProductGrid({ items, trust = {}, priorityCount = 0 }: { items: P
   );
 }
 
-export function ProductRail({ items, trust = {} }: { items: ProductCardData[]; trust?: Record<string, Trust> }) {
+export function ProductRail({ items, trust = {}, priority = false }: { items: ProductCardData[]; trust?: Record<string, Trust>; priority?: boolean }) {
   return (
     <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 lg:grid-cols-5">
-      {items.map((p) => <li key={p.id} className="w-[44vw] max-w-[220px] shrink-0 snap-start md:w-auto md:max-w-none"><ProductCard p={p} trust={trust[p.shop.id]} /></li>)}
+      {items.map((p, i) => <li key={p.id} className="w-[44vw] max-w-[220px] shrink-0 snap-start md:w-auto md:max-w-none"><ProductCard p={p} trust={trust[p.shop.id]} priority={priority && i < 3} /></li>)}
     </ul>
   );
 }

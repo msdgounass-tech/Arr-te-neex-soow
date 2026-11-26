@@ -62,13 +62,13 @@ Un test unitaire compare les deux fichiers pour qu'ils ne divergent jamais.
 
 | Situation | Composant / classe | Recette |
 | --- | --- | --- |
-| **Changement de page** | `app/**/template.tsx` → classe `.page-enter` | opacité 0→1 + `translateY(4px)`→0, `--dur-base`, `--ease-out`. Onglets de la barre du bas (très fréquents) : opacité seule. |
+| **Changement de page** | — | **Aucune animation** : action la plus fréquente du site (revue `/review-animations`, 2ᵉ passe). |
 | **Apparition au défilement** | `<Reveal index>` | `IntersectionObserver` partagé, **seuil 15 % de l'élément** (pas de marge négative : un élément en bas de page doit pouvoir apparaître), une seule fois, `translateY(8px)` + opacité, cascade 50 ms via `--i`. **Accueil et pages vitrines seulement**, jamais sur les grilles du catalogue. |
 | **Boutons** | classe `.press` | `:active` → `scale(0.97)`, `--dur-press`. Aucune animation de survol hors couleur. |
-| **Cartes produit / boutique** | classe `.card-interactive` | Appui `scale(0.98)` ; survol (souris seulement) : ombre via l'opacité d'un pseudo-élément, `--dur-fast`. Pas de soulèvement 3D. |
+| **Cartes produit / boutique** | classe `.card-interactive` | Appui `scale(0.98)` (neutralisé si l'appui vise le cœur) ; survol (souris seulement) : ombre via l'opacité d'un pseudo-élément et zoom de l'image en `--dur-base`. Pas de soulèvement 3D. |
 | **Images produits** | `<FadeImage>` | Opacité 0→1 au chargement, `--dur-base` : évite l'apparition brutale. Dimensions réservées (aucun décalage de mise en page). |
 | **Catégories (carrousel)** | défilement natif `scroll-snap` | Aucune animation JS. Puce active : transition de couleur `--dur-fast`. |
-| **Favori (cœur)** | `<FavoriteButton>` | Transition `scale(0.85)`→1 + couleur, `--dur-press`, interruptible. Pas de confettis (action fréquente). |
+| **Favori (cœur)** | `<FavoriteButton>` | Retour d'appui `scale(0.95)` + couleur, `--dur-press`, interruptible. Pas de toast ni de confettis (action fréquente). |
 | **Menus, listes déroulantes** | `<Popover>` / `<Menu>` | `scale(0.96)` + opacité, origine = déclencheur, `--dur-base`, sortie plus rapide. |
 | **Filtres, panier, menus mobiles** | `<Sheet>` (feuille du bas) | Motion : `translateY(100%)`→0, `--ease-drawer`, `--dur-sheet`, glisser pour fermer (vitesse > 0,11 px/ms), résistance au-delà du bord. Sur ordinateur : tiroir latéral, même composant. |
 | **Fenêtre modale** | `<Modal>` | `scale(0.96)` + opacité, centrée, `--dur-modal`. Fond : opacité seule. |
@@ -131,3 +131,14 @@ tests/motion-tokens.test.ts           cohérence CSS ↔ TS
 `src/styles/motion.css` · `src/lib/motion/{tokens,presets,features}.ts` · `src/components/motion/{MotionProvider,LazyMotionScope,Reveal,FadeImage,SuccessMark}.tsx` ·
 `src/components/ui/{Sheet,Toaster,toast}.tsx` · `src/app/(site)/template.tsx` · `tests/unit/motion-tokens.test.ts`.
 Les onglets, accordéons (`<details>`) et barres de progression utilisent directement les classes et jetons CSS.
+
+## 10. Revue `/review-animations`
+
+| Passe | Verdict | Points traités |
+| --- | --- | --- |
+| 1 | Bloquer | Défilement au doigt bloqué par le glisser de la feuille, zoom des cartes sans transition, triple pression sur le cœur, contenu au-dessus de la ligne de flottaison masqué, toasts qui sautent, sortie de feuille lente, démonstration non directionnelle, anneaux SVG |
+| 2 | Bloquer | Images et sections masquées avant l'hydratation, feuille vidée pendant sa sortie, fondu de page supprimé, zoom ramené à 200 ms, entrée des toasts, synchronisation en mouvement réduit, préchargement de la feuille |
+| 3 | voir `docs/marketplace/CONTEXTE.md` (journal) | |
+
+Règles ajoutées : un élément n'est masqué pour une apparition que s'il est **sous la ligne de flottaison** au moment de l'observation ;
+une image n'est masquée en attendant son chargement que **si JavaScript s'exécute** ; une feuille garde son contenu pendant sa sortie.
