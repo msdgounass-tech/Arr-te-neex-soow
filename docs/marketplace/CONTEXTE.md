@@ -60,6 +60,17 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 3. `cd msd-shoppy && npm install && npm test && npx tsc --noEmit && npx next build`.
 4. Chaque fin d'étape : commit + push sur la branche de travail, mise à jour du journal.
 
+## Mise en ligne (2026-11-26)
+
+- Supabase : projet `msd-shoppy` (réf. `anpmpveswepsfpdyewxv`, Paris), gratuit. `nder-wouram` mis en pause (réactivable).
+  Installé : schéma, fonctions, RLS (39 règles), stockage `media`, rappels, données de référence, durcissement (migration 6).
+  **Reste** : fonction `delete_my_account` (la confirmation Supabase n'a pas abouti via l'outil), à exécuter dans le SQL Editor.
+- Vercel : projet `msd-shoppy` (équipe msd-tech), racine `msd-shoppy`, Node 22, région cdg1, variables publiques posées.
+  **Reste** : autoriser l'application GitHub de Vercel sur le dépôt, puis brancher le dépôt (branche `ccr-9ced9e68-fhugy8`) ;
+  ajouter `SUPABASE_SERVICE_ROLE_KEY` (secret, envoi des photos) dans Vercel.
+- Auth Supabase : le service d'e-mail par défaut n'envoie qu'aux membres de l'équipe → brancher un SMTP (Resend ou Brevo, gratuits)
+  et régler Site URL / Redirect URLs sur l'adresse Vercel. Ne pas désactiver la confirmation d'e-mail : le badge « E-mail confirmé » perdrait son sens.
+
 ## Journal
 
 - **2026-11-25** — Analyse de l'environnement, plan, installation des 4 skills, architecture d'animations, vérification technique (maquette Motion testée, 3 corrections).
