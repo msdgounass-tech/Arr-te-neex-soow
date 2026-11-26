@@ -84,7 +84,9 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 - Mode démo : `NEXT_PUBLIC_DEMO_MODE=1` sur Vercel, page **/demo**, 6 comptes `@demo.msdshoppy.sn` (mot de passe DemoMSD2026),
   boutiques `is_demo`. Scripts : `scripts/demo/*`. Suppression : `supabase/demo/remove_demo.sql`.
 - Inscriptions publiques : **ouvertes** (2026-11-26) — « Confirm email » désactivé, liaison manuelle et connexions anonymes désactivées.
-  Testé : inscription → session immédiate + profil créé (compte de test supprimé). Reste : Site URL / Redirect URLs, puis SMTP (Brevo) pour « mot de passe oublié ».
+  Testé : inscription → session immédiate + profil créé (compte de test supprimé). Site URL = https://msd-shoppy.vercel.app, Redirect URLs = https://msd-shoppy.vercel.app/** (réglés par l'API de gestion).
+  Jeton Supabase (Project Settings + Auth Config en écriture, projet msd-shoppy, 90 j) enregistré comme secret réseau pour api.supabase.com.
+  Reste : SMTP (Brevo) pour « mot de passe oublié ».
 
 ## Journal
 
