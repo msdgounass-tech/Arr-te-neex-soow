@@ -71,6 +71,12 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 - Auth Supabase : le service d'e-mail par défaut n'envoie qu'aux membres de l'équipe → brancher un SMTP (Resend ou Brevo, gratuits)
   et régler Site URL / Redirect URLs sur l'adresse Vercel. Ne pas désactiver la confirmation d'e-mail : le badge « E-mail confirmé » perdrait son sens.
 
+## En ligne
+
+- **https://msd-shoppy.vercel.app** (production, protégée par l'authentification Vercel de l'équipe msd-tech tant que l'ouverture au public n'est pas décidée).
+- Déploiement : envoi direct par l'API Vercel (jeton d'équipe msd-tech enregistré comme secret réseau de l'environnement cloud) ;
+  le dépôt GitHub n'est pas relié (compte GitHub de Vercel = MSD18gns, dépôt = msdgounass-tech).
+
 ## Journal
 
 - **2026-11-25** — Analyse de l'environnement, plan, installation des 4 skills, architecture d'animations, vérification technique (maquette Motion testée, 3 corrections).
