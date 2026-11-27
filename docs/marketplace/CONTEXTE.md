@@ -73,6 +73,9 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 
 ## En ligne
 
+- Adresse principale : **https://shoppy-by-msd.vercel.app** (2026-11-27) ; l'ancienne https://msd-shoppy.vercel.app reste active.
+  `NEXT_PUBLIC_SITE_URL` et Site URL Supabase pointent sur la nouvelle ; les deux sont dans les Redirect URLs.
+
 - **https://msd-shoppy.vercel.app** (production, protégée par l'authentification Vercel de l'équipe msd-tech tant que l'ouverture au public n'est pas décidée).
 - Déploiement : envoi direct par l'API Vercel (jeton d'équipe msd-tech enregistré comme secret réseau de l'environnement cloud) ;
   le dépôt GitHub n'est pas relié (compte GitHub de Vercel = MSD18gns, dépôt = msdgounass-tech).
