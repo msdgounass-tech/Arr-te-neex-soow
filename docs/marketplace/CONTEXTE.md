@@ -1,11 +1,11 @@
-# MSD Shoppy — contexte et reprise
+# Shoppy by MSD — contexte et reprise
 
 Fichier de reprise : à lire en premier dans toute nouvelle session, avant d'ouvrir d'autres fichiers.
 À mettre à jour à chaque étape importante (section « Journal »).
 
 ## Projet
 
-- **Nom officiel : MSD Shoppy.** Marketplace multi-vendeurs, site responsive mobile d'abord, Sénégal d'abord (extensible : table `countries`).
+- **Nom officiel : Shoppy by MSD.** Marketplace multi-vendeurs, site responsive mobile d'abord, Sénégal d'abord (extensible : table `countries`).
 - Un compte = acheteur et vendeur. Consultation libre sans compte. Navigation mobile : Accueil, Explorer, **Vendre** (centre, mis en avant), Favoris, Compte.
 - Code : `msd-shoppy/` (application Next.js autonome). Documentation technique : `msd-shoppy/README.md`. Animations : `docs/marketplace/ANIMATIONS.md`.
 
@@ -19,7 +19,7 @@ Fichier de reprise : à lire en premier dans toute nouvelle session, avant d'ouv
 | Commande sans compte | **Non** (consultation libre, commande avec compte) | Avis vérifiés, suivi, notifications |
 | Expiration de l'abonnement | Boutique masquée, gestion en lecture seule, commandes en cours toujours traitables, **rien n'est supprimé** | Demande du cahier des charges |
 | Paiement des abonnements (V1) | Le vendeur déclare la référence Wave / Orange Money → statut « paiement en attente » → validation par un administrateur | Aucun paiement simulé ; API Wave/Orange Money à brancher plus tard |
-| Paiement des achats | Directement au vendeur (à la livraison, Wave, Orange Money) | MSD Shoppy n'encaisse rien en V1 |
+| Paiement des achats | Directement au vendeur (à la livraison, Wave, Orange Money) | Shoppy by MSD n'encaisse rien en V1 |
 | Fin de commande | Vendeur : livrée → terminée ; ou client : « J'ai bien reçu » (expédiée/livrée → terminée) | Seules les commandes terminées comptent comme ventes |
 | Badges | Calculés en base : e-mail confirmé, vendeur confirmé (5 commandes, 3 avis ≥ 4/5), très réactif (90 % < 24 h), établie (6 mois) ; « vérifiée » par l'admin | Critères vérifiables, non attribuables par le vendeur |
 | Qualité des fiches | Score 0–100 en base (photos 30, titre 15, description 25, prix 10, catégorie 10, disponibilité 10) ; obligatoire pour publier : catégorie + 1 photo | Ne bloque jamais au-delà de l'obligatoire |
@@ -91,4 +91,4 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 ## Journal
 
 - **2026-11-25** — Analyse de l'environnement, plan, installation des 4 skills, architecture d'animations, vérification technique (maquette Motion testée, 3 corrections).
-- **2026-11-26** — Développement de MSD Shoppy : schéma, RLS et fonctions métier (58 tests) ; design system (orange #F26B1D / #C9480B, encre #1C2230, Bricolage Grotesque + Onest) ; expérience client complète ; espace vendeur complet avec assistant ; abonnements (essai, déclaration, rappels) ; promotion Facebook ; centre d'aide ; SEO (métadonnées, JSON-LD Product/Store, sitemap, robots, aperçu Open Graph). Aucun déploiement.
+- **2026-11-26** — Développement de Shoppy by MSD : schéma, RLS et fonctions métier (58 tests) ; design system (orange #F26B1D / #C9480B, encre #1C2230, Bricolage Grotesque + Onest) ; expérience client complète ; espace vendeur complet avec assistant ; abonnements (essai, déclaration, rappels) ; promotion Facebook ; centre d'aide ; SEO (métadonnées, JSON-LD Product/Store, sitemap, robots, aperçu Open Graph). Aucun déploiement.

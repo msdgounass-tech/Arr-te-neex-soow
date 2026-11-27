@@ -56,7 +56,7 @@ export default async function StatsPage({ searchParams }: { searchParams: Promis
           <h2 className="font-semibold">Comment lire ces chiffres</h2>
           {conversion != null && <p><b>{conversion} %</b> des consultations de produits ont mené à une commande sur la période.</p>}
           <p className="text-slate">Une visite ou une consultation est comptée une fois par session de navigation. Vos propres visites ne sont jamais comptées.</p>
-          <p className="text-slate">Les ventes confirmées correspondent aux commandes terminées sur MSD Shoppy. Les commandes annulées ou refusées, et les ventes conclues uniquement sur WhatsApp, n'y figurent pas.</p>
+          <p className="text-slate">Les ventes confirmées correspondent aux commandes terminées sur Shoppy by MSD. Les commandes annulées ou refusées, et les ventes conclues uniquement sur WhatsApp, n'y figurent pas.</p>
           <Link href="/vendeur/assistant#understand_stats" className="link inline-block">Guide : comprendre ses statistiques</Link>
         </section>
       </>)}

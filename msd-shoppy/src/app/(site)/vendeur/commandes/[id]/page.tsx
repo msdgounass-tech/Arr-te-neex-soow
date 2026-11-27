@@ -18,7 +18,7 @@ export default async function SellerOrderPage({ params }: { params: Promise<{ id
   const { data } = await sb.from("orders").select("*, items:order_items(*), events:order_events(*)").eq("id", id).eq("shop_id", shop.id).maybeSingle();
   if (!data) notFound();
   const o = data as Order & { items: OrderItem[]; events: OrderEvent[] };
-  const msg = `Bonjour ${o.recipient_name}, c'est ${shop.name} (MSD Shoppy) au sujet de votre commande ${o.number} : ${STATUS[o.status].label.toLowerCase()}.`;
+  const msg = `Bonjour ${o.recipient_name}, c'est ${shop.name} (Shoppy by MSD) au sujet de votre commande ${o.number} : ${STATUS[o.status].label.toLowerCase()}.`;
   const wa = whatsappLink(o.phone, msg); const tel = telLink(o.phone);
   return (
     <div>

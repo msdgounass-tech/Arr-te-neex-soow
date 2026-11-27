@@ -1,5 +1,5 @@
 export const SITE = {
-  name: "MSD Shoppy",
+  name: "Shoppy by MSD",
   description: "Les boutiques du Sénégal au même endroit : découvrez des produits, comparez les vendeurs et commandez directement.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   country: "SN",

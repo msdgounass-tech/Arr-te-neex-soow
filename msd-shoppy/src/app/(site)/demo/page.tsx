@@ -25,7 +25,7 @@ export default function DemoPage() {
   if (!isDemoMode) notFound();
   return (
     <div className="container-page max-w-3xl py-6 md:py-10">
-      <PageTitle title="Mode démo" subtitle="Découvrez MSD Shoppy côté client et côté vendeur avec des comptes de démonstration déjà prêts. Toutes les données de ces comptes sont fictives." />
+      <PageTitle title="Mode démo" subtitle="Découvrez Shoppy by MSD côté client et côté vendeur avec des comptes de démonstration déjà prêts. Toutes les données de ces comptes sont fictives." />
       <DemoLogin accounts={ACCOUNTS} password="DemoMSD2026" />
       <p className="mt-6 rounded-2xl bg-mist p-4 text-sm text-slate">
         Mot de passe commun des comptes de démo : <b className="text-ink">DemoMSD2026</b>. Les boutiques de démonstration sont marquées « Démo » et seront supprimées avant l'ouverture au public.

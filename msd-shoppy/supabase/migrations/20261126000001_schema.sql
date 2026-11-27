@@ -1,4 +1,4 @@
--- MSD Shoppy — schéma principal
+-- Shoppy by MSD — schéma principal
 -- Monnaie : montants entiers en francs CFA (XOF, sans décimales). Pays : extensible (table countries).
 
 create extension if not exists pg_trgm with schema extensions;

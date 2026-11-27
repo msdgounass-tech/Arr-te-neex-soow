@@ -43,7 +43,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         <aside className="space-y-4">
           <BuyerOrderActions orderId={o.id} status={o.status} hasReview={Boolean(review)} />
           <section className="card space-y-3 p-4 text-sm"><h2 className="font-semibold">Vendeur</h2><Link href={`/b/${o.shop.slug}`} className="link">{o.shop.name}</Link>
-            <ContactButtons shopId={o.shop.id} phone={o.shop.public_phone} whatsapp={o.shop.public_whatsapp} size="sm" message={`Bonjour ${o.shop.name}, je vous contacte au sujet de ma commande ${o.number} sur MSD Shoppy.`} /></section>
+            <ContactButtons shopId={o.shop.id} phone={o.shop.public_phone} whatsapp={o.shop.public_whatsapp} size="sm" message={`Bonjour ${o.shop.name}, je vous contacte au sujet de ma commande ${o.number} sur Shoppy by MSD.`} /></section>
           <section className="card p-4 text-sm"><h2 className="mb-2 font-semibold">Livraison</h2><p>{o.recipient_name}<br />{o.phone}<br />{o.city}, {o.region}{o.address_details ? <><br />{o.address_details}</> : null}</p>
             <h2 className="mb-1 mt-3 font-semibold">Paiement</h2><p>{PAY[o.payment_method]}</p></section>
         </aside>

@@ -41,7 +41,7 @@ export function AuthForm({ mode, next }: { mode: Mode; next: string | null }) {
         const { data, error } = await sb.auth.signUp({ email, password, options: {
           data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/auth/callback?suite=${encodeURIComponent(safeNext(next))}` } });
         if (error) throw error;
-        if (data.session) { toast("Compte créé. Bienvenue sur MSD Shoppy."); router.replace(safeNext(next)); router.refresh(); }
+        if (data.session) { toast("Compte créé. Bienvenue sur Shoppy by MSD."); router.replace(safeNext(next)); router.refresh(); }
         else setSent(true);
       } else if (mode === "forgot") {
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?suite=/nouveau-mot-de-passe` });

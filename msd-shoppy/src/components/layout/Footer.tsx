@@ -13,7 +13,7 @@ export function Footer() {
     <footer className="mt-16 border-t border-line bg-mist pb-24 md:pb-0">
       <div className="container-page grid gap-8 py-10 md:grid-cols-4">
         <div>
-          <div className="flex items-center gap-2"><LogoMark size={28} /><span className="font-display text-lg font-bold">MSD Shoppy</span></div>
+          <div className="flex items-center gap-2"><LogoMark size={28} /><span className="font-display text-lg font-bold">Shoppy by MSD</span></div>
           <p className="mt-3 max-w-xs text-sm text-slate">Les boutiques du Sénégal au même endroit. Chaque vendeur gère sa boutique ; vous commandez directement chez lui.</p>
           <SoundToggle className="-ml-3 mt-4" />
         </div>
@@ -27,7 +27,7 @@ export function Footer() {
         ))}
       </div>
       <div className="container-page flex flex-wrap gap-x-6 gap-y-2 border-t border-line py-5 text-xs text-slate">
-        <span>© {new Date().getFullYear()} MSD Shoppy</span>
+        <span>© {new Date().getFullYear()} Shoppy by MSD</span>
         <Link href="/aide/conditions" className="hover:text-ink">Conditions d'utilisation</Link>
         <Link href="/aide/confidentialite" className="hover:text-ink">Confidentialité</Link>
       </div>

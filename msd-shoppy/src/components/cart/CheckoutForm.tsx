@@ -116,7 +116,7 @@ export function CheckoutForm({ regions, addresses, defaultName, defaultPhone }:
 
         <section className="card p-5">
           <fieldset><legend className="text-lg font-semibold">Paiement</legend>
-            <p className="mb-3 mt-1 text-sm text-slate">Le paiement se fait directement avec le vendeur. MSD Shoppy n'encaisse aucune somme.</p>
+            <p className="mb-3 mt-1 text-sm text-slate">Le paiement se fait directement avec le vendeur. Shoppy by MSD n'encaisse aucune somme.</p>
             {PAYMENTS.map(([v, l, h]) => (
               <label key={v} className="mb-2 flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 has-[:checked]:border-orange-strong">
                 <input type="radio" name="payment" value={v} className="mt-1 accent-[var(--color-orange-strong)]" checked={form.payment_method === v} onChange={set("payment_method")} />

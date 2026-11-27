@@ -25,7 +25,7 @@ export default async function SellerOrders({ searchParams }: { searchParams: Pro
       <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4">
         {TABS.map(([v, l]) => <Link key={v} href={v ? `/vendeur/commandes?statut=${v}` : "/vendeur/commandes"} aria-current={statut === v ? "page" : undefined} className="chip press">{l}</Link>)}
       </div>
-      {!orders.length ? <EmptyState icon="package" title="Aucune commande ici" text="Les commandes passées sur MSD Shoppy apparaissent ici. Partagez vos produits pour recevoir vos premières commandes." action={{ href: "/vendeur/promouvoir", label: "Partager ma boutique" }} /> : (
+      {!orders.length ? <EmptyState icon="package" title="Aucune commande ici" text="Les commandes passées sur Shoppy by MSD apparaissent ici. Partagez vos produits pour recevoir vos premières commandes." action={{ href: "/vendeur/promouvoir", label: "Partager ma boutique" }} /> : (
         <ul className="space-y-3">{orders.map((o) => (
           <li key={o.id}><Link href={`/vendeur/commandes/${o.id}`} className="card press flex items-center justify-between gap-3 p-4 hover:border-[#cfd3db]">
             <div className="min-w-0"><p className="font-semibold">{o.number}</p>

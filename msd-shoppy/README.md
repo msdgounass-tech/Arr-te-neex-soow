@@ -1,4 +1,4 @@
-# MSD Shoppy
+# Shoppy by MSD
 
 Marketplace multi-vendeurs pour le Sénégal : chaque vendeur ouvre sa boutique, publie ses produits et reçoit des commandes ;
 les acheteurs parcourent le catalogue sans compte, commandent directement et suivent leurs commandes.
@@ -41,7 +41,7 @@ npm run dev                   # http://localhost:3000
 
 ### Base de données Supabase (projet dédié)
 
-1. Créez un projet Supabase dédié à MSD Shoppy (région `eu-west`). Ne réutilisez pas un projet existant : les noms de tables et les comptes seraient partagés.
+1. Créez un projet Supabase dédié à Shoppy by MSD (région `eu-west`). Ne réutilisez pas un projet existant : les noms de tables et les comptes seraient partagés.
 2. Appliquez les migrations dans l'ordre : `supabase/migrations/*.sql`, puis `supabase/seed.sql` (pays, 14 régions, 8 domaines, 43 catégories). Avec la CLI : `npx supabase link --project-ref <ref>` puis `npx supabase db push` et l'exécution de `seed.sql`.
 3. **Authentication > URL Configuration** : Site URL = votre domaine ; Redirect URLs = `https://votre-domaine/auth/callback`, `http://localhost:3000/auth/callback`.
 4. Laissez la confirmation d'e-mail activée et configurez un SMTP (Resend, Brevo…) pour les e-mails d'inscription.

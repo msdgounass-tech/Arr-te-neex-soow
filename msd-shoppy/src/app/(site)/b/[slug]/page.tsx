@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const data = await getShopBySlug(slug);
   if (!data) return { title: "Boutique introuvable" };
   const { shop } = data;
-  const description = (shop.description || `${shop.name}, boutique à ${shop.city} sur MSD Shoppy.`).slice(0, 160);
+  const description = (shop.description || `${shop.name}, boutique à ${shop.city} sur Shoppy by MSD.`).slice(0, 160);
   return { title: shop.name, description, alternates: { canonical: `/b/${shop.slug}` },
     openGraph: { title: shop.name, description, url: `/b/${shop.slug}`, images: shop.logo_url ? [shop.logo_url] : undefined } };
 }
@@ -65,7 +65,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug: str
             {specialties.length > 0 && <ul className="mt-3 flex flex-wrap gap-2">{specialties.map((c) => <li key={c.id}><a href={`/explorer?categorie=${c.id}`} className="chip press">{c.name}</a></li>)}</ul>}
             {shop.description && <p className="mt-4 max-w-2xl whitespace-pre-line text-[0.95rem] leading-relaxed">{shop.description}</p>}
             <div className="mt-4 max-w-md space-y-2">
-              <ContactButtons shopId={shop.id} phone={shop.public_phone} whatsapp={shop.public_whatsapp} message={`Bonjour ${shop.name}, je vous contacte depuis MSD Shoppy (${SITE.url}/b/${shop.slug}).`} />
+              <ContactButtons shopId={shop.id} phone={shop.public_phone} whatsapp={shop.public_whatsapp} message={`Bonjour ${shop.name}, je vous contacte depuis Shoppy by MSD (${SITE.url}/b/${shop.slug}).`} />
               <div className="flex gap-2"><FollowShopButton shopId={shop.id} userId={user?.id ?? null} initial={following} /><ShareButton url={`/b/${shop.slug}`} title={shop.name} shopId={shop.id} /></div>
             </div>
 

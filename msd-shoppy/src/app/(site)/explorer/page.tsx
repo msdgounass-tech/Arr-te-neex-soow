@@ -14,7 +14,7 @@ const PER_PAGE = 24;
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<Params> }): Promise<Metadata> {
   const { q } = await searchParams;
-  return { title: q ? `« ${q} »` : "Explorer le catalogue", description: "Recherchez parmi les produits et les boutiques de MSD Shoppy." };
+  return { title: q ? `« ${q} »` : "Explorer le catalogue", description: "Recherchez parmi les produits et les boutiques de Shoppy by MSD." };
 }
 
 export default async function ExplorePage({ searchParams }: { searchParams: Promise<Params> }) {

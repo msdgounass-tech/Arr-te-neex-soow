@@ -1,4 +1,4 @@
--- MSD Shoppy — fonctions métier. Toute opération sensible passe par ici (prix, stock, statuts, abonnements).
+-- Shoppy by MSD — fonctions métier. Toute opération sensible passe par ici (prix, stock, statuts, abonnements).
 
 -- ───────────────────────── Utilitaires ─────────────────────────
 create or replace function public.slugify(txt text) returns text

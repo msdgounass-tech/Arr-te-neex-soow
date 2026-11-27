@@ -5,10 +5,10 @@ import { Stars } from "@/components/ui/bits";
 import { formatDate, plural } from "@/lib/format";
 
 export const BADGES: Record<string, { label: string; icon: string; rule: string }> = {
-  verified: { label: "Boutique vérifiée", icon: "badge", rule: "Identité et coordonnées contrôlées par l'équipe MSD Shoppy." },
+  verified: { label: "Boutique vérifiée", icon: "badge", rule: "Identité et coordonnées contrôlées par l'équipe Shoppy by MSD." },
   trusted_seller: { label: "Vendeur confirmé", icon: "shield", rule: "Au moins 5 commandes terminées et une note moyenne de 4/5 ou plus sur 3 avis minimum." },
   responsive: { label: "Très réactif", icon: "clock", rule: "Répond à 90 % des commandes en moins de 24 h (sur 5 commandes minimum)." },
-  established: { label: "Boutique établie", icon: "store", rule: "Active sur MSD Shoppy depuis plus de 6 mois." },
+  established: { label: "Boutique établie", icon: "store", rule: "Active sur Shoppy by MSD depuis plus de 6 mois." },
 };
 
 /** Indicateur simplifié pour les fiches produits. */
@@ -31,7 +31,7 @@ export function TrustPanel({ trust }: { trust: Trust | null }) {
   const rows: [string, string, string][] = [
     ["package", "Commandes terminées", String(trust.completed_orders)],
     ["star", "Note moyenne", trust.reviews_count > 0 && trust.average_rating != null ? `${trust.average_rating} / 5 (${plural(trust.reviews_count, "avis", "avis")})` : "Pas encore d'avis"],
-    ["clock", "Sur MSD Shoppy depuis", formatDate(trust.member_since)],
+    ["clock", "Sur Shoppy by MSD depuis", formatDate(trust.member_since)],
     ["phone", "Taux de réponse", trust.response_rate != null ? `${Math.round(trust.response_rate * 100)} % en moins de 24 h` : "Pas encore mesurable"],
   ];
   return (
@@ -60,7 +60,7 @@ export function TrustPanel({ trust }: { trust: Trust | null }) {
       ) : (
         <p className="mt-4 text-sm text-slate">Aucun badge pour le moment. Les badges sont attribués automatiquement selon l'activité réelle de la boutique.</p>
       )}
-      <p className="mt-4 text-xs text-slate">Seules les commandes passées et terminées sur MSD Shoppy comptent. Les avis proviennent uniquement de clients dont la commande est terminée.</p>
+      <p className="mt-4 text-xs text-slate">Seules les commandes passées et terminées sur Shoppy by MSD comptent. Les avis proviennent uniquement de clients dont la commande est terminée.</p>
     </section>
   );
 }

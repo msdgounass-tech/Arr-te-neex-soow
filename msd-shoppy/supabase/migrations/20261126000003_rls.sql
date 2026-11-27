@@ -1,4 +1,4 @@
--- MSD Shoppy — sécurité au niveau des lignes (RLS). Chaque table est fermée par défaut.
+-- Shoppy by MSD — sécurité au niveau des lignes (RLS). Chaque table est fermée par défaut.
 
 alter table public.countries enable row level security;
 alter table public.regions enable row level security;

@@ -1,4 +1,4 @@
-/* Système d'animations MSD Shoppy — source unique (voir docs/marketplace/ANIMATIONS.md).
+/* Système d'animations Shoppy by MSD — source unique (voir docs/marketplace/ANIMATIONS.md).
    Les mêmes valeurs existent pour Motion dans src/lib/motion/tokens.ts (test : tests/unit/motion-tokens.test.ts). */
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

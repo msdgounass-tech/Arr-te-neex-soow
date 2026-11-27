@@ -1,8 +1,8 @@
--- MSD Shoppy — installation restante (à exécuter une seule fois dans Supabase > SQL Editor)
+-- Shoppy by MSD — installation restante (à exécuter une seule fois dans Supabase > SQL Editor)
 -- Contient : fonctions métier, règles de sécurité (RLS), stockage des images, rappels d'abonnement, données de référence.
 
 -- ═════ migrations/20261126000002_functions.sql ═════
--- MSD Shoppy — fonctions métier. Toute opération sensible passe par ici (prix, stock, statuts, abonnements).
+-- Shoppy by MSD — fonctions métier. Toute opération sensible passe par ici (prix, stock, statuts, abonnements).
 
 -- ───────────────────────── Utilitaires ─────────────────────────
 create or replace function public.slugify(txt text) returns text
@@ -576,7 +576,7 @@ end $$;
 create trigger shops_touch before update on public.shops for each row execute function public.touch_updated_at();
 
 -- ═════ migrations/20261126000003_rls.sql ═════
--- MSD Shoppy — sécurité au niveau des lignes (RLS). Chaque table est fermée par défaut.
+-- Shoppy by MSD — sécurité au niveau des lignes (RLS). Chaque table est fermée par défaut.
 
 alter table public.countries enable row level security;
 alter table public.regions enable row level security;

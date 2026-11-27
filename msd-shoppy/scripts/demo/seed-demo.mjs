@@ -1,4 +1,4 @@
-// Remplit le mode démo de MSD Shoppy en passant par les mêmes règles que les vrais utilisateurs (RLS, fonctions métier).
+// Remplit le mode démo de Shoppy by MSD en passant par les mêmes règles que les vrais utilisateurs (RLS, fonctions métier).
 // Usage : NODE_USE_ENV_PROXY=1 node scripts/demo/seed-demo.mjs <dossier_images>
 // Les comptes de démo (…@demo.msdshoppy.sn, mot de passe DemoMSD2026) doivent exister ; les boutiques sont ensuite marquées is_demo.
 import { createClient } from "@supabase/supabase-js";

@@ -34,7 +34,7 @@ export default async function SubscriptionPage() {
           {status === "expired" && "Votre boutique est temporairement invisible. Vos produits, commandes et historique sont conservés : réactivez votre abonnement pour reprendre."}
           {status === "suspended" && "Votre compte vendeur est suspendu. Contactez l'assistance pour en connaître la raison."}
         </p>
-        <p className="mt-3 rounded-xl bg-mist p-3 text-xs text-slate">Les frais d'abonnement sont distincts des ventes de vos produits : MSD Shoppy ne prélève rien sur vos ventes.</p>
+        <p className="mt-3 rounded-xl bg-mist p-3 text-xs text-slate">Les frais d'abonnement sont distincts des ventes de vos produits : Shoppy by MSD ne prélève rien sur vos ventes.</p>
       </section>
 
       <section className="card p-5">

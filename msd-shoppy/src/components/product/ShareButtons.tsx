@@ -61,7 +61,7 @@ export function PromoteButton({ url, label = "Promouvoir sur Facebook" }: { url:
           <li className="flex gap-3"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-orange-soft text-xs font-bold text-orange-text">3</span>
             <p>Collez le lien comme destination. Vous choisissez vous-même le budget, la durée et le public.</p></li>
         </ol>
-        <p className="mt-4 rounded-xl bg-mist p-3 text-xs text-slate">MSD Shoppy ne crée pas de publicité à votre place et ne débite rien : la campagne et son paiement se gèrent dans votre compte Meta.</p>
+        <p className="mt-4 rounded-xl bg-mist p-3 text-xs text-slate">Shoppy by MSD ne crée pas de publicité à votre place et ne débite rien : la campagne et son paiement se gèrent dans votre compte Meta.</p>
         <a href={SITE.adsManagerUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary press mt-4 w-full"
           onClick={() => { void copy(full); }}><Icon name="external" size={18} /> Copier le lien et ouvrir Ads Manager</a>
       </Sheet>

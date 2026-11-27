@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const o = (data ?? {}) as Record<string, number>;
   return (
     <div className="container-page py-4 md:py-8">
-      <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white"><Icon name="shield" size={14} /> Administration MSD Shoppy</p>
+      <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white"><Icon name="shield" size={14} /> Administration Shoppy by MSD</p>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
         <aside className="min-w-0 md:sticky md:top-20 md:h-fit"><AdminNav badges={{ "/admin/paiements": o.payments_pending ?? 0, "/admin/signalements": o.tickets_open ?? 0, "/admin/commandes": o.orders_pending ?? 0 }} /></aside>
         <div className="min-w-0">{children}</div>

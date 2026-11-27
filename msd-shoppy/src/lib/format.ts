@@ -31,7 +31,7 @@ export function formatRelativeDays(iso: string): string {
 export function memberSince(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
   if (days < 30) return "Nouvelle boutique";
-  return `Sur MSD Shoppy depuis ${formatRelativeDays(iso).replace("il y a ", "")}`;
+  return `Sur Shoppy by MSD depuis ${formatRelativeDays(iso).replace("il y a ", "")}`;
 }
 
 /** Normalise un numéro sénégalais en format international sans « + » (ex. 221771234567). */

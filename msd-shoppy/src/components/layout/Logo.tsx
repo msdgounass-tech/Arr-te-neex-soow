@@ -13,10 +13,10 @@ export function LogoMark({ size = 32 }: { size?: number }) {
 
 export function Logo() {
   return (
-    <Link href="/" className="press flex items-center gap-2" aria-label="MSD Shoppy, accueil">
+    <Link href="/" className="press flex items-center gap-2" aria-label="Shoppy by MSD, accueil">
       <LogoMark />
       <span className="font-display text-[1.2rem] font-bold leading-none tracking-tight">
-        MSD <span className="text-orange-text">Shoppy</span>
+        Shoppy <span className="text-[0.8em] font-semibold text-orange-text">by MSD</span>
       </span>
     </Link>
   );

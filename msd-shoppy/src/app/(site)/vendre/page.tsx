@@ -5,7 +5,7 @@ import { getMyShop, getUser } from "@/lib/auth";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/motion/Reveal";
 
-export const metadata: Metadata = { title: "Vendre sur MSD Shoppy", description: "Ouvrez votre boutique en ligne au Sénégal : 7 jours d'essai gratuit, un assistant pour vous guider, vos clients commandent directement chez vous." };
+export const metadata: Metadata = { title: "Vendre sur Shoppy by MSD", description: "Ouvrez votre boutique en ligne au Sénégal : 7 jours d'essai gratuit, un assistant pour vous guider, vos clients commandent directement chez vous." };
 
 const POINTS = [
   ["store", "Votre boutique en ligne", "Logo, description, catalogue et coordonnées publiques que vous choisissez."],

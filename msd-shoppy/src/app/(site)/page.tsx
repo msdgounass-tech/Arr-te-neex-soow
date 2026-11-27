@@ -66,7 +66,7 @@ export default async function HomePage() {
         <section className="container-page mt-10">
           <div className="rounded-3xl bg-mist p-6 md:p-10">
             <h2 className="text-2xl font-bold">Les premières boutiques s'installent</h2>
-            <p className="mt-2 max-w-xl text-slate">Vous vendez au Sénégal ? Ouvrez votre boutique en quelques minutes et soyez parmi les premiers vendeurs visibles sur MSD Shoppy.</p>
+            <p className="mt-2 max-w-xl text-slate">Vous vendez au Sénégal ? Ouvrez votre boutique en quelques minutes et soyez parmi les premiers vendeurs visibles sur Shoppy by MSD.</p>
             <Link href="/vendre" className="btn btn-primary press mt-5"><Icon name="store" size={18} /> Ouvrir ma boutique</Link>
           </div>
         </section>
@@ -86,7 +86,7 @@ export default async function HomePage() {
       <Reveal as="section" className="container-page mt-12 grid gap-3 md:grid-cols-2">
         <Link href="/vendre" className="press flex items-center gap-4 rounded-3xl bg-ink p-6 text-white">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-orange"><Icon name="store" size={24} /></span>
-          <span><span className="block text-lg font-bold">Vendez sur MSD Shoppy</span>
+          <span><span className="block text-lg font-bold">Vendez sur Shoppy by MSD</span>
             <span className="text-sm text-white/80">7 jours d'essai gratuit, un assistant pour vous guider pas à pas.</span></span>
         </Link>
         <Link href="/aide/confiance" className="press flex items-center gap-4 rounded-3xl border border-line p-6">

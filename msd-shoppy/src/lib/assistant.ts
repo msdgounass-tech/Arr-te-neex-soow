@@ -70,7 +70,7 @@ export const GUIDES: Guide[] = [
     steps: [
       { title: "Visites et consultations", text: "Une visite = une personne qui ouvre votre boutique. Une consultation = l'ouverture d'une fiche produit. Vos propres visites ne comptent pas.", demo: { screen: "Statistiques", highlight: "124 consultations", caption: "Comptées une fois par session." } },
       { title: "Contacts", text: "Clics sur Appeler et WhatsApp : des acheteurs intéressés qui veulent vous parler.", demo: { screen: "Contacts", highlight: "18 clics WhatsApp", caption: "Répondez vite : la réactivité est mesurée." } },
-      { title: "Ventes confirmées", text: "Seules les commandes terminées sur MSD Shoppy comptent. Une vente conclue uniquement sur WhatsApp n'apparaît pas ici.", demo: { screen: "Ventes", highlight: "6 commandes terminées", caption: "Les commandes annulées ne comptent jamais." } },
+      { title: "Ventes confirmées", text: "Seules les commandes terminées sur Shoppy by MSD comptent. Une vente conclue uniquement sur WhatsApp n'apparaît pas ici.", demo: { screen: "Ventes", highlight: "6 commandes terminées", caption: "Les commandes annulées ne comptent jamais." } },
     ],
     tips: ["Beaucoup de consultations mais peu de commandes ? Travaillez les photos et le prix."],
     action: { href: "/vendeur/statistiques", label: "Voir mes statistiques" },

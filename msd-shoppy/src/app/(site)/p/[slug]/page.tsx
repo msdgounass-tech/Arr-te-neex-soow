@@ -88,7 +88,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <section className="mt-6"><h2 className="mb-2 font-semibold">Description</h2>
             <div className="whitespace-pre-line text-[0.95rem] leading-relaxed text-ink/90">{product.description || "Le vendeur n'a pas encore ajouté de description. Contactez-le pour plus de détails."}</div>
           </section>
-          <p className="mt-6 rounded-2xl bg-mist p-4 text-xs text-slate">Le paiement et la livraison se règlent directement avec le vendeur. Une commande passée sur MSD Shoppy vous permet de suivre son statut et de laisser un avis vérifié.</p>
+          <p className="mt-6 rounded-2xl bg-mist p-4 text-xs text-slate">Le paiement et la livraison se règlent directement avec le vendeur. Une commande passée sur Shoppy by MSD vous permet de suivre son statut et de laisser un avis vérifié.</p>
         </div>
       </div>
       {others.length > 0 && (

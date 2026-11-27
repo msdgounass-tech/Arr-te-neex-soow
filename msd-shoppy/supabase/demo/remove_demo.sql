@@ -1,4 +1,4 @@
--- Supprime toutes les données de démonstration de MSD Shoppy (à exécuter dans Supabase > SQL Editor avant l'ouverture au public).
+-- Supprime toutes les données de démonstration de Shoppy by MSD (à exécuter dans Supabase > SQL Editor avant l'ouverture au public).
 -- Les comptes de démo ont des e-mails en @demo.msdshoppy.sn ; les boutiques sont marquées is_demo.
 begin;
 delete from public.reviews where shop_id in (select id from public.shops where is_demo);

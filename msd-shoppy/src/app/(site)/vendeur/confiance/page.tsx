@@ -30,7 +30,7 @@ export default async function TrustPage() {
             <section className="card p-5"><h2 className="font-semibold">Badges à obtenir</h2>
               <ul className="mt-3 space-y-2 text-sm">{missing.map(([k, b]) => (
                 <li key={k} className="flex gap-2"><Icon name={b.icon} size={18} className="mt-0.5 text-slate" /><span><b>{b.label}</b> — <span className="text-slate">{b.rule}</span></span></li>))}</ul>
-              <p className="mt-3 text-xs text-slate">Les badges sont calculés automatiquement à partir de votre activité réelle. Ils ne peuvent pas être achetés ni attribués manuellement par le vendeur. Le badge « Boutique vérifiée » est délivré par l'équipe MSD Shoppy après contrôle.</p></section>
+              <p className="mt-3 text-xs text-slate">Les badges sont calculés automatiquement à partir de votre activité réelle. Ils ne peuvent pas être achetés ni attribués manuellement par le vendeur. Le badge « Boutique vérifiée » est délivré par l'équipe Shoppy by MSD après contrôle.</p></section>
           )}
         </div>
         <section className="card p-5"><h2 className="font-semibold">Qualité de vos fiches produits</h2>

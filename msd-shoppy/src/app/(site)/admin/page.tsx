@@ -46,7 +46,7 @@ export default async function AdminHome() {
           </li>))}</ul>
         {!recent.length && <p className="text-sm text-slate">Aucune commande pour le moment.</p>}
       </section>
-      <p className="text-xs text-slate">Les montants de vente sont ceux déclarés par les commandes terminées ; MSD Shoppy n'encaisse pas ces sommes. Les abonnements sont suivis séparément dans Paiements.</p>
+      <p className="text-xs text-slate">Les montants de vente sont ceux déclarés par les commandes terminées ; Shoppy by MSD n'encaisse pas ces sommes. Les abonnements sont suivis séparément dans Paiements.</p>
     </div>
   );
 }
