@@ -8,6 +8,8 @@ import { friendlyError } from "@/lib/errors";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+// À incrémenter à chaque changement des consignes : invalide le cache des anciennes générations.
+const PROMPT_VERSION = "v2:";
 
 const AI_ERRORS: Record<string, [number, string]> = {
   IA_NON_CONFIGUREE: [503, "Shoppy AI n'est pas encore activé sur la plateforme (clé du fournisseur d'IA non configurée). Les analyses calculées restent disponibles."],
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
   try { prompt = await buildPrompt(sb, task, input.data as Record<string, unknown>); }
   catch (e) { return NextResponse.json({ error: friendlyError(e as { message: string }) }, { status: 400 }); }
   const image = (input.data as { image?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; data: string } }).image;
-  const hash = createHash("sha256").update(task + "\n" + prompt + "\n" + (image?.data ?? "")).digest("hex");
+  const hash = createHash("sha256").update(PROMPT_VERSION + task + "\n" + prompt + "\n" + (image?.data ?? "")).digest("hex");
 
   // Cache : une demande identique des 7 derniers jours est resservie sans consommer de quota.
   const { data: cached } = await sb.from("ai_usage").select("output").eq("input_hash", hash).eq("status", "ok")

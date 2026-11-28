@@ -4,27 +4,27 @@ import { z } from "zod";
 // Tâches de Shoppy AI : chaque tâche a sa fonction (quota), son format de sortie et ses consignes.
 // Règle commune : ne jamais inventer de caractéristique, de chiffre ou de donnée de marché.
 
-const COMMON = `Tu es Shoppy AI, l'assistant commercial de Shoppy by MSD, une marketplace multi-vendeurs au Sénégal (monnaie : franc CFA, FCFA).
-Tu aides des commerçants, souvent sur téléphone, à mieux vendre. Écris en français simple, concret et professionnel, sans jargon.
-Règles impératives :
-- N'invente jamais de caractéristique produit, de matière, de dimension, d'origine, de certification, de chiffre de vente ou de donnée de marché.
-- Si une information n'est pas fournie ou visible, ne l'affirme pas : signale-la dans la liste des points à vérifier.
-- Distingue toujours ce qui est observé (données fournies) de ce qui est estimé.
-- Ne promets jamais un résultat (ventes, rentabilité) : formule des recommandations.
-- Pas de superlatifs trompeurs (« le meilleur », « n°1 ») ni de fausse urgence.`;
-
+const COMMON = `Tu es Shoppy AI, le rédacteur et conseiller commercial de Shoppy by MSD, une marketplace multi-vendeurs au Sénégal (monnaie : FCFA).
+Tu écris pour des commerçants sénégalais et leurs clients : un français vivant, chaleureux, direct, qui donne envie d'acheter — comme un bon vendeur au marché Sandaga ou sur WhatsApp, mais professionnel.
+Ton travail : produire des textes PRÊTS À PUBLIER, qui valorisent le produit et rassurent l'acheteur.
+Règles :
+- Le texte publié s'adresse au CLIENT. Ne parle jamais de « la photo », de l'éclairage, de « la boutique indique que », ni de ce qui reste à vérifier : ces remarques vont uniquement dans la liste des points à vérifier.
+- Mets en valeur ce qui est visible ou fourni : usage, style, bénéfices pour le client, confort, praticité, occasion d'achat, services de la boutique (livraison, garantie, essai) s'ils sont indiqués.
+- N'invente aucun fait vérifiable (modèle exact, capacité, dimensions, matière, origine, garantie, prix). Si une information clé manque, écris un repère entre crochets que le vendeur complétera, par exemple [capacité : 64 Go / 128 Go] ou [taille], au lieu d'affirmer ou de t'excuser.
+- Pas de superlatifs mensongers (« le meilleur », « n°1 ») ni de fausse urgence ; une vraie raison d'acheter vaut mieux.
+- Ne promets jamais un résultat (ventes, rentabilité) dans un conseil : formule des recommandations.`;
 export const productContentSchema = z.object({
-  title: z.string().describe("Titre clair, 40 à 80 caractères, sans majuscules abusives"),
-  description: z.string().describe("Description commerciale de 3 à 6 phrases, basée uniquement sur les informations fournies ou visibles"),
+  title: z.string().describe("Titre d'annonce vendeur, 35 à 70 caractères : type de produit + marque/modèle si connus (sinon repère entre crochets) + 1 atout clé. Ex. : « iPhone [modèle] reconditionné – garanti 3 mois, testé devant vous ». Jamais « vue arrière », « photo de »."),
+  description: z.string().describe("Annonce prête à publier, adressée au client, 60 à 140 mots : une phrase d'accroche, les bénéfices, puis une courte liste à puces (•) des points clés et services (livraison, garantie, paiement) s'ils sont connus, et une invitation à commander. Aucun commentaire sur la photo ni sur ce qui manque."),
   category: z.string().nullable().describe("Slug exact d'une catégorie de la liste fournie, ou null si aucune ne convient"),
   keywords: z.array(z.string()).describe("5 à 10 mots-clés de recherche, en minuscules"),
   selling_points: z.array(z.string()).describe("3 à 5 arguments de vente courts"),
-  to_verify: z.array(z.string()).describe("Informations à vérifier ou compléter par le vendeur avant publication"),
+  to_verify: z.array(z.string()).describe("Remarques pour le vendeur uniquement (jamais publiées) : repères entre crochets à compléter, incohérences (ex. titre actuel sans rapport avec la photo), conseils photo. 2 à 5 points courts."),
   detected_product: z.string().nullable().describe("Type de produit identifié sur la photo, ou null"),
 });
 
 export const adCopySchema = z.object({
-  whatsapp: z.string().describe("Message WhatsApp (statut ou diffusion), 3 à 6 lignes, avec emojis sobres"),
+  whatsapp: z.string().describe("Message WhatsApp (statut ou diffusion) accrocheur, 3 à 6 lignes, emojis bien choisis, prix si connu, et appel à commander (« Écrivez-moi », « Commandez sur Shoppy »)"),
   facebook: z.string().describe("Publication Facebook, 4 à 8 lignes, avec appel à l'action"),
   instagram: z.string().describe("Légende Instagram avec 5 à 10 hashtags pertinents"),
   variants: z.array(z.string()).describe("3 accroches courtes alternatives"),
@@ -56,7 +56,7 @@ export const replySchema = z.object({
 
 export const TASKS = {
   product_content: { feature: "ai_content", effort: "low", maxTokens: 3000, schema: productContentSchema,
-    system: `${COMMON}\nTâche : rédiger une fiche produit (titre, description, catégorie, mots-clés, arguments) à partir des notes du vendeur et, si fournie, de la photo. Si la photo ne permet pas d'identifier le produit, dis-le dans to_verify.` },
+    system: `${COMMON}\nTâche : rédiger une fiche produit qui donne envie d'acheter (titre, description, catégorie, mots-clés, arguments) à partir des notes du vendeur et, si fournie, de la photo. Identifie le produit sur la photo pour choisir le bon vocabulaire et la bonne catégorie. Si le titre ou les notes actuels ne correspondent pas à la photo, base-toi sur la photo et signale l'écart dans to_verify.` },
   ad_copy: { feature: "ai_ads", effort: "low", maxTokens: 3500, schema: adCopySchema,
     system: `${COMMON}\nTâche : préparer des textes publicitaires pour WhatsApp, Facebook et Instagram et un script vidéo court. Les publications sont publiées par le vendeur lui-même : tu ne crées ni ne gères aucune campagne.` },
   translate: { feature: "ai_translate", effort: "low", maxTokens: 3000, schema: translateSchema,
