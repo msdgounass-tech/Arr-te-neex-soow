@@ -36,6 +36,19 @@ const MESSAGES: Record<string, string> = {
   BOUTIQUE_INTROUVABLE: "Boutique introuvable.",
   PAIEMENT_INTROUVABLE: "Ce paiement a déjà été traité.",
   SLUG_INDISPONIBLE: "Ce nom est déjà très utilisé. Essayez une variante.",
+  FORMULE_INVALIDE: "Choisissez une formule disponible.",
+  PERIODE_INVALIDE: "Choisissez un paiement mensuel ou annuel.",
+  BOUTIQUE_SUSPENDUE: "Votre boutique est suspendue. Contactez l'assistance.",
+  MODULE_DESACTIVE: "Ce module de Shoppy AI est momentanément désactivé.",
+  FONCTION_NON_INCLUSE: "Cette fonction n'est pas incluse dans votre formule.",
+  QUOTA_EPUISE: "Vous avez utilisé tout votre quota Shoppy AI de ce mois pour cette fonction.",
+  TROP_DE_REQUETES: "Trop de demandes en peu de temps. Patientez une minute.",
+  STATUT_INVALIDE: "Statut non reconnu.",
+  ACTION_INTROUVABLE: "Recommandation introuvable.",
+  NIVEAU_INVALIDE: "Niveau non reconnu.",
+  QUOTA_INVALIDE: "Quota invalide.",
+  MODULE_INTROUVABLE: "Module introuvable.",
+  PRODUIT_INACCESSIBLE: "Ce produit n'appartient pas à votre boutique.",
 };
 
 /** Traduit une erreur Supabase / PostgreSQL en message clair pour l'utilisateur. */

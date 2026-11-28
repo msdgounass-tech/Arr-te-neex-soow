@@ -254,10 +254,12 @@ export async function setAssistantStepAction(stepKey: string, status: "done" | "
 
 export async function declarePaymentAction(_: ActionResult | null, form: FormData): Promise<ActionResult> {
   const parsed = z.object({ method: z.enum(["wave", "orange_money", "autre"]), reference: z.string().trim().min(3, "Indiquez la référence de la transaction.").max(80),
-    plan: z.string().optional() }).safeParse({ method: form.get("method"), reference: form.get("reference"), plan: form.get("plan") || undefined });
+    plan: z.enum(["starter", "pro", "business"], "Choisissez une formule."), cycle: z.enum(["monthly", "yearly"]) })
+    .safeParse({ method: form.get("method"), reference: form.get("reference"), plan: form.get("plan"), cycle: form.get("cycle") ?? "monthly" });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const { sb } = await ctx();
-  const { error } = await sb.rpc("declare_subscription_payment", { p_method: parsed.data.method, p_reference: parsed.data.reference, p_plan: parsed.data.plan ?? null, p_amount: null });
+  // Le montant est calculé par la base à partir de la formule et de la période : rien n'est fourni par le navigateur.
+  const { error } = await sb.rpc("declare_subscription_payment", { p_method: parsed.data.method, p_reference: parsed.data.reference, p_plan: parsed.data.plan, p_cycle: parsed.data.cycle });
   if (error) return { ok: false, error: friendlyError(error) };
   revalidatePath("/vendeur", "layout");
   return { ok: true, message: "Paiement déclaré. Il sera vérifié avant l'activation de votre abonnement." };

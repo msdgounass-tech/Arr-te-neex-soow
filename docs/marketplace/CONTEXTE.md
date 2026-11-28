@@ -25,7 +25,7 @@ Fichier de reprise : à lire en premier dans toute nouvelle session, avant d'ouv
 | Qualité des fiches | Score 0–100 en base (photos 30, titre 15, description 25, prix 10, catégorie 10, disponibilité 10) ; obligatoire pour publier : catégorie + 1 photo | Ne bloque jamais au-delà de l'obligatoire |
 | Statistiques | Événements réels (visites, consultations, appels, WhatsApp, partages, favoris), 1 fois par session, visites du vendeur exclues | Aucune statistique inventée |
 | Langue / monnaie | Français, FCFA (XOF) | V1 Sénégal |
-| Tarifs | Aucun (table `subscription_plans` vide) | À valider par le propriétaire |
+| Tarifs | Starter 2 900 F, Pro 5 000 F, Business 12 000 F / mois ; annuel avec mois offerts | Décidés par le propriétaire (2026-11-28) |
 | Ambiance sonore | Composée en Web Audio, désactivée par défaut, jamais de démarrage automatique | Aucun fichier, aucun impact sur le chargement |
 
 ## État au 2026-11-26
@@ -92,6 +92,12 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
   SMTP Brevo branché (2026-11-28) : smtp-relay.brevo.com:587, identifiant c57d0b001@smtp-brevo.com, expéditeur « Shoppy by MSD » <msdgounass@gmail.com>,
   30 e-mails/h, blocage IP Brevo désactivé pour les clés SMTP. Modèles d'e-mails en français. Test « mot de passe oublié » : envoyé (200).
   À faire : régénérer la clé SMTP (elle a été écrite dans le chat) et la recoller dans Supabase › Auth › SMTP.
+
+## Abonnements et Shoppy AI (2026-11-28)
+
+- Formules Starter 2 900 F / Pro 5 000 F / Business 12 000 F, annuel 31 900 / 52 500 / 120 000 F (migration 10, `plan_features` réglable dans /admin/ia).
+- Shoppy AI : /vendeur/ia (10 modules), /api/ai (Claude, clé serveur `ANTHROPIC_API_KEY` **non encore posée**), /api/export (Business).
+- Détail, coûts et décisions en attente : `docs/marketplace/SHOPPY_AI.md`.
 
 ## Journal
 

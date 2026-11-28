@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 
 export const SELLER_LINKS = [
   ["/vendeur", "Tableau de bord", "grid"], ["/vendeur/commandes", "Commandes", "package"], ["/vendeur/produits", "Produits", "tag"],
-  ["/vendeur/boutique", "Ma boutique", "store"], ["/vendeur/livraison", "Livraison", "truck"], ["/vendeur/statistiques", "Statistiques", "chart"],
+  ["/vendeur/boutique", "Ma boutique", "store"], ["/vendeur/livraison", "Livraison", "truck"], ["/vendeur/ia", "Shoppy AI", "sparkles"], ["/vendeur/statistiques", "Statistiques", "chart"],
   ["/vendeur/confiance", "Confiance et qualité", "shield"], ["/vendeur/promouvoir", "Promotion", "share"], ["/vendeur/assistant", "Assistant", "bulb"],
   ["/vendeur/abonnement", "Abonnement", "wallet"],
 ] as const;

@@ -56,6 +56,11 @@ export async function searchProducts(p: SearchParams): Promise<{ items: ProductC
   return { items: await getProductCardsByIds(rows.map((r) => r.id)), total: rows[0]?.total_count ?? 0 };
 }
 
+export async function logSearch(term: string, results: number) {
+  if (!isSupabaseConfigured) return;
+  await supabasePublic().rpc("log_search", { p_term: term, p_results: results });
+}
+
 export async function searchShops(q?: string, domain?: number, region?: string, limit = 24): Promise<Shop[]> {
   if (!isSupabaseConfigured) return [];
   const { data } = await supabasePublic().rpc("search_shops", { p_query: q ?? null, p_domain: domain ?? null, p_region: region ?? null, p_limit: limit });

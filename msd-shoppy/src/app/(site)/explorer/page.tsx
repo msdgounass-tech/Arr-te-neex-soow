@@ -6,7 +6,7 @@ import { ExploreToolbar } from "@/components/explore/Filters";
 import { ProductGrid } from "@/components/product/ProductCard";
 import { ShopCard } from "@/components/shop/ShopCard";
 import { EmptyState } from "@/components/ui/bits";
-import { getCategories, getDomains, getRegions, getTrustMap, searchProducts, searchShops, type SearchParams } from "@/lib/queries";
+import { getCategories, getDomains, getRegions, getTrustMap, logSearch, searchProducts, searchShops, type SearchParams } from "@/lib/queries";
 
 type Params = Record<string, string | undefined>;
 const num = (v?: string) => (v && /^\d+$/.test(v) ? Number(v) : undefined);
@@ -39,6 +39,8 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   } else {
     const res = await searchProducts(query);
     total = res.total;
+    // Demande non couverte : les recherches sont comptées (sans compte ni adresse IP) pour Shoppy AI.
+    if (query.q && (query.page ?? 1) === 1) await logSearch(query.q, res.total).catch(() => undefined);
     const trust = await getTrustMap(res.items.map((p) => p.shop.id));
     const pages = Math.ceil(res.total / PER_PAGE);
     const pageHref = (n: number) => { const p = new URLSearchParams(sp as Record<string, string>); p.set("page", String(n)); return `/explorer?${p}`; };

@@ -12,7 +12,7 @@ async function run(fn: string, args: Record<string, unknown>, paths: string[], m
   return { ok: true, message };
 }
 
-export const reviewPaymentAction = async (id: string, approve: boolean, days: number) =>
+export const reviewPaymentAction = async (id: string, approve: boolean, days: number | null) =>
   run("admin_review_subscription_payment", { p_payment: id, p_approve: approve, p_days: days }, ["/admin", "/admin/paiements"], approve ? "Paiement validé, abonnement activé." : "Paiement refusé.");
 export const setSubscriptionAction = async (shopId: string, action: "suspend" | "activate" | "extend_trial", days = 30) =>
   run("admin_set_subscription", { p_shop: shopId, p_action: action, p_days: days }, ["/admin", "/admin/boutiques"],
@@ -23,3 +23,12 @@ export const setProductStatusAdminAction = async (productId: string, status: "hi
   run("admin_set_product_status", { p_product: productId, p_status: status }, ["/admin/produits"], status === "hidden" ? "Produit masqué." : "Produit republié.");
 export const setTicketStatusAction = async (ticketId: string, status: "open" | "closed") =>
   run("admin_set_ticket_status", { p_ticket: ticketId, p_status: status }, ["/admin", "/admin/signalements"], status === "closed" ? "Signalement clos." : "Signalement rouvert.");
+
+export const setAiModuleAction = async (feature: string, enabled: boolean) =>
+  run("admin_set_ai_module", { p_feature: feature, p_enabled: enabled }, ["/admin/ia"], enabled ? "Module réactivé." : "Module désactivé pour toutes les boutiques.");
+
+export async function setPlanFeatureAction(_: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const quotaRaw = String(form.get("quota") ?? "").trim();
+  return run("admin_set_plan_feature", { p_plan: String(form.get("plan")), p_feature: String(form.get("feature")), p_level: String(form.get("level")),
+    p_quota: quotaRaw === "" ? null : Number(quotaRaw) }, ["/admin/ia"], "Droits de la formule mis à jour.");
+}

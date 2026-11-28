@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 const LINKS = [
   ["/admin", "Vue d'ensemble", "grid"], ["/admin/paiements", "Paiements", "wallet"], ["/admin/boutiques", "Boutiques", "store"],
   ["/admin/produits", "Produits", "tag"], ["/admin/commandes", "Commandes", "package"], ["/admin/utilisateurs", "Utilisateurs", "user"],
-  ["/admin/signalements", "Signalements", "flag"], ["/admin/avis", "Avis", "star"],
+  ["/admin/signalements", "Signalements", "flag"], ["/admin/avis", "Avis", "star"], ["/admin/ia", "Shoppy AI", "sparkles"],
 ] as const;
 
 export function AdminNav({ badges }: { badges: Record<string, number> }) {

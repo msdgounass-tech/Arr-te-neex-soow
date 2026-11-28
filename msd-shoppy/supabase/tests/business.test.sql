@@ -162,7 +162,7 @@ select pg_temp.ok((select count(*) = 1 from public.products), 'le vendeur conser
 select pg_temp.ok((select count(*) = 2 from public.orders), 'le vendeur conserve son historique de commandes');
 select pg_temp.ok(pg_temp.fails($$insert into public.products (shop_id, title, price) values (public.my_shop_id(), 'Nouveau', 1000)$$, null),
   'gestion restreinte tant que l''abonnement n''est pas réactivé');
-select public.declare_subscription_payment('wave', 'TX-123456');
+select public.declare_subscription_payment('wave', 'TX-123456', 'starter');
 select pg_temp.ok((select status = 'pending_payment' from public.subscriptions), 'déclaration de paiement : statut « paiement en attente »');
 select pg_temp.ok(pg_temp.fails($$select public.admin_review_subscription_payment((select id from public.subscription_payments), true)$$, 'INTERDIT'),
   'le vendeur ne peut pas valider son propre paiement');
@@ -222,3 +222,54 @@ select public.admin_set_subscription((select id from public.shops where name = '
 select pg_temp.ok((select status = 'suspended' from public.subscriptions where shop_id = (select id from public.shops where name = 'Bamba Tech')), 'suspension d''une boutique');
 select public.admin_set_subscription((select id from public.shops where name = 'Bamba Tech'), 'activate', 30);
 select pg_temp.ok((select status = 'active' and current_period_end > now() + interval '29 days' from public.subscriptions where shop_id = (select id from public.shops where name = 'Bamba Tech')), 'activation 30 jours');
+
+-- ── Formules, facturation annuelle, quotas Shoppy AI, plan d'action (migration 10)
+reset role;
+select pg_temp.ok((select count(*) = 3 from public.subscription_plans where active and code in ('starter', 'pro', 'business')), 'trois formules actives');
+select pg_temp.ok((select price_xof = 2900 and price_year_xof = 31900 from public.subscription_plans where code = 'starter')
+  and (select price_xof = 5000 and price_year_xof = 52500 from public.subscription_plans where code = 'pro')
+  and (select price_xof = 12000 and price_year_xof = 120000 from public.subscription_plans where code = 'business'), 'tarifs mensuels et annuels conformes');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.ok((select amount = 2900 and cycle = 'monthly' from public.subscription_payments where status = 'validated' limit 1), 'le montant est calculé par la base (mensuel Starter)');
+select pg_temp.ok(public.my_plan() = 'starter', 'formule effective = formule payée');
+select pg_temp.ok(public.feature_level('competitors') = 'none' and public.feature_level('sales') = 'basic', 'droits Starter appliqués');
+select pg_temp.ok(pg_temp.fails($$select public.ai_reserve('ai_translate')$$, 'FONCTION_NON_INCLUSE'), 'traduction IA non incluse dans Starter');
+select pg_temp.ok(pg_temp.fails($$select public.generate_action_plan()$$, 'FONCTION_NON_INCLUSE'), 'plan d''action non inclus dans Starter');
+select pg_temp.ok(pg_temp.fails($$select public.declare_subscription_payment('wave', 'TX-1', 'inconnu', 'monthly')$$, 'FORMULE_INVALIDE'), 'formule inconnue refusée');
+select public.declare_subscription_payment('wave', 'TX-ANNUEL-1', 'pro', 'yearly');
+select pg_temp.ok((select amount = 52500 and cycle = 'yearly' from public.subscription_payments where reference = 'TX-ANNUEL-1'), 'paiement annuel Pro : 52 500 F calculés par la base');
+select pg_temp.ok(pg_temp.fails($$select public.declare_subscription_payment('wave', 'TX-ANNUEL-2', 'pro', 'yearly')$$, 'PAIEMENT_DEJA_EN_ATTENTE'), 'pas de double facturation');
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000ad');
+select public.admin_review_subscription_payment((select id from public.subscription_payments where reference = 'TX-ANNUEL-1'), true);
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.ok((select current_period_end > now() + interval '390 days' from public.subscriptions), 'annuel : 365 jours ajoutés à la période en cours');
+select pg_temp.ok(public.my_plan() = 'pro', 'passage à Pro après validation');
+select pg_temp.ok((public.ai_reserve('ai_content', 'title') ->> 'quota')::int = 200, 'quota IA Pro appliqué');
+select pg_temp.ok(pg_temp.fails($$insert into public.ai_usage (shop_id, feature) values (public.my_shop_id(), 'ai_content')$$, null), 'le vendeur ne peut pas écrire son compteur IA');
+reset role;
+update public.plan_features set monthly_quota = 2 where plan_code = 'pro' and feature = 'ai_content';
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select public.ai_finalize((select max(id) from public.ai_usage), false, 'test', 0, 0, 0, null, 'erreur');
+select pg_temp.ok((public.ai_reserve('ai_content') ->> 'used')::int = 1, 'une génération en erreur ne consomme pas de quota');
+select public.ai_reserve('ai_content');
+select pg_temp.ok(pg_temp.fails($$select public.ai_reserve('ai_content')$$, 'QUOTA_EPUISE'), 'quota mensuel épuisé : génération refusée');
+reset role;
+update public.plan_features set monthly_quota = 200 where plan_code = 'pro' and feature = 'ai_content';
+update public.ai_modules set enabled = false where feature = 'ai_ads';
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.ok(pg_temp.fails($$select public.ai_reserve('ai_ads')$$, 'MODULE_DESACTIVE'), 'module désactivé par l''administration');
+select pg_temp.ok(pg_temp.fails($$select public.admin_set_ai_module('ai_ads', true)$$, 'INTERDIT'), 'seul l''administrateur règle les modules');
+select pg_temp.ok(pg_temp.fails($$select public.admin_set_plan_feature('pro', 'ai_content', 'full', 99999)$$, 'INTERDIT'), 'seul l''administrateur règle les quotas');
+select pg_temp.ok((public.ai_sales_insights(30) -> 'products') is not null, 'analyse des ventes calculée sur les données de la boutique');
+select pg_temp.ok(public.generate_action_plan() >= 0, 'plan d''action généré (Pro)');
+insert into public.product_costs (product_id, shop_id, unit_cost) select id, shop_id, 8000 from public.products where shop_id = public.my_shop_id() limit 1;
+select pg_temp.ok((select count(*) = 1 from public.product_costs), 'coût d''achat enregistré par le vendeur');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.ok((select count(*) = 0 from public.product_costs), 'les coûts d''achat restent privés');
+select pg_temp.ok((select count(*) = 0 from public.ai_actions), 'le plan d''action d''une boutique est invisible des autres');
+select pg_temp.ok((select count(*) = 0 from public.ai_usage), 'l''utilisation IA d''une boutique est invisible des autres');
+select pg_temp.as_anon();
+select pg_temp.ok(pg_temp.fails($$select public.ai_sales_insights(30)$$, null), 'un visiteur ne peut pas lancer d''analyse');
+select public.log_search('chaussures enfant', 0);
+reset role;
+select pg_temp.ok((select count(*) = 1 from public.search_log), 'recherche sans résultat enregistrée (demande non couverte)');

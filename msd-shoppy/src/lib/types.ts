@@ -49,8 +49,8 @@ export interface OrderItem {
 export interface OrderEvent { id: number; order_id: string; status: OrderStatus; actor: "buyer" | "seller" | "system"; note: string | null; created_at: string }
 
 export interface Subscription { shop_id: string; status: SubscriptionStatus; trial_ends_at: string; current_period_end: string | null; plan_code: string | null }
-export interface SubscriptionPayment { id: string; method: string; reference: string; status: "pending" | "validated" | "rejected"; created_at: string; amount: number | null }
-export interface SubscriptionPlan { code: string; name: string; price_xof: number | null; period_days: number; active: boolean }
+export interface SubscriptionPayment { id: string; method: string; reference: string; status: "pending" | "validated" | "rejected"; created_at: string; amount: number | null; plan_code: string | null; cycle: "monthly" | "yearly" }
+export interface SubscriptionPlan { code: string; name: string; price_xof: number | null; price_year_xof: number | null; period_days: number; active: boolean; tier: number; tagline: string }
 
 export interface Trust {
   completed_orders: number; reviews_count: number; average_rating: number | null; member_since: string; days_active: number;
