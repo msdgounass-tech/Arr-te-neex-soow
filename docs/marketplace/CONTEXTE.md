@@ -89,7 +89,9 @@ Revue des animations : `/review-animations` en 3 passes — Bloquer, Bloquer, pu
 - Inscriptions publiques : **ouvertes** (2026-11-26) — « Confirm email » désactivé, liaison manuelle et connexions anonymes désactivées.
   Testé : inscription → session immédiate + profil créé (compte de test supprimé). Site URL = https://msd-shoppy.vercel.app, Redirect URLs = https://msd-shoppy.vercel.app/** (réglés par l'API de gestion).
   Jeton Supabase (Project Settings + Auth Config en écriture, projet msd-shoppy, 90 j) enregistré comme secret réseau pour api.supabase.com.
-  Reste : SMTP (Brevo) pour « mot de passe oublié ».
+  SMTP Brevo branché (2026-11-28) : smtp-relay.brevo.com:587, identifiant c57d0b001@smtp-brevo.com, expéditeur « Shoppy by MSD » <msdgounass@gmail.com>,
+  30 e-mails/h, blocage IP Brevo désactivé pour les clés SMTP. Modèles d'e-mails en français. Test « mot de passe oublié » : envoyé (200).
+  À faire : régénérer la clé SMTP (elle a été écrite dans le chat) et la recoller dans Supabase › Auth › SMTP.
 
 ## Journal
 
