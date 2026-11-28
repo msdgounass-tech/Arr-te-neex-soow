@@ -9,7 +9,7 @@ import { friendlyError } from "@/lib/errors";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 // À incrémenter à chaque changement des consignes : invalide le cache des anciennes générations.
-const PROMPT_VERSION = "v2:";
+const PROMPT_VERSION = "v3:";
 
 const AI_ERRORS: Record<string, [number, string]> = {
   IA_NON_CONFIGUREE: [503, "Shoppy AI n'est pas encore activé sur la plateforme (clé du fournisseur d'IA non configurée). Les analyses calculées restent disponibles."],
@@ -40,8 +40,8 @@ export async function POST(req: Request) {
   let prompt: string;
   try { prompt = await buildPrompt(sb, task, input.data as Record<string, unknown>); }
   catch (e) { return NextResponse.json({ error: friendlyError(e as { message: string }) }, { status: 400 }); }
-  const image = (input.data as { image?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; data: string } }).image;
-  const hash = createHash("sha256").update(PROMPT_VERSION + task + "\n" + prompt + "\n" + (image?.data ?? "")).digest("hex");
+  const images = (input.data as { images?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; data: string }[] }).images ?? [];
+  const hash = createHash("sha256").update(PROMPT_VERSION + task + "\n" + prompt + "\n" + images.map((i) => i.data).join("|")).digest("hex");
 
   // Cache : une demande identique des 7 derniers jours est resservie sans consommer de quota.
   const { data: cached } = await sb.from("ai_usage").select("output").eq("input_hash", hash).eq("status", "ok")
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   const r = reservation as { id: number; used: number; quota: number };
 
   try {
-    const out = await getProvider().generate({ system: def.system, prompt, image, schema: def.schema, effort: def.effort, maxTokens: def.maxTokens });
+    const out = await getProvider().generate({ system: def.system, prompt, images, schema: def.schema, effort: def.effort, maxTokens: def.maxTokens });
     await sb.rpc("ai_finalize", { p_id: r.id, p_ok: true, p_model: out.model, p_input_tokens: out.inputTokens, p_output_tokens: out.outputTokens,
       p_cost_usd: out.costUsd, p_output: out.data, p_error: null });
     return NextResponse.json({ result: out.data, usage: { used: r.used, quota: r.quota } });
@@ -79,7 +79,7 @@ async function buildPrompt(sb: Sb, task: TaskName, input: Record<string, unknown
       return [shopLine,
         `Catégories possibles (slug : nom) : ${(cats ?? []).map((c) => `${c.slug} : ${c.name}`).join(" ; ") || "aucune"}`,
         input.title ? `Titre actuel : ${input.title}` : "", input.price ? `Prix : ${input.price} FCFA` : "",
-        `Notes du vendeur : ${input.notes || "(aucune)"}`, input.image ? "Une photo du produit est jointe." : "Pas de photo."].filter(Boolean).join("\n");
+        `Notes du vendeur : ${input.notes || "(aucune)"}`, (input.images as unknown[] | undefined)?.length ? `${(input.images as unknown[]).length} photo(s) du produit jointe(s), sous différents angles.` : "Pas de photo."].filter(Boolean).join("\n");
     }
     case "ad_copy": {
       let product = "";

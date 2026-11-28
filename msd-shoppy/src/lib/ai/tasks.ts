@@ -69,10 +69,10 @@ export const TASKS = {
 
 export type TaskName = keyof typeof TASKS;
 
-const image = z.object({ mediaType: z.enum(["image/jpeg", "image/png", "image/webp"]), data: z.string().max(2_000_000) });
+const image = z.object({ mediaType: z.enum(["image/jpeg", "image/png", "image/webp"]), data: z.string().max(1_500_000) });
 export const INPUTS = {
-  product_content: z.object({ notes: z.string().max(2000).default(""), title: z.string().max(140).default(""), price: z.number().int().positive().optional(), image: image.optional() })
-    .refine((v) => v.notes.trim() || v.title.trim() || v.image, "Ajoutez une photo ou quelques mots sur le produit."),
+  product_content: z.object({ notes: z.string().max(2000).default(""), title: z.string().max(140).default(""), price: z.number().int().positive().optional(), images: z.array(image).max(4).default([]) })
+    .refine((v) => v.notes.trim() || v.title.trim() || v.images.length, "Ajoutez une photo ou quelques mots sur le produit."),
   ad_copy: z.object({ productId: z.string().uuid().optional(), brief: z.string().max(1500).default("") }),
   translate: z.object({ text: z.string().min(2).max(4000), target: z.enum(["fr", "en", "wo"]) }),
   advisor: z.object({ question: z.string().min(3).max(600) }),

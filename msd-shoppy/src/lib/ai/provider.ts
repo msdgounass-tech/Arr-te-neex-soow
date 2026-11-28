@@ -10,7 +10,7 @@ export type AiImage = { mediaType: "image/jpeg" | "image/png" | "image/webp"; da
 export interface AiRequest<T extends z.ZodType> {
   system: string;
   prompt: string;
-  image?: AiImage;
+  images?: AiImage[];
   schema: T;
   effort?: "low" | "medium" | "high";
   maxTokens?: number;
@@ -44,7 +44,7 @@ class AnthropicProvider implements AiProvider {
 
   async generate<T extends z.ZodType>(req: AiRequest<T>): Promise<AiResult<z.infer<T>>> {
     const content: Anthropic.Beta.BetaContentBlockParam[] = [];
-    if (req.image) content.push({ type: "image", source: { type: "base64", media_type: req.image.mediaType, data: req.image.data } });
+    for (const img of req.images ?? []) content.push({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.data } });
     content.push({ type: "text", text: req.prompt });
     let res;
     try {
