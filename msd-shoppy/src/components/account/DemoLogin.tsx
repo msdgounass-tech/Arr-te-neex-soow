@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { friendlyError } from "@/lib/errors";
@@ -10,7 +9,6 @@ export interface DemoAccount { email: string; name: string; role: string; detail
 
 /** Connexion en un clic à un compte de démonstration (mot de passe de démo public, comptes sans données réelles). */
 export function DemoLogin({ accounts, password }: { accounts: DemoAccount[]; password: string }) {
-  const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
   async function go(a: DemoAccount) {
     setPending(a.email);
@@ -20,7 +18,7 @@ export function DemoLogin({ accounts, password }: { accounts: DemoAccount[]; pas
     setPending(null);
     if (error) { toast(friendlyError(error), "error"); return; }
     toast(`Connecté en tant que ${a.name}`);
-    router.replace(a.next); router.refresh();
+    window.location.assign(a.next); return;
   }
   return (
     <ul className="grid gap-3 sm:grid-cols-2">

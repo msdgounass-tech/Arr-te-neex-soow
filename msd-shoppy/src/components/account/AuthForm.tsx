@@ -11,6 +11,8 @@ import { toast } from "@/components/ui/toast";
 type Mode = "signin" | "signup" | "forgot" | "reset";
 
 const safeNext = (n: string | null) => (n && n.startsWith("/") && !n.startsWith("//") ? n : "/compte");
+/** Navigation complète : le serveur lit la session fraîchement créée et choisit la bonne page. */
+const goAfterLogin = (next: string | null) => window.location.assign(`/auth/destination${next ? `?suite=${encodeURIComponent(safeNext(next))}` : ""}`);
 
 export function AuthForm({ mode, next }: { mode: Mode; next: string | null }) {
   const router = useRouter();
@@ -36,12 +38,13 @@ export function AuthForm({ mode, next }: { mode: Mode; next: string | null }) {
         const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast("Vous êtes connecté.");
-        router.replace(safeNext(next)); router.refresh();
+        goAfterLogin(next);
+        return;
       } else if (mode === "signup") {
         const { data, error } = await sb.auth.signUp({ email, password, options: {
           data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/auth/callback?suite=${encodeURIComponent(safeNext(next))}` } });
         if (error) throw error;
-        if (data.session) { toast("Compte créé. Bienvenue sur Shoppy by MSD."); router.replace(safeNext(next)); router.refresh(); }
+        if (data.session) { toast("Compte créé. Bienvenue sur Shoppy by MSD."); goAfterLogin(next); return; }
         else setSent(true);
       } else if (mode === "forgot") {
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?suite=/nouveau-mot-de-passe` });

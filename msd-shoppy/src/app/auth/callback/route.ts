@@ -5,8 +5,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("suite") ?? "/compte";
-  const safe = next.startsWith("/") && !next.startsWith("//") ? next : "/compte";
+  const next = url.searchParams.get("suite") ?? "/auth/destination";
+  const safe = next.startsWith("/") && !next.startsWith("//") ? next : "/auth/destination";
   if (code) {
     const sb = await supabaseServer();
     const { error } = await sb.auth.exchangeCodeForSession(code);
